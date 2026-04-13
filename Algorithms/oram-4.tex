@@ -1,0 +1,27 @@
+\algnewcommand\algorithmicforeach{\textbf{for each}}
+\algdef{S}[FOR]{ForEach}[1]{\algorithmicforeach\ #1\ \algorithmicdo}
+
+%%%
+%%% ORAM Algorithm 4 - HomExpand (RLWEtoRGSW)
+%%%
+\begin{algorithm}[ht!]
+\caption{HomExpand}
+\label{alg:ORAM:4}
+\begin{algorithmic}[1]
+    \State \textbf{Input:} $\mathbf{c}_k$ = RLWE$(\sum_{i=0}^{n-1}\frac{b_i}{nB^{k+1}}),\; b_i\in\{0,1\},\; 0 \leq k < \ell$
+    %, \Statex $\quad\quad\quad\;\; k=0,1,\dots,\ell - 1$
+    \State \textbf{Input:} $A = \mathrm{RGSW}(-s)$
+    \State \textbf{Output:} $\mathbf{C}_i = \mathrm{RGSW}(b_i),\; 0 \leq i < n$
+    \ForEach{$k$} % in $0, \dots, \ell - 1$}
+        \State $\mathbf{c'}_k:= \mathsf{expandRlwe}(c_k)$
+    \EndFor
+    \For{$i = 0,\; i < n$}
+        \State Initialize $\mathbf{C}_i$ as an empty $2\ell \times 2$ matrix of polynomials
+        \For{$k = 0; k < \ell$}
+            \State $\mathbf{C}_i[k] = A \boxdot \mathbf{c'}_k[i]$
+            \State $\mathbf{C}_i[k + \ell] = \mathbf{c'}_k[i]$
+        \EndFor
+    \EndFor
+    \State\Return $\{\mathbf{C}_j\}^{n-1}_{j=0}$
+\end{algorithmic}
+\end{algorithm}

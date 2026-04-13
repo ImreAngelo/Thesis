@@ -1,0 +1,22 @@
+\noindent
+% Background - Anonymous communication
+Many anonymous communication systems have been proposed and implemented with the goal of allowing users to exchange messages over a network without revealing who is communicating with whom. Most of these designs %(e.g., Tor, I2P, mixnets) 
+rely on the \emph{threshold model} to provide anonymity, wherein some components of their infrastructure must be behaving honestly. Systems with stronger anonymity guarantees %(e.g., DC-nets) 
+generally suffer from poor scalability or are impractical to instantiate. %realize (e.g., NIAR).
+
+This thesis examines a new construction called a \gls{spar}, which addresses the trust and practicality concerns of existing systems. The construction relies only on well-established \gls{fhe} schemes, making it realistically implementable. While \gls{spar} presents a promising new avenue for constructing anonymous communication systems, it remains a theoretical construction. A concrete implementation and a deeper investigation is therefore needed to evaluate its practical performance and viability in larger networks.
+
+% Results - Implement sPAR, evaluate performance.
+In an effort to investigate \gls{spar}'s viability, this thesis aims to implement the scheme %in C++ using OpenFHE 
+and conduct a structured evaluation of its performance with respect to the number of participants in the system. 
+
+\noindent
+\textbf{Research Questions:}
+\begin{itemize}
+    \item What is the computational cost of \gls{spar}, and how does it compare to the theoretical complexity described in the original paper?
+    \item How does the performance of \gls{spar} scale with the number of participants, and at what point does it become impractical?
+\end{itemize}
+
+% How does sPAR compare to existing anonymous communication systems with respect to the trade-off between anonymity guarantees and performance?
+
+\vspace{.25cm}

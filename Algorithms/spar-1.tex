@@ -1,0 +1,20 @@
+%%%
+%%% sPAR Algorithm 1 - RLWE Expansion subroutine ExpandRLWE
+%%%
+\begin{algorithm}
+\caption{Homomorphic placing $\mathsf{HomPlacing}$ for one slot}
+\label{alg:expandRlwe}
+\begin{algorithmic}[1]
+    \State \textbf{Input:} $\mathbf{c} = \mathrm{RLWE}(\sum_{i=0}^{n-1} b_i X^i),\;b_i\in\{0,1\}$
+    \State \textbf{Output:} $\mathbf{c}_i = \mathrm{RLWE}(n\cdot b_i),\; 0 \leq i < n$
+    \State $\mathbf{c}_0 := \mathbf{c}$
+    \For{$i = 0,\; i \leq \log{n}$}
+        \State $k = n/2^{i - 1} + 1$
+        \For{$b = 0; b < 2^i$}
+            \State $\mathbf{c}_{2b} = c_b + \mathrm{Subs}(c_b, k)$
+            \State $\mathbf{c}_{2b + 1} = c_b - \mathrm{Subs}(c_b, k)$
+        \EndFor
+    \EndFor
+    \State\Return $\{\mathbf{c}_j\}^{n-1}_{j=0}$
+\end{algorithmic}
+\end{algorithm}

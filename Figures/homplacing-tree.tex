@@ -1,0 +1,37 @@
+\begin{tikzpicture}[
+    level 1/.style={sibling distance=0cm},
+    level 2/.style={sibling distance=0.25cm},
+    level 3/.style={sibling distance=1.45cm},
+    level distance=2cm,
+    % Define a reusable style for highlighted edges
+    highlight/.style={draw=red, text=red, very thick}
+]
+\Tree [.ciphertext
+  \edge node[auto=right]{0};              % label the left edge "0"
+  [.0
+    \edge node[auto=right]{0};
+    [.00
+      \edge node[auto=right]{0};  [.000 ]
+      \edge node[auto=left]{1}; [.001 ]
+    ]
+    \edge node[auto=left]{1};
+    [.01
+      \edge node[auto=right]{0};  [.010 ]
+      \edge node[auto=left]{1}; [.011 ]
+    ]
+  ]
+  \edge[highlight] node[auto=left]{1};             % label the right edge "1"
+  [.\node[highlight]{1};
+    \edge node[auto=right]{0};
+    [.10
+      \edge node[auto=right]{0};  [.100 ]
+      \edge node[auto=left]{1}; [.101 ]
+    ]
+    \edge[highlight] node[auto=left]{1};
+    [.\node[highlight]{11};
+      \edge[highlight] node[auto=right]{0}; [.\node[highlight]{110}; ]
+      \edge node[auto=left]{1}; [.111 ]
+    ]
+  ]
+]
+\end{tikzpicture}

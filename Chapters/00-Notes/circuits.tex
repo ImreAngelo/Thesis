@@ -1,0 +1,158 @@
+\section{Decryption Circuits}
+Imagine we want to outsource checking if $a > 0$ to a third party, but we also don't want the third party to know if $a > 0$, nor do we want them to even know the value of $a$. This is a textbook use-case for HE. 
+
+\begin{itemize}
+    \item Note that $a > 0 \iff \sign(a) = 1$
+    \item Derive approximation $\sign(x) \approx f(x)$ using Newton's, Householder, RK4, etc.
+    \item Let's go with $\sign(x) \approx f(x) = \frac{a}{2}(3 - a^2)$
+    \item Iteratively find $f_n(x) = f(f_{n-1}(x)) \to \sign(x)$ as $n \to \infty$
+    \item Finally, scale results to $[0,1]$ by taking $\frac{1}{2}(\sign(x) + 1)$
+    \item The reciever can decrypt the FHE result and remove noise manually i.e. determine $a > 0$ by checking if the plaintext is closer to 1 than 0.
+\end{itemize}
+
+We can therefore approximate $a > 0$ to arbitrary precision by homomorphically calculating $f_n(x)$ where $x$ is the FHE encryption of $a$ and $n$ is the number of iterations used to approximate $\sign(x)$.
+
+% \floatname{algorithm}{Source code} % if you want to rename 'Algorithm' to 'Source code'
+\begin{algorithm}[h]
+  \caption{The Hello World! program in Java.}
+  \label{algo:fhe:sign}
+  % alternatively you may use algorithmic, or lstlisting from the listings package
+  \begin{verbatim}
+  
+template <typename T>
+Ciphertext<T> sign(CryptoContext<T> cc, Ciphertext<T> x, int iters)
+{
+    for(auto i = 0; i < iters; i++) {
+        auto a = cc->EvalMult(x, 0.5);
+        auto b = cc->EvalMult(x, x);
+        b = cc->EvalSub(3, b);
+        x = cc->EvalMult(a, b);
+    }
+    return x;
+}
+\end{verbatim}
+\end{algorithm}
+
+Instead of manually finding the optimal approximation of some function $f(x)$, OpenFHE provides a Chebyshev function for calculating the coefficients of a Chebyshev approximation... 
+
+% \begin{algorithm}
+% \caption{An example algorithm}
+% \label{alg:example}
+% \begin{algorithmic}[1] % [1] adds line numbering every line
+%     \State \textbf{Input:} A set of observations $\mathcal{D}$
+%     \State \textbf{Output:} A causal direction
+%     \If{HSIC$_{X \to Y} <$ HSIC$_{Y \to X}$}
+%         \State The causal direction is $X \to Y$
+%     \ElsIf{HSIC$_{X \to Y} >$ HSIC$_{Y \to X}$}
+%         \State The causal direction is $Y \to X$
+%     \Else
+%         \State Direction is ambiguous
+%     \EndIf
+%     \For{each data point in $\mathcal{D}$}
+%         \State Process data
+%     \EndFor
+%     \State Return result
+% \end{algorithmic}
+% \end{algorithm}
+
+% \begin{algorithm}[h]
+%     \caption{The Hello World! program in C++.}
+%     \label{algo:fhe:sign}
+% \begin{lstlisting}[language=C++]
+% template <typename T>
+% Ciphertext<T> sign(CryptoContext<T> cc, Ciphertext<T> x, uint32_t iters = 1)
+% {
+%     for(uint32_t i = 0; i < iterations; i++) {
+%         auto a = cc->EvalMult(x, 0.5);
+%         auto b = cc->EvalMult(x, x);
+%         b = cc->EvalSub(3, b);
+%         x = cc->EvalMult(a, b);
+%     }
+%     return x;
+% }
+% \end{lstlisting}
+% \end{algorithm}
+
+
+\subsection{Sorting}
+Imagine further that we have 2 numbers $a, b$ and we want to sort $\{a, b\}$ homomorphically. We can use a similar approach to before if we consider that:
+
+\begin{equation}
+    \sign(a - b) = \begin{cases} 
+      \;\,1 & a > b \\
+      \;\,0 & a = b \\
+      -1 & a < b
+   \end{cases}
+\end{equation}
+
+This allows us to sort $\{a, b\}$ by homomorphically calculating $\sign(a - b)$ and then using \emph{branchless programming} and/or boolean expressions to extract the smallest and largest values. Half the sum plus/minus half the difference will give the max/min values.
+
+\begin{align}
+    \label{eq:min}
+    min &= \frac{(a + b) - |a - b|}{2} \\
+    \label{eq:max}
+    max &= \frac{(a + b) + |a - b|}{2}
+\end{align}
+
+This then becomes \autoref{alg:sort2}, which is shown implemented in \autoref{algo:fhe:sort_two}.
+
+\begin{algorithm}
+\caption{Homomorphic sorting of two numbers}
+\label{alg:sort2}
+\begin{algorithmic}[1] % [1] adds line numbering every line
+    \State \textbf{Input:} Two numbers $a$ and $b$
+    \State \textbf{Output:} A sorted list of the two numbers
+    
+    diff = a - b
+    
+    comp = sign(diff)
+    
+    abs = diff $\cdot$ comp
+    
+    sum = a + b
+
+    min = (sum - abs)/2
+    
+    max = (sum + abs)/2
+    
+    \State Return $\{min, max\}$
+\end{algorithmic}
+\end{algorithm}
+
+
+\begin{algorithm}
+\caption{Sort two numbers homomorphically.}
+\label{algo:fhe:sort_two}
+\begin{verbatim}
+template <typename T>
+std::tuple<Ciphertext<T>, Ciphertext<T>> 
+sort_two_unpacked(
+    CryptoContext<T>    cc, 
+    Ciphertext<T>       a, 
+    Ciphertext<T>       b, 
+    uint32_t            iterations = 2, 
+    double              delta = 0.1
+) {
+    // Check sign(a - b)
+    // diff a - b must be in [-1, 1]
+    auto diff = cc->EvalSub(a, b);
+    auto sign = compare(cc, diff, iterations, delta);
+
+    // Circuit switch positions
+    auto sum = cc->EvalAdd(a, b);
+    auto abs = cc->EvalMult(sign, diff);
+
+    auto min = cc->EvalMult(cc->EvalSub(sum, abs), 0.5);
+    auto max = cc->EvalMult(cc->EvalAdd(sum, abs), 0.5);
+    
+    return std::tuple(min, max);
+}
+\end{verbatim}
+\end{algorithm}
+
+% \subsection{Bitonic Sorting Network}
+% Sorting in this way is slow.
+
+% Sorting networks.
+
+% Bitonic sort can reach $\mathcal{O}(\log^2n)$, which is not quite optimal, but still. Also highly parallelizable.

@@ -1,0 +1,29 @@
+%%
+%% This file contains all structural changes from the provided MSc thesis template
+%%
+
+% Trees in tikz
+\usepackage{tikz-qtree}
+
+% Theorem and Definiton styles
+\usepackage{etoolbox}
+\AtBeginEnvironment{definition}{\renewcommand{\emph}[1]{\textbf{#1}}}
+
+% Operators
+\DeclareMathOperator{\sign}{sign}
+
+% Autoref
+\newcommand{\algorithmautorefname}{Algorithm}
+
+% Code
+\usepackage{minted}
+
+
+%%
+%% Temporary: Silence warnings outside my control
+%%
+%% Source - https://tex.stackexchange.com/a/759797
+%% Posted by Peter LeFanu Lumsdaine
+%% Retrieved 2026-03-20, License - CC BY-SA 4.0
+\usepackage{silence}
+\WarningFilter{latex}{Command \showhyphens has changed}

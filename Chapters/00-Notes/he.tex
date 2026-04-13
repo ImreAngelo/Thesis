@@ -1,0 +1,163 @@
+\section{Homomorphic Encryption}
+
+For an algorithm to be \emph{oblivious} or \emph{data-independent}, it must perform the same operations regardless of the data being processed. In other words, \gls{fhe} is \emph{branchless programming}; programming without conditional statements such as \texttt{if}, \texttt{switch}, \texttt{match}, and so on. (Conditional with respect to the data, the program can still be stateful etc.) Therefore, it is often natural to think of \gls{fhe} algorithms as logical/boolean circuits. 
+
+\begin{itemize}
+    \item \textbf{Homomorphic Encryption} allows computation on encrypted data
+    \item \textbf{\gls{fhe}} can evaluate \emph{any} circuit consisting of addition $(+)$ and multiplication $(\cdot)$
+    \item \textbf{Levelled \gls{fhe}} can only evaluate circuits of a certain depth, but are faster than their non-levelled counterparts
+    \item \textbf{Somewhat HE} supports a limited number of operations before noise renders data unreadable, whereas FHE employs \emph{bootstrapping} to refresh noisy data, enabling unlimited, arbitrary computations
+\end{itemize}
+
+\noindent\textbf{Relevant resources:}
+\begin{itemize}
+    \item \cite{cryptoeprint:2025/860}
+    \item \cite{cryptoeprint:2022/915}
+    \item \cite{cryptoeprint:2021/435}
+    \item \cite{cryptoeprint:2016/870}
+    \item \cite{cryptoeprint:2016/421}
+    \item \cite{cryptoeprint:2013/340}
+    \item \cite{cryptoeprint:2012/144}
+    \item \cite{cryptoeprint:2012/078}
+    \item \cite{cryptoeprint:2011/277}
+    \item \cite{arxiv:2022/textbook}
+    \item \cite{park:sortinghat:2022}
+    \item \cite{chillotti:onionring:2019}
+\end{itemize}
+
+\newpage
+
+\subsection{Basics}
+
+A tuple of setup, keygen, eval and decrypt...
+
+\subsubsection{Encoding}
+
+
+
+\subsubsection{Embedding}
+DCRT!
+
+
+\subsection{Hardness Assumptions}
+
+Reductions from hard lattice problems: IVP, SVP, Gap versions, Shortest Integer Solution, LWE.
+
+\subsection{Ciphertexts}
+
+\gls{rlwe} ciphertext:
+\begin{equation}
+    \mathbf{RLWE}_{s}(m):\quad (a, b), \quad b = a\cdot s + \delta\cdot m + \varepsilon
+\end{equation}
+
+\gls{rgsw} ciphertext, defined in \cite{cryptoeprint:2013/340}:
+\begin{equation}
+    \mathbf{RGSW}_s(m):\quad ???
+\end{equation}
+
+An important operation for this thesis is defined between these two forms through \eqref{eq:externalprod}, where the inverse gadget matrix $G^{-1}(\cdot)$ satisfies \eqref{eq:externalprod_gadget}. This operation is called the \emph{external product} and is denoted by the $\boxdot$ operator.
+\begin{align}
+    \label{eq:externalprod}
+    a \boxdot B &= G^{-1}(a)\cdot B \\
+    \label{eq:externalprod_gadget}
+    G^{-1}(a)\cdot G &= a + e \pmod{q}
+\end{align}
+
+A key observation is that an \gls{rgsw} ciphertext encodes a collection of \gls{rlwe} samples. It follows that we can convert, or expand, an \gls{rlwe} ciphertext to an \gls{rgsw} representation.
+
+\begin{algorithm}
+\caption{HomExpand}
+\label{alg:HomExpand}
+\begin{algorithmic}[1] % [1] adds line numbering every line
+    \State \textbf{Input:} A set $\mathcal{S}$ of \gls{rlwe} ciphertexts
+    \State \textbf{Output:} An \gls{rgsw} ciphertext
+    % \If{HSIC$_{X \to Y} <$ HSIC$_{Y \to X}$}
+    %     \State The causal direction is $X \to Y$
+    % \ElsIf{HSIC$_{X \to Y} >$ HSIC$_{Y \to X}$}
+    %     \State The causal direction is $Y \to X$
+    % \Else
+    %     \State Direction is ambiguous
+    % \EndIf
+    \For{$c = (a,b)$ in $\mathcal{S}$}
+        \State Process data
+    \EndFor
+    \State Return result
+\end{algorithmic}
+\end{algorithm}
+
+\clearpage
+
+% \subsection{Ciphertexts (AI preview)}
+
+% \gls{rlwe} ciphertext:
+% \begin{equation}
+%     \mathbf{RLWE}_{s}(m):\quad (a, b), \quad b = a\cdot s + \delta\cdot m + \varepsilon
+% \end{equation}
+
+% \gls{rgsw} ciphertext, defined in \cite{cryptoeprint:2013/340}:
+% \begin{equation}\label{eq:rgsw}
+%     \mathbf{RGSW}_s(m):\quad
+%     \mathbf{C} \in \mathcal{R}_q^{2\ell \times 2},\qquad
+%     \mathbf{C} = \mathbf{Z} + m\cdot\mathbf{G}
+% \end{equation}
+% Here $\mathbf{Z}\in\mathcal{R}_q^{2\ell\times 2}$ is a matrix whose rows are fresh
+% $\mathbf{RLWE}_s(0)$ samples, $\mathbf{G} = \mathbf{I}_2\otimes\mathbf{g}
+% \in\mathcal{R}_q^{2\ell\times 2}$ is the gadget matrix, and
+% $\mathbf{g}=(1,\beta,\dots,\beta^{\ell-1})^{\!\top}$ for decomposition base $\beta$
+% and level count $\ell$.
+
+% An important operation is defined between these two forms through
+% \eqref{eq:externalprod}, where the inverse gadget matrix $G^{-1}(\cdot)$ satisfies
+% \eqref{eq:externalprod_gadget}.  This operation is called the \emph{external product}
+% and is denoted by the $\boxdot$ operator.
+% \begin{align}
+%     \label{eq:externalprod}
+%     a \boxdot B &= G^{-1}(a)\cdot B \\
+%     \label{eq:externalprod_gadget}
+%     G^{-1}(a)\cdot G &= a + e \pmod{q}
+% \end{align}
+% Applying the external product to an $\mathbf{RLWE}_s$ ciphertext
+% $c = (a,b)$ and an $\mathbf{RGSW}_s(m)$ ciphertext $\mathbf{C}$ gives
+% \begin{equation}\label{eq:ext_prod_result}
+%     c \boxdot \mathbf{C}
+%     = G^{-1}(a,b)\cdot\bigl(\mathbf{Z}+m\cdot\mathbf{G}\bigr)
+%     \approx m\cdot(a,b),
+% \end{equation}
+% where the approximation follows because $G^{-1}(a,b)\cdot\mathbf{Z}$ contributes
+% only a small error (each row of $\mathbf{Z}$ decrypts to zero) and
+% $G^{-1}(a,b)\cdot\mathbf{G}\approx(a,b)$ by \eqref{eq:externalprod_gadget}.
+% The result $m\cdot(a,b)$ is itself an $\mathbf{RLWE}_s$ ciphertext, enabling
+% homomorphic scalar multiplication in $\mathcal{R}_q$.
+
+% A key observation is that an \gls{rgsw} ciphertext encodes a collection of
+% \gls{rlwe} samples---its $2\ell$ rows each constitute a pair in $\mathcal{R}_q^2$.
+% It follows that we can convert, or \emph{expand}, a structured collection of
+% \gls{rlwe} ciphertexts into an \gls{rgsw} representation, as described in
+% Algorithm~\ref{alg:HomExpand}.
+
+% \begin{algorithm}
+% \caption{HomExpand}
+% \label{alg:HomExpand}
+% \begin{algorithmic}[1]
+%     \State \textbf{Input:}  A set
+%            $\mathcal{S} = \bigl\{c_j=(a_j,b_j)\bigr\}_{j=1}^{2\ell}$
+%            of \gls{rlwe} ciphertexts under an auxiliary key $s'$, where $c_j$
+%            encrypts $\bigl\lfloor q/\beta^{(j-1)\bmod\ell}\bigr\rfloor\cdot m$
+%     \State \textbf{Output:} An \gls{rgsw} ciphertext
+%            $\mathbf{C}\in\mathcal{R}_q^{2\ell\times 2}$
+%     \State Initialise $\mathbf{C}\leftarrow\mathbf{0}^{2\ell\times 2}$,
+%            $\;j\leftarrow 1$
+%     \For{$c=(a,b)\in\mathcal{S}$}
+%         \State $(a,b)\leftarrow\mathsf{KS}_{s'\to s}(a,b)$
+%                \Comment{Re-encrypt under target key $s$}
+%         \State $(a,b)\leftarrow\mathsf{ModSwitch}_{\,q'\to q}(a,b)$
+%                \Comment{Reduce noise via modulus switching}
+%         \State $\mathbf{C}[j,\,:\,]\leftarrow(a,\,b)$
+%                \Comment{Assign as $j$-th row of RGSW matrix}
+%         \State $j\leftarrow j+1$
+%     \EndFor
+%     \State \Return $\mathbf{C}$
+% \end{algorithmic}
+% \end{algorithm}
+
+\clearpage

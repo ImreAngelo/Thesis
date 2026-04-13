@@ -1,0 +1,17 @@
+%%%
+%%% ORAM Algorithm 8 - Subs
+%%%
+\begin{algorithm}
+\caption{RLWE Substitution Algorithm $\mathsf{Subs}(c, k)$}
+\label{alg:ORAM:8}
+\begin{algorithmic}[1] % [1] adds line numbering every line
+    \State \textbf{Input:} $\mathbf{c} = \mathrm{RLWE}_s(\mu(X))$; odd integer $k$
+    \State \textbf{Input:} $KS_{s(X^k)\to s}[j]$ for $j = 1 : \ell_{ks}$
+    \State \textbf{Output:} $\mathbf{c'} = \mathrm{RLWE}_s(\mu(X^k))$
+    \State $\mathbf{c} = (c_0, c_1)$
+    \State Let $\mathbf{c'} = (c'_0, c'_1) = (c_0(X^k), c_1(X^k))$
+    \State Decompose $c'_0$ as $\sum_{j=1}^{\ell_{ks}} c'_0[j]/B^j_{ks} + \epsilon_{dec}$ with
+    \Statex $\quad||c'_0[j]||_\infty \leq B_{ks}/2$ and $||\epsilon_{dec}||_\infty\leq 1/(2B^\ell_{ks})$
+    \State\Return $\mathbf{c'} = (0, c_1) - \sum_{j=1}^{\ell_{ks}} c_0[j] \cdot KS_{s(X^k)\to s}[j]$
+\end{algorithmic}
+\end{algorithm}
