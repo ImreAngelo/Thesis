@@ -1,0 +1,20 @@
+%%%
+%%% RGSW(m) on client-side
+%%%
+\begin{algorithm}[ht!]
+\caption{Client-side RGSW generation}
+\label{alg:rgsw}
+\begin{algorithmic}[1]
+    \State \textbf{Input:} Polynomial $\mu = \sum_{j} b_j X^j,\quad b_j\in[0,N)$
+    \State \textbf{Input:} Decomposition parameter \paramDecomp
+    \State \textbf{Output:} $\mathsf{RGSW}_s(\mu)$
+    \State Construct a $2\ell\times 1$ vector $C$
+    % \State let $z = 0$ % cache plaintext
+    \For{$i = 0,\; i < \ell$}
+        \State Let $\hat{\mu} = \mu B^i/\Delta = \frac{B^i}{\Delta}(\sum_{j} b_j X^j) \quad \textrm{note: coeff.}\;B^i\cdot b_j \bmod{q}$
+        \State $\mathbf{C}_i = \mathsf{RLWE}_s(\hat{\mu})$
+        \State $\mathbf{C}_{i+\ell} = \mathsf{RLWE}_s(0) + (0, \hat{\mu})$
+    \EndFor
+    \State\Return $\{\mathbf{C}_k\}^{2\ell - 1}_{k=0}$
+\end{algorithmic}
+\end{algorithm}

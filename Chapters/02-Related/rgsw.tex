@@ -1,17 +1,233 @@
-\section{Onion Ring ORAM}
-\label{sec:rgsw}
+\newcommand{\paramDecomp}{$\ell$}
 
+\section{TFHE (RGSW)}
+\label{sec:rgsw}
+\ifnotes
+\begin{itemize}
+    \item Problem with relinearization (noise, keys, time etc.)
+    \item Introduce (R)GSW as solution
+    \item External product
+    \item Trade-offs (size $\to$ communication overhead)
+    \item Decomposition parameter \paramDecomp bounds
+    \item HomExpand
+\end{itemize}
+\fi
+
+The GSW ciphertext defined in \cite{cryptoeprint:2013/340}, now in the ring $R_q$. It works by changing bases. Given a base $B$ and decomposition parameter \paramDecomp, such that the message $\mu$ can be expressed with $\ell$ digits in base $B$, define the \emph{gadget vector} as $g = (1, B, \dots, B^{\ell - 1})^\intercal\bmod{t}$ and define the \emph{gadget matrix} $G$ as \eqref{eq:gadget-matrix}.
+
+\begin{equation}
+    \label{eq:gadget-matrix}
+    G = I_2 \otimes g = 
+    \begin{bmatrix}
+        g & 0 \\
+        0 & g
+    \end{bmatrix}
+\end{equation}
+
+Then an \gls{rgsw} ciphertext $C$ encrypting a message $\mu \in [0, N)$ is defined by \eqref{eq:rgsw}, where each row of $Z$ is an \gls{rlwe} encryption of 0 under the secret key $s$ (effectively rows of public keys), $\mu$ is the message and $G$ is the gadget matrix (duh).
+
+\begin{equation}
+    \label{eq:rgsw}
+    C = Z + \mu \cdot G
+\end{equation}
+
+% \textcolor{magenta}{I show in \autoref{sec:impl:rgsw} that each row $C_i$ can be constructed directly...}
+While \eqref{eq:rgsw} is sufficient to construct $\mathsf{RGSW}_s(\mu)$, we can speed up the process by directly encrypting each row. (Note \gls{rgsw} can be viewed as a flat vector of $2\ell$ \gls{rlwe} ciphertexts where the first $\ell$ modify $a$ and the last $\ell$ modify $b$).
+
+\noindent\textcolor{red}{\textbf{Maybe use $\mathsf{RLWE} = (b, a)$ like OpenFHE uses in e.g. $\to$\texttt{GetElements()}? In which case the top and bottom rows swap place.}}
+
+\noindent\textcolor{magenta}{\textbf{Implementation details below, but ultimately not used}}
+
+\newpage
+\begin{corollary}
+\label{corollary:rgsw:bottom}
+For an \gls{rgsw} ciphertext $C$ encrypting a message $\mu$ under $s$, the $(\ell + i)$-th row $(0 \leq i < \ell)$ is equivalent to: 
+\begin{equation}
+    C_{\ell + i} = \mathsf{RLWE}_s(\mu B^i/\Delta)
+\end{equation}
+
+\begin{proof} 
+    Follows from the definitions \eqref{eq:rgsw} and \eqref{eq:gadget-matrix}.
+    \begin{align*}
+        Z_i + \mu\cdot G_i &= \mathsf{RLWE}_s(0) + \mu \cdot(0, g_i) \\
+            &= (a, a\cdot s + \epsilon) + (0, \mu\cdot B^i) \\
+            &= (a, a\cdot s +\mu B^i + \epsilon) \\
+            &= \mathsf{RLWE}_s(\mu B^i/\Delta)
+    \end{align*}
+\end{proof}
+\end{corollary}
+
+\noindent The same approach shows the first $\ell$ rows can be constructed as an \gls{rlwe} encryption $c_i = \mathsf{RLWE}_s(-s\mu B^i/\Delta)$ for $0 \leq i <\ell$ (\autoref{lemma:rgsw:top}). However, calculating $s\cdot \mu$ is not trivial in practice, and it's faster to simply modifying the $a$ component of a fresh $\mathsf{RLWE}(0)$ encryption. % TODO: Create from scratch
+\autoref{alg:rgsw} creates $\mathsf{RGSW}_s(\mu)$ in $\mathcal{O}(\ell)$ steps (but can only be performed on the client-side as it requires $s$). 
+
+%% Generate RGSW on client-side
+\input{Algorithms/rgsw-client}
+
+\noindent\textcolor{red}{Note: we focus on BGV, where $\Delta = 1$, which simplifies the algorithm even more.}
+
+\ifnotes
+\subsubsection{In BGV-RNS}
+In \gls{rns}, each coefficient $b_i \in R_q$ is represented as a set of $k$ residues mod $q_i$ where $q = q_0q_1\cdots q_{k-1}$, such that $b_i$ is reconstructed using \gls{crt}.
+\fi
+
+\subsection{Parameter Choice}
+The choice of basis $B$ and decomposition parameter $\ell$ is one and the same. For a given basis, the message polynomial $\mu$ is rewritten into $\log_B(\mu)$ base-$B$ digits. Therefore $\ell \geq \log_B(\mu)$, otherwise the RGSW does not encode all the digits, and $\ell \leq \log_B(\mu)$ because more $B$-digits would always be 0. The value of $\ell$ is then squeezed and must equal the number of base-$B$ digits that encodes all $\mu$ values allowed by the scheme.
+
+%%------------------%%
+%% EXTERNAL PRODUCT %%
+%%------------------%%
+\newpage
 \subsection{External Product}
-We want to be able to use the external product, which essentially multiplies an RLWE ciphertext (vector form) and an RGSW ciphertext (matrix form), resulting in a RLWE ciphertext (vector form). This is analogous to multiplying a vector with a matrix, except they are both encrypted under a homomorphic encryption scheme... The external product is denoted $\boxdot$ and is defined as \eqref{eq:externalprod:2}, where the inverse \emph{gadget matrix} $G^{-1}(\cdot)$ satisfies \eqref{eq:externalprod_gadget:2} and some other stuff...
+\ifnotes
+\textcolor{magenta}{The purpose of using RGSW \emph{is} to get ``access'' to the external product, which allows homomorphic multiplication without the expensive relinearization step.}
+\fi
+First defined in \cite{cryptoeprint:2018/421}? The external product \eqref{eq:externalprod} is defined between an \gls{rlwe} and a \gls{rgsw} ciphertext, and outputs an \gls{rlwe} ciphertext without needing to use homomorphic multiplication (and thus relinearization). The external product uses a \emph{decomposition matrix} $G^{-1}$ that has the \emph{gadget property} \eqref{eq:gadget-property}, which effectively ``undoes'' the effect of the gadget matrix $G$ (with some error $\leq B/2$, assuming $x$ has binary elements).
+
 \begin{align}
-    \label{eq:externalprod:2}
-    a \boxdot B &= G^{-1}(a)\cdot B \\
-    \label{eq:externalprod_gadget:2}
-    G^{-1}(a)\cdot G &= a + e \pmod{q}
+    \label{eq:gadget-property}
+    G^{-1}(x)\cdot G &= x + e \pmod{q} \\
+    \label{eq:externalprod}
+    x \boxdot Y &= G^{-1}(x)\cdot Y
 \end{align}
 
-\subsection{RLWE-to-RGSW Expansion}
-\textbf{HomExpand:} Expands an \gls{rlwe} ciphertext into an \gls{rgsw} ciphertext.
+
+\subsection{BGV-RNS Optimizations}
+Some key observations allow us to much more efficiently port the \gls{rgsw} operations to BGV-RNS. 
+
+\begin{enumerate}
+    \item RNS ciphertexts are decomposed by \gls{crt} using $\{ q_i \} \;\forall\; i$ as a basis.
+    \item If we choose $g = (q_0, q_1, \dots, q_\ell)$ as the gadget vector, then we get gadget de/composition for ``free'' as it is already baked into the RNS structure
+\end{enumerate}
+
+\ifnotes
+\textbf{No homomoprhic multiplication:}
+\begin{align}
+    x\boxdot Y &= G^{-1}(x)\cdot Y \\
+    &= G^{-1}(x)\cdot(Z + \mu_y\cdot G) \\
+    &= G^{-1}(x)\cdot Z + \mu_y \cdot G^{-1}(x)\cdot G \\
+    &= \underbrace{G^{-1}(x)\cdot Z}_{A} + \underbrace{\mu_y \cdot (x + \epsilon)}_{B}
+\end{align}
+
+\textbf{Term A:}
+???
+
+\textbf{Term B:}
+Since $x = (b, a) = (as + \Delta \mu_x + \epsilon')$ we get:
+\begin{align}
+   \mu_y\cdot &(as + \Delta \mu_x + \epsilon, a + \epsilon) \\
+   &(as\cdot\mu_y + \Delta \mu_x\mu_y + \epsilon, a\mu_y + \epsilon) \\
+   &((a\mu_y)\cdot s + \Delta (\mu_x\mu_y) + \epsilon, (a\mu_y) + \epsilon) \\
+   &\mathsf{RLWE}_s(\mu_x\mu_y) + \epsilon
+\end{align}
+
+% As mentioned eariler, this does not use homomoprhic multiplication. \textcolor{red}{Show that this does not use (homomorphic) multiplication:} 
+
+% \begin{align}
+%     x \mod{B}
+% \end{align}
+
+\newpage
+\fi
+\ifnotes
+\subsubsection{Gadget Decomposition}
+The gadget encodes the message as digits in base $B$. To reconstruct the message $m$, we therefore need to find a decryption function such that:
+
+\begin{equation}
+      \mathsf{Dec}(\cdot): R_q \to R^{\ell} \quad s.t.\quad \langle \mathsf{Dec}(x), g\rangle = x \pmod{Q}
+\end{equation}
+
+Then $x\boxdot Y = \langle \mathsf{Dec}(x), Y\rangle$
+
+% Encodes the message as digits in base $B$, which limits the noise to $B/2$ per level $\approx \mathcal{O}(B\log{B}) = \mathcal{O}(B\ell)$ instead of ...
+
+% The RGSW really encodes $\mu$ as digits in $B$. In general, for each component of a vector, the gadget composition takes $B^i$. Let $v_B$ be $v$ in base $B$.
+
+\begin{equation}
+    (v_0, v_1, \dots, v_{\ell-1}) \cdot g = v_0 + v_1B + \dots + v_{\ell - 1} B^{\ell - 1} = v_B
+\end{equation}
+
+A general gadget matrix for a $k$-dimensional vector then becomes: 
+\begin{equation}
+    G = I_k \otimes g
+\end{equation}
+
+And the decomp:
+\begin{align}
+    G^{-1}(x)\cdot G &= G^{-1}(x)\cdot(I_k\otimes g) = x + \epsilon \\
+    G^{-1}(x) &= (I_k \otimes g)^{-1}(x + \epsilon)
+\end{align}
+
+In our case, each component of the vector $v$ is an \gls{rlwe} encryption $(b,a)$, so $k = 2$. 
+\begin{equation}
+    G^{-1}(x) = 
+    \begin{pmatrix}
+        g & 0 \\
+        0 & g
+    \end{pmatrix}
+    ^{-1}
+    (a + \epsilon, b + \epsilon) = 
+    \frac{1}{}
+\end{equation}
+
+
+From \label{eq:rgsw} we can see that we are gadgeting the message $\mu$. In other words, assuming we are encrypting bits, $\mu$ is encoded into base $B$ digits in each component of our ciphertext(s). 
+\begin{equation}
+    Z + \mu B
+\end{equation}
+
+In one dimension, the gadget property \eqref{eq:gadget-property} for a decomposition vector $g^{-1}$ undoes the gadget:
+\begin{equation}
+    (v_0 + v_1B + \dots + v_{\ell - 1} B^{\ell - 1}) \cdot g^{-1} = (v_0, v_1, \dots , v_{\ell - 1})
+\end{equation}
+
+\subsubsection{Constructing Decomp Matrix}
+????????
+
+\subsubsection{Placing}
+Let $u \in \{0,1\}$.
+
+\begin{equation}
+    \mathsf{RLWE}_s(v) \boxdot \mathsf{RGSW}_s(u) = 
+\end{equation}
+
+Alternative: just show 1) it exists and 2) this matrix has the property
+\fi
+
+\newpage
+
+\subsection{Internal Product}
+RGSW $\times$ RGSW
+
+\begin{equation}
+    A \boxtimes B = 
+    \begin{bmatrix}
+        A \boxdot b_0 \\
+        A \boxdot b_1 \\
+        \vdots \\
+        A \boxdot b_\ell
+    \end{bmatrix}
+\end{equation}
+
+\newpage
+
+%%-----------------------%%
+%% Homomorphic Expansion %%
+%%-----------------------%%
+\subsection{RLWE-to-RGSW Expansion from ORAM}
+\ifnotes
+\begin{itemize}
+    \item We want to use RGSW to avoid relinearization
+    \item We want to send packed ciphertexts to save on communication
+    \item Therefore, we send RLWE and convert to RGSW on the server 
+    \item (Requires a single RGSW encryption $\mathsf{RGSW}(-s)$ to be sent as well)
+    \item 1 RLWE for the index bits = size $\ell$
+    \item $\ell$ RGSW's for the index bits = size $2\ell \times 2$ or smth
+    \item Expanding = size $2\ell$ or something
+\end{itemize}
+\fi
+As established in \autoref{sec:rgsw}, \gls{rgsw} ciphertexts are enticing because the external product allows us to perform homomorphic multiplication without relinearization. However, the size of \gls{rgsw} makes the communication costs very high in a communication protocol. We wish to strike a balance between the cheap communication cost of packed \gls{rlwe} and the fast multiplication of \gls{rgsw}. The solution is to send \gls{rlwe} ciphertexts from the client, and \emph{expand} them homomorphically on the server.
+
+Solution from \autocite{chillotti:onionring:2019}. \textbf{HomExpand:} Expands an \gls{rlwe} ciphertext into an \gls{rgsw} ciphertext.
 
 This expansion is described in Algorithm 4 of \cite{chillotti:onionring:2019}, which builds on Algorithms 3 and 8 from the same paper. The algorithms are listed below (in slightly different notation) as \autoref{alg:ORAM:4}, \autoref{alg:ORAM:3}, and \autoref{alg:ORAM:8}, respectively.
 
@@ -29,48 +245,32 @@ It begins by running a subroutine $\mathsf{expandRlwe}$ (\autoref{alg:ORAM:3}) w
 %%%
 \input{Algorithms/oram-3}
 
-This subroutine works by...?
+This subroutine converts an RLWE ciphertext with $\ell$ slots into $\ell$ ciphertexts, each encoding a unique slot of the input. \textcolor{red}{Subs} is a function that... (EvalAutomorphism!)
 
+Their method is fast for TFHE, but for our use --- case where $n << N$ --- it's faster to use the method described in \cite{cryptoeprint:2018/244} to repeatedly ``rotate'' the ciphertext $\ell$ times as in \autoref{alg:expand:bgv}. The FastRotate operation is supported by the OpenFHE as $\mathsf{EvalFastRotate}$.
+
+Note that the components being scaled by $n$ is a side-effect of their implementation, and not required when using FastRotate, so the output is a list of $c_i =\mathsf{RLWE}(b_i)$.
+
+%%
+%% ORAM ALGORITHM 3 - MODIFIED
+%%
+\input{Algorithms/oram-3-bgv}
+
+
+\ifnotes
 \subsubsection{Substitution}
 Finally, the substitution is a bit more complex... Uses an automorphism key to rotate? Or something?
 
-%%%
+%%% -----------------------
 %%% ORAM ALGORITHM 8 - Subs
-%%%
+%%% -----------------------
 \input{Algorithms/oram-8}
 
 \newpage % TODO: Fix floating issues...
+\clearpage
+\newpage
+\fi
 
-
-\subsection{Notes}
-\gls{rgsw} ciphertext, defined in \cite{cryptoeprint:2013/340}:
-\begin{equation}\label{eq:rgsw}
-    \mathbf{RGSW}_s(m):\quad
-    \mathbf{C} \in \mathcal{R}_q^{2\ell \times 2},\qquad
-    \mathbf{C} = \mathbf{Z} + m\cdot\mathbf{G}
-\end{equation}
-Here $\mathbf{Z}\in\mathcal{R}_q^{2\ell\times 2}$ is a matrix whose rows are fresh
-$\mathbf{RLWE}_s(0)$ samples, $\mathbf{G} = \mathbf{I}_2\otimes\mathbf{g}
-\in\mathcal{R}_q^{2\ell\times 2}$ is the gadget matrix, and
-$\mathbf{g}=(1,\beta,\dots,\beta^{\ell-1})^{\!\top}$ for decomposition base $\beta$
-and level count $\ell$.
-
-% An important operation is defined between these two forms through \eqref{eq:externalprod}, where the inverse gadget matrix $G^{-1}(\cdot)$ satisfies \eqref{eq:externalprod_gadget}.  This operation is called the \emph{external product} and is denoted by the $\boxdot$ operator.
-% \begin{align}
-%     \label{eq:externalprod}
-%     a \boxdot B &= G^{-1}(a)\cdot B \\
-%     \label{eq:externalprod_gadget}
-%     G^{-1}(a)\cdot G &= a + e \pmod{q}
-% \end{align}
-Applying the external product to an $\mathbf{RLWE}_s$ ciphertext $c = (a,b)$ and an $\mathbf{RGSW}_s(m)$ ciphertext $\mathbf{C}$ gives
-\begin{equation}\label{eq:ext_prod_result}
-    c \boxdot \mathbf{C}
-    = G^{-1}(a,b)\cdot\bigl(\mathbf{Z}+m\cdot\mathbf{G}\bigr)
-    \approx m\cdot(a,b),
-\end{equation}
-where the approximation follows because $G^{-1}(a,b)\cdot\mathbf{Z}$ contributes only a small error (each row of $\mathbf{Z}$ decrypts to zero) and $G^{-1}(a,b)\cdot\mathbf{G}\approx(a,b)$ by \eqref{eq:externalprod_gadget:2}. The result $m\cdot(a,b)$ is itself an $\mathbf{RLWE}_s$ ciphertext, enabling homomorphic scalar multiplication in $\mathcal{R}_q$.
-
-A key observation is that an \gls{rgsw} ciphertext encodes a collection of \gls{rlwe} samples---its $2\ell$ rows each constitute a pair in $\mathcal{R}_q^2$. It follows that we can convert, or \emph{expand}, a structured collection of \gls{rlwe} ciphertexts into an \gls{rgsw} representation, as described in \autoref{alg:ORAM:4}.
 
 % \begin{algorithm}
 % \caption{HomExpand}
@@ -96,3 +296,17 @@ A key observation is that an \gls{rgsw} ciphertext encodes a collection of \gls{
 %     \State \Return $\mathbf{C}$
 % \end{algorithmic}
 % \end{algorithm}
+
+
+%%----------------%%
+%%                %%
+%%----------------%%
+\subsection{Homomorphic Field Trace}
+New paper!
+
+
+%%----------------%%
+%% IMPLEMENTATION %%
+%%----------------%%
+\newpage % Covered by lemma 2.1
+\input{Chapters/02-Related/impl}

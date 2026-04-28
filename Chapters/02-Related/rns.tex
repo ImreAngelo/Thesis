@@ -1,5 +1,33 @@
+\section{Residue Number System}
+\begin{itemize}
+    \item We use large numbers
+    \item A computer word is typically 64-bit (or less: 32-bit)
+    \item We want to work exclusively with numbers smaller than 64 bits
+    \item A \gls{rns} decomposes every number into a set of residues
+    \item Addition is easy, but multiplication uses \gls{ntt}
+\end{itemize}
+
+\textcolor{red}{\textbf{The gadget becomes the RNS primes?}}
+
+
+\subsection{CRT representation}
+Let 
+
+\begin{equation}
+\mathsf{DCRT}(x) = 
+\begin{pmatrix}
+    a & b \\
+    c & d
+\end{pmatrix}
+\end{equation}
+
+\subsection{Double CRT rep.}
+
+\newpage
+
+
 %%%
-%%% sPAR Algorithm 1 - RLWE Expansion subroutine ExpandRLWE
+%%% sPAR Algorithm 2
 %%%
 \begin{algorithm}
 \caption{Homomorphic placing $\mathsf{HomPlacing}$ for one slot}
@@ -24,6 +52,13 @@
         \State $z_i := b_{2^{l+1} - 1 + i}$
         \State $\mathbf{l}[i] = z_i$
     \EndFor
+    
+    \State // xxx //
+    \State Let 
+    
     \State\Return $\mathbf{l}$
 \end{algorithmic}
 \end{algorithm}
+
+
+\newpage

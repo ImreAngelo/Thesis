@@ -98,6 +98,15 @@
       url = {https://eprint.iacr.org/2016/870}
 }
 
+% TFHE (External Product)
+@misc{cryptoeprint:2018/421,
+      author = {Ilaria Chillotti and Nicolas Gama and Mariya Georgieva and Malika Izabachène},
+      title = {{TFHE}: Fast Fully Homomorphic Encryption over the Torus},
+      howpublished = {Cryptology {ePrint} Archive, Paper 2018/421},
+      year = {2018},
+      url = {https://eprint.iacr.org/2018/421}
+}
+
 % Craig Gentry FHE
 @phdthesis{gentry:2009,
     author = {Craig Gentry},
@@ -136,6 +145,14 @@
       url = {https://eprint.iacr.org/2013/340}
 }
 
+% ExpandRLWE
+@misc{cryptoeprint:2018/244,
+      author = {Shai Halevi and Victor Shoup},
+      title = {Faster Homomorphic Linear Transformations in {HElib}},
+      howpublished = {Cryptology {ePrint} Archive, Paper 2018/244},
+      year = {2018},
+      url = {https://eprint.iacr.org/2018/244}
+}
 
 
 %%% 
@@ -189,4 +206,20 @@
     keywords = {homomorphic encryption, oblivious RAM, permutation network},
     location = {London, United Kingdom},
     series = {CCS '19}
+}
+
+% Maybe
+@article{CHE2023101794,
+    title = {Multi-key homomorphic encryption with tightened RGSW ciphertexts without relinearization for ciphertexts product},
+    journal = {Journal of King Saud University - Computer and Information Sciences},
+    volume = {35},
+    number = {10},
+    pages = {101794},
+    year = {2023},
+    issn = {1319-1578},
+    doi = {https://doi.org/10.1016/j.jksuci.2023.101794},
+    url = {https://www.sciencedirect.com/science/article/pii/S1319157823003488},
+    author = {Xiaoliang Che and Longfei Liu and Baocang Wang and Yiliang Han and Xu An Wang and Xiaoyuan Yang and Tanping Zhou},
+    keywords = {Privacy computing, Secure multi-party computing (MPC) protocol, Multi-key homomorphic encryption, Ring learning with errors, Relinearization},
+    abstract = {Most previous RLWE-based multi-key homomorphic encryptions (MKHEs) need to perform complex relinearization operations on ciphertext products to complete the evaluation of circuits of bounded polynomial depth. In this process, many intermediate ciphertexts or keys are needed for computing, resulting in inefficient computing and redundant storage. We propose a more efficient RLWE-based MKHE without relinearization operations to squeeze the storage space provided for homomorphic computation. Firstly, a controllable factor is introduced into the party’s ciphertexts, delineating the ciphertext as a component-like factor in preparation for concatenate operations. Secondly, we construct a tightened RGSW ciphertext extension algorithm that can directly work on the party’s original ciphertext. The extended ciphertext no longer needs to be converted, so no conversion keys are required. Again, by combining the concatenate and bit decomposition techniques, we construct new matching homomorphic computation algorithms, which ensure that the ciphertext product or sum is consistent in morphology with the extended ciphertext. The homomorphic multiplication algorithm allows the resultant ciphertext to directly participate in the next round of homomorphic operations without relinearization. Finally, we propose a specific RLWE-based MKHE scheme and provide the decryption process. Our analysis shows that our scheme guarantees IND-CPA security and performs efficient homomorphic computations correctly without relinearization operations.}
 }

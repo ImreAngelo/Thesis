@@ -1,14 +1,14 @@
-\section{Algebra}
+\chapter{Algebra}
 A refresher on relevant basic algebra and number theory. Maybe some can be used in the thesis or as an appendix.
 
-\subsection{Rings}
+\section{Rings}
 A polynomial with coefficients in $\mathbb{F}$ is denoted $\mathbb{F}[X]$. The quotient of a ring $\mathbb{F}[X]/{S}$ is just $\mathbb{F}[X] \bmod{S}$. Most FHE schemes are based on rings (\gls{rlwe}, \gls{rgsw} etc.), and in particular we often see the ring $(\mathbb{Z}/q\mathbb{Z})[X] / (f(X))$ for some integer $q$ and some polynomial $f(X)$. Here $(\mathbb{Z}/q\mathbb{Z})[X]$ denotes a polynomial with coefficients in $\mathbb{Z}_q$ i.e. integers mod $q$, and since we have $\mathbb{Z}_q[X]/(f(X))$ it means that $f(x) \equiv 0$ in this ring. A natural choice is $f(X) = X^n + 1$ for many of these schemes for some variable $n$, as this allows all polynomials with degree (up to) $n$. (And is a cyclotomic polynomial $\to$ has additional structure that can be used to optimize performance.)
 
 If $f(X)$ is irreducible over $\mathbb{F}$, then $\mathbb{F}[X]/(f(X))$ is a field. (And $f(X)$ is a maximum ideal of $\mathbb{F}[X]$.)
 
 \textcolor{red}{A factor group $G/H$, pronounced \emph{G mod H}, is a factor group where $H$ \textbf{is the identity element}.} In other words, $\mathbb{F}[X]/(f(X))$ has the (additive) identity $f(X)$ aka. $f(X) \equiv 0$ in the ring.
 
-\subsection{Cyclotomic Polynomials}
+\section{Cyclotomic Polynomials}
 $(X^n + 1)$ is a \emph{cyclotomic polynomial}.
 They are irreducible over $\mathbb{Z}$ as long as $n = 2^m,\; m\in\mathbb{Z}$ (in other words, $n$ is a power of 2) but are typically not irreducible over $\mathbb{Z}_q$.
 
@@ -24,7 +24,7 @@ Geometrically, we can interpret the $n$-th roots of unity as the points that are
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=0.33\linewidth]{figs/cyclotomic-temp.png}
-    \caption{TODO: Create in tikz or something, not screenshot}
+    \caption{TODO: Create in tikz or drop}
     \label{fig:cyclotomic:1}
 \end{figure}
 
@@ -90,7 +90,7 @@ The identity \eqref{eq:cyclotomic:ident} says that a number is an $n$-th root of
 
 
 
-\subsection{Galois Group of Cyclotomic Polynomials}
+\section{Galois Group of Cyclotomic Polynomials}
 Galois theory can be used to answer the question of whether the roots of an arbitrary polynomial $f$ can be expressed in terms of its coefficients. The method for doing so leads to the definition of the \emph{splitting field of a polynomial}, which contains the elementary symmetric polynomials and other polynomials of (subsets of) the roots that can be obtained from them??
 
 \begin{definition}

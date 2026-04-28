@@ -11,6 +11,9 @@
 \DeclareGraphicsExtensions{.pdf,.jpg}
 \graphicspath{{./figs/}}
 
+\newif\ifnotes
+% \notestrue % Uncomment to see notes
+
 %% Uncomment the following in case you want subfigures; note that there will be a warning for the caption package
 % \let\subcaption\undefined
 % \let\subfloat\undefined
@@ -49,7 +52,7 @@
 \include{abstract_english}
 
 %% Uncomment the following line if you can write Norwegian. If the main text is in English and you can write Norwegian, there must be an abstract in Norwegian as well.
-%\include{abstract_norwegian}
+\include{abstract_norwegian}
 
 \include{preface}
 \cleardoublepage
@@ -83,7 +86,8 @@
 
 \pagenumbering{arabic}
 \pagestyle{ruled}
-\include{example_chapter}
+
+% \include{example_chapter}
 \include{Chapters/00-Notes/0-index}
 \include{Chapters/01-Background}
 \include{Chapters/02-Related/0-index}
@@ -96,14 +100,18 @@
 
 %% Uncomment the following if you have any appendix
 %% if your language is English and you only have one appendix, uncomment the following line
-%% \renewcommand{\appendixtocname}{Appendix}
-% \renewcommand{\chaptername}{\appendixname}
-% \appendix
-% \addtocontents{toc}{%
-%  \protect\vspace{1em}% 
-%  \protect\noindent \bfseries \appendixtocname\protect\par
-% }
+% \renewcommand{\appendixtocname}{Appendix}
+\renewcommand{\chaptername}{\appendixname}
+\appendix
+\addtocontents{toc}{%
+ \protect\vspace{1em}% 
+ \protect\noindent \bfseries \appendixtocname\protect\par
+}
 %% include below possible appendices (chapters)
+
+\input{Appendix/algebra}
+\input{Appendix/ntt}
+
 
 \else
 % produce the problem description to be signed and submitted within one month after start
