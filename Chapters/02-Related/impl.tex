@@ -1,7 +1,8 @@
 \section{Implementation Details}
 
-\subsection{RGSW}
+\subsection{RGSW Encryption (textbook form)}
 \label{sec:impl:rgsw}
+
 In practice, it would be convenient to construct each row directly, rather than first constructing both matrices in $\eqref{eq:rgsw}$ and combining them.
 
 Recall that an RLWE ciphertext is a vector $\mathsf{RLWE}(\mu) = (a, b)$ where $b=a\cdot s + \mu + \epsilon$ \textit{(since $\Delta = 1$ in BGV)}. We can view \gls{rgsw} as a flat vector of $2\ell$ \gls{rlwe} ciphertexts, or a $2\ell \times 2$ matrix with an $a$ column and $b$ column. In the latter representation, the first $\ell$ rows of $C$ are expressed as:
@@ -22,61 +23,40 @@ As each row of an \gls{rgsw} ciphertext is a valid \gls{rlwe} ciphertext, we can
 \end{align}
 
 The middle term must equal 0 to match $C_i$, which leads us to an expression \eqref{eq:rgsw:top} for $\hat{\mu}_i$.
-\begin{align} 
+\begin{align}
     0 &= s\cdot \mu \cdot B^{i} + \Delta\cdot \hat{\mu}_i \\
     \hat{\mu}_i &= -s\cdot\mu\cdot B^{i} \cdot 1/\Delta \\
     \label{eq:rgsw:top}
     \hat{\mu}_i &= -s\cdot\mu\cdot B^{i}
 \end{align}
 
-$\therefore$ we can construct row $i$ (0-indexed) of $\mathsf{RGSW}_s(\mu)$ as $\mathsf{RLWE}_s(-s\cdot\mu\cdot B^{i})$ for $0 \leq i < \ell$.Further, the RLWE plaintext $\mu$ in mod $t$ so we can also use $\mathsf{RLWE}_s(t - s\mu B^{i})$.
+Therefore we can construct row $i$ (0-indexed) of $\rgsw{\mu}$ as $\rlwe{-s\cdot\mu\cdot B^{i}}$ for $0 \leq i < \ell$. Further, the RLWE plaintext $\mu$ is mod $t$ so we can also use $\rlwe{t - s\mu B^{i}}$.
 
 \begin{align*}
-    \mathsf{RLWE}_s(-s\mu B^{i}) &= (a, a\cdot s - s\mu B^{i} + \epsilon) \pmod{t} \\
-    \mathsf{RLWE}_s(t - s\mu B^{i}) &= (a, a\cdot s + (t - s\mu B^{i}) + \epsilon) \pmod{t} \\
-    \mathsf{RLWE}_s(-s\mu B^{i})  &\equiv \mathsf{RLWE}_s(t - s\mu B^{i})   \pmod{t}
+    \rlwe{-s\mu B^{i}} &= (a, a\cdot s - s\mu B^{i} + \epsilon) \pmod{t} \\
+    \rlwe{t - s\mu B^{i}} &= (a, a\cdot s + (t - s\mu B^{i}) + \epsilon) \pmod{t} \\
+    \rlwe{-s\mu B^{i}}  &\equiv \rlwe{t - s\mu B^{i}}   \pmod{t}
 \end{align*}
 
-For the bottom $\ell$ rows, we can skip Z entirely since, as \autoref{lemma:rgsw:bottom} says: 
-$$\mathsf{RLWE}_s(0) + (0, \mu B^{i}) = (a,\; a\cdot s + \mu B^{i} + \epsilon) = \mathsf{RLWE}_s(\mu B^{i})$$
+For the bottom $\ell$ rows, we can skip $Z$ entirely since, as \autoref{corollary:rgsw:bottom} says:
+$$\rlwe{0} + (0, \mu B^{i}) = (a,\; a\cdot s + \mu B^{i} + \epsilon) = \rlwe{\mu B^{i}}$$
 
-% \newpage
-% Maybe: present as lemmas for top/bottom rows?
-% \begin{lemma}
-% \label{lemma:rgsw:bottom}
-% For an \gls{rgsw} ciphertext $C$ encrypting a message $\mu$ under $s$, the $(\ell + i)$-th row ($0 \leq i < \ell$) is given by: 
-% \begin{equation}
-%     C_{\ell + i} = \mathsf{RLWE}_s(\mu B^i/\Delta)
-% \end{equation}
-
-% \begin{proof} 
-%     Follows from the definitions \eqref{eq:rgsw} and \eqref{eq:gadget-matrix}.
-%     \begin{align*}
-%         Z_i + \mu\cdot G_i &= \mathsf{RLWE}_s(0) + \mu \cdot(0, g_i) \\
-%             &= (a, a\cdot s + \epsilon) + (0, \mu\cdot B^i) \\
-%             &= (a, a\cdot s +\mu B^i + \epsilon) \\
-%             &= \mathsf{RLWE}_s(\mu B^i/\Delta)
-%     \end{align*}
-% \end{proof}
-% \end{lemma}
-
-\subsubsection{Appendix?}
 \begin{lemma}
 \label{lemma:rgsw:top}
-The $i$-th row $C_i$ of $\mathsf{RGSW}_s(\mu)$ is:
+The $i$-th row $C_i$ of $\rgsw{\mu}$ is:
 \begin{equation}
-    C_i = \mathsf{RLWE}_s(-s\mu B^{i}/\Delta)
+    C_i = \rlwe{-s\mu B^{i}/\Delta}
 \end{equation}
 
 \begin{proof}
-Let $\hat{a} = a + \mu B^i$, and consider $\mathsf{RLWE}_s(\hat{\mu})$.
+Let $\hat{a} = a + \mu B^i$, and consider $\rlwe{\hat{\mu}}$.
 \begin{align*}
-    \mathsf{RLWE}(\hat{\mu}) &= (\hat{a}, \hat{a}\cdot s + \Delta \hat{\mu} + \epsilon) \\
+    \rlwe{\hat{\mu}} &= (\hat{a}, \hat{a}\cdot s + \Delta \hat{\mu} + \epsilon) \\
         &=(a + \mu B^i, (a + \mu B^i)\cdot s + \Delta \hat{\mu} + \epsilon) \\
         &=(a + \mu B^i, a\cdot s + \mu B^i\cdot s + \Delta\hat{\mu} + \epsilon)
 \end{align*}
 
-Assume $C_i = \mathsf{RLWE}(\hat{\mu})$, then:
+Assume $C_i = \rlwe{\hat{\mu}}$, then:
 \begin{align*}
     s\mu B^i + \Delta\hat{\mu} &= 0 \\
     \therefore \hat{\mu} &= -s\mu B^i /\Delta
@@ -84,227 +64,7 @@ Assume $C_i = \mathsf{RLWE}(\hat{\mu})$, then:
 \end{proof}
 \end{lemma}
 
-% \subsubsection{Prove thing}
-% $enc(-s * msg * B^i) = Enc(0) - Enc(msg * B^i)$
+\subsection{V2 RGSW Encryption}
+\label{sec:impl:rgsw-v2}
 
-% \begin{align}
-%     \mathsf{RLWE}_s(0) - \rlwe{\mu B^i} &= (a, as + (0 - \mu B^i) + \epsilon) \\
-%         &= (a, as - \mu B^i + \epsilon)
-% \end{align}
-
-
-\subsubsection{RNS optimizations}
-OpenFHE is built on a \gls{rns} where each polynomial is represented as residues of smaller (typically 48 bits for AVX512 or 60 bits by default) primes. The polynomials are equivalent to their non-RNS counter-parts by the Chinese Remainder Theorem.
-
-The base should be 60 (or 48) aka. \texttt{NativeSize} (?) in OpenFHE, then the gadget decomposition param becomes (lower bound)...
-
-% \subsubsection{Implementation Details (Shorter)}
-% In practice we wish to construct $C$ directly, rather than follow \eqref{eq:rgsw} directly (by first constructing $Z$ and $G$). An \gls{rgsw} can be viewed as a vector of $2\ell$ \gls{rlwe} ciphertexts. Note also $G$ is a sparse matrix represented uniquely by $g$. 
-
-% \begin{equation}
-%     C = (\mathbf{c_0}, \mathbf{c_1}) = \mathsf{RLWE}(0) + \mu\cdot g
-% \end{equation}
-
-% \begin{equation}
-%     C_{i} = 
-%     \begin{cases}
-%         (a, b_0 - \mu \cdot B^i) = (a, b_{- \mu B^{i}}), & 0 \leq i < \ell \\
-%         (a - \mu \cdot B^{i-\ell}, b), & \ell \leq i < 2\ell \\
-%     \end{cases}
-% \end{equation}
-
-
-\newpage
-\subsection{External Product for BGV-RNS}
-\label{sec:impl:extprod}
-Expand the condition \eqref{eq:externalprod:G}:
-
-\newcommand{\rlwe}[1]{\mathsf{RLWE}(#1)}
-
-% \begin{equation}
-%     G^{-1}(x)\cdot
-%     \begin{pmatrix}
-%         a & a\cdot s -s\cdot\mu/B + \varepsilon \\
-%         \vdots \\
-%         a & a\cdot s -s\cdot\mu/B^\ell + \varepsilon \\
-%         a & a\cdot s + \mu/B + \varepsilon \\
-%         \vdots \\
-%         a & a\cdot s + \mu/B^\ell + \varepsilon \\
-%     \end{pmatrix}
-%     =
-%     \begin{pmatrix}
-%         a, a\cdot s + \mu_a + 
-%     \end{pmatrix}
-% \end{equation}
-
-\begin{equation}
-    G^{-1}(x)\cdot 
-    \begin{pmatrix}
-        g & 0 \\
-        0 & g
-    \end{pmatrix} 
-    = (a, \; a\cdot s + \mu)
-    + \epsilon \pmod{q}
-\end{equation}
-
-% If we let $G^{-1}$ be a vector of size $2\ell$, then the first $\ell$ components build the public component $a$ ...
-Due to the 0's, the top $\ell$ rows correspond to the public component $a$, while the bottom $\ell$ rows correspond to the encrypted message $b$. So $G^{-1}$ is a vector with $2\ell$ components, which we can split into two distinct vectors denoted $G^{-1}_\mathrm{top}$ and $G^{-1}_\mathrm{bot}$ for now.
-
-\begin{align}
-    G^{-1}_\mathrm{top}(x) \cdot g &= \sum_{i=1}^{l}u_i/B^i \approx a + \epsilon \pmod{q} \\
-    G^{-1}_\mathrm{bot}(x) \cdot g &= \sum_{i=1}^{l}v_i/B^i \approx a\cdot s + \mu_x + \epsilon \pmod{q}
-\end{align}
-
-\begin{equation}
-    G^{-1}_\mathrm{RNS}(a)_j = a \bmod \alpha_j \in R_{\alpha_j},
-    \qquad
-    g_j = \hat{\alpha}_j = \frac{q}{\alpha_j}
-\end{equation}
-\begin{equation}
-    G^{-1}_\mathrm{RNS}(a) \cdot g 
-    = \sum_{j=0}^{\ell-1} (a \bmod \alpha_j) \cdot \hat{\alpha}_j 
-    \equiv a \pmod{q}
-\end{equation}
-
-
-
-% Top row can be written as:
-% \begin{equation}
-%     G^{-1}_\mathrm{top}(x)\cdot
-%     \begin{pmatrix}
-%         1/B \\ \vdots \\ 1/B^{\ell}
-%     \end{pmatrix}
-%     = \sum_{i=1}^{\ell}\frac{[G^{-1}_\mathrm{top}(x)]_i}{B^i} 
-%     \approx a \pmod{x}
-% \end{equation}
-
-% Let $g^{-1} = B + BX + \dots + B^\ell X^\ell = (B, \dots, B^\ell)$. Clearly, if  $G^{-1}_{top}(x) = [a] \cdot g^{-1}$ works (as $g^{-1}_i \cdot g_i = 1$ for $0 <i \leq \ell$, where $g_i$ denotes the $i$-th coefficient in the polynomial $g$.) This is fine because $G^{-1}(x)$ takes $x = (a,b)$ as input, so $a$ is easily accessible. The same argument can be applied to see that $b + g^{-1}$ is a valid choice for $G^{-1}_{bot}(x)$ as well.
-
-% \begin{equation}
-%     (b + g^{-1}) \cdot g = \sum_{i = 1}^{\ell}\frac{b_i \cdot B^i}{B^i} = b \pmod{x}
-% \end{equation}
-
-% % Let $g^{-1} = (B, \dots, B^\ell) \in \mathbb{Z}_q^{1\times\ell}$ be the row vector of gadget inverses, satisfying $g^{-1}_i + g_i = 1$ for $0 < i \leq \ell$ (where $g_i$ denotes the $i$-th entry of $g$).
-% % Then $G^{-1}_\mathrm{top}(x) = a \cdot g^{-1}$ is a valid choice, since $G^{-1}(x)$ takes $x = (a, b)$ as input, so $a$ is readily accessible. The same argument gives $G^{-1}_\mathrm{bot}(x) = b \cdot g^{-1}$, yielding:
-
-So in the code, we consider $G^{-1}(x)$ as two separate vectors/polynomials $a\cdot g^{-1}$ and $b \cdot g^{-1}$ and then calculate the external product \eqref{eq:externalprod} as: 
-
-\begin{align}
-    x \boxdot Y &= (a, b) \\
-    \mathrm{where}\;\,  a &= (x_1\cdot g^{-1}) \cdot Y \\
-                        b &= (x_2\cdot g^{-1}) \cdot Y
-\end{align}
-
-\begin{equation}
-    a = \sum_{i=0}^n c_i\cdot x^i \quad\implies\quad a\cdot b = \sum 
-\end{equation}
-
-% \begin{equation}
-%     g^{-1}(x)\cdot 
-%     \begin{pmatrix}
-%         1/B      & 0        \\
-%         \vdots   & \vdots   \\
-%         1/B^\ell & 0        \\
-%         0        & 1/B      \\
-%         \vdots   & \vdots   \\
-%         0        & 1/B^\ell
-%     \end{pmatrix} 
-%     = (a, \; a\cdot s + \mu)
-%     + \epsilon \pmod{q}
-% \end{equation}
-
-% Examine one of the bottom $\ell$ rows, which clearly build the b component:
-
-% \begin{equation}
-%     g^{-1}_{\ell + 1}(x)\cdot 1/B + \dots + g^{-1}_{2\ell}(x) \cdot 1/B^\ell
-%     = \sum_{i = \ell + 1}^{2\ell}{\frac{g^{-1}_{i}(x)}{B^{i}}}
-% \end{equation}
-
-% \begin{equation}
-%     \sum_{i = \ell + 1}^{2\ell}{\frac{g^{-1}_{i}(x)}{B^{i}}} \approx a\cdot s + \mu
-% \end{equation}
-
-
-% Let $g^{-1} = x \mod{B}$
-
-% \begin{equation}
-%     g^{-1}(a)\cdot 
-%     \begin{pmatrix}
-%         1/B \\
-%         \vdots \\ 
-%         1/B^{\ell}
-%     \end{pmatrix} 
-%     = a + \epsilon \pmod{q}
-% \end{equation}
-
-% \begin{align*}
-%     G^{-1}(a)\cdot G &= a + e &\mod{q} \\
-%     g^{-1}(a)\cdot (1/B, \dots, 1/B^{\ell})^\intercal\bmod{t} &= a + e &\mod{q} \\
-%     g^{-1}(a) &\approx a\cdot B^{i} &\mod{q} \\
-%     (u, v) &\approx (a\cdot B^{i}, (a\cdot s + \mu)\cdot B^{i}) &\mod{q} \\
-% \end{align*}
-
-% \newpage
-% In the BGV-RNS setting, the ciphertext modulus $q = \prod_{j=0}^{\ell-1} \alpha_j$
-% is factored into $\ell$ digit moduli. The gadget vector is
-% $g = (\hat{\alpha}_0, \ldots, \hat{\alpha}_{\ell-1})^\top$ where
-% $\hat{\alpha}_j = q/\alpha_j$, and the decomposition is:
-% \begin{equation}
-%     [G^{-1}(a)]_j = a \bmod \alpha_j
-% \end{equation}
-% This is a projection onto the $j$-th RNS digit — no per-coefficient
-% arithmetic — and the reconstruction $\sum_j (a \bmod \alpha_j)\cdot\hat{\alpha}_j = a$
-% holds by CRT. The external product is then:
-% \begin{equation}
-%     \mathbf{x} \mathbin{\boxdot} Y
-%     = G^{-1}_\mathrm{RNS}(\mathbf{x}) \cdot Y
-% \end{equation}
-% where each digit $[G^{-1}(\mathbf{x})]_j \in R_{\alpha_j}^{1\times 2}$
-% is computed by truncating the RNS representation of $\mathbf{x}$ to
-% the $j$-th limb group.
-
-% \subsubsection{Implementation Details (AI)}
-
-% The gadget $G = \mathrm{diag}(g, g) \in \mathbb{Z}_q^{2\ell \times 2}$ with
-% $g = (1, B, \ldots, B^{\ell-1})^\top$ is chosen so that
-% $G^{-1}(\mathbf{x}) \cdot G \approx \mathbf{x} \pmod{q}$.
-% With $\mathbf{x} = (a, b) \in R_q^2$ and writing
-% $G^{-1}(\mathbf{x}) = (u_0, \ldots, u_{\ell-1},\; v_0, \ldots, v_{\ell-1})
-% \in R_q^{1 \times 2\ell}$, the block structure of $G$ decouples into two conditions:
-% \begin{equation}
-%     \sum_{i=0}^{\ell-1} u_i \cdot B^i = a,
-%     \qquad
-%     \sum_{i=0}^{\ell-1} v_i \cdot B^i = b
-%     \pmod{q}
-%     \label{eq:decomp-conditions}
-% \end{equation}
-% These are satisfied by the \emph{digit decomposition}: apply base-$B$ expansion
-% to every coefficient of $a$ simultaneously.
-% Define the decomposition $\mathrm{Decomp}_B : R_q \to R_q^{\ell}$ by
-% \begin{equation}
-%     r_0 := a, \qquad
-%     u_i := r_i \bmod B, \qquad
-%     r_{i+1} := \bigl\lfloor r_i / B \bigr\rfloor
-%     \qquad (0 \le i < \ell)
-% \end{equation}
-% where $\bmod$ and $\lfloor\cdot/B\rfloor$ act \emph{coefficient-wise} on the
-% polynomial. By construction:
-% \begin{equation}
-%     \sum_{i=0}^{\ell-1} u_i \cdot B^i = a \pmod{q}
-%     \label{eq:decomp-exact}
-% \end{equation}
-% since each $u_i$ holds the $i$-th base-$B$ digit of every coefficient
-% and each digit satisfies $u_i \in (-B/2,\, B/2]$ (small).
-% Applying the same procedure to $b$ gives $\mathrm{Decomp}_B(b)$, and the
-% external product \eqref{eq:externalprod} is then:
-% \begin{equation}
-%     \mathbf{x} \mathbin{\boxdot} Y
-%     \;=\; G^{-1}(\mathbf{x}) \cdot Y
-%     \;=\;
-%     \bigl(\,\mathrm{Decomp}_B(a) \;\big|\; \mathrm{Decomp}_B(b)\,\bigr)
-%     \cdot Y
-%     \label{eq:extprod-impl}
-% \end{equation}
-% which in code is: decompose $a$ and $b$ into $\ell$ small-coefficient
-% polynomials each, concatenate into a $1 \times 2\ell$ row, and multiply
-% into the RGSW matrix $Y \in R_q^{2\ell \times 2}$.
+The hybrid-keyswitch (V2) RGSW format defined in \autoref{sec:rgsw:v2-format} is constructed directly from the secret key $s$ via \autoref{alg:rgsw-v2}. The full derivation, including the gadget identity (\autoref{lem:gadget-identity}) and external product correctness (\autoref{lem:v2-extprod}), is given in \autoref{sec:rgsw:hybrid}. The implementation in \texttt{src/core/context.cpp} (\texttt{EncryptRGSW}, \texttt{EvalExternalProduct}, \texttt{EvalInternalProduct}) follows that section line-by-line.

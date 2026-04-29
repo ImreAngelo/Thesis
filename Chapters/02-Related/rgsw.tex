@@ -1,7 +1,11 @@
 \newcommand{\paramDecomp}{$\ell$}
+\newcommand{\dnum}{\mathsf{dnum}}
+\newcommand{\rlwe}[1]{\mathsf{RLWE}_s(#1)}
+\newcommand{\rgsw}[1]{\mathsf{RGSW}_s(#1)}
 
 \section{TFHE (RGSW)}
 \label{sec:rgsw}
+
 \ifnotes
 \begin{itemize}
     \item Problem with relinearization (noise, keys, time etc.)
@@ -17,71 +21,67 @@ The GSW ciphertext defined in \cite{cryptoeprint:2013/340}, now in the ring $R_q
 
 \begin{equation}
     \label{eq:gadget-matrix}
-    G = I_2 \otimes g = 
+    G = I_2 \otimes g =
     \begin{bmatrix}
         g & 0 \\
         0 & g
     \end{bmatrix}
 \end{equation}
 
-Then an \gls{rgsw} ciphertext $C$ encrypting a message $\mu \in [0, N)$ is defined by \eqref{eq:rgsw}, where each row of $Z$ is an \gls{rlwe} encryption of 0 under the secret key $s$ (effectively rows of public keys), $\mu$ is the message and $G$ is the gadget matrix (duh).
+Then an \gls{rgsw} ciphertext $C$ encrypting a message $\mu \in [0, N)$ is defined by \eqref{eq:rgsw}, where each row of $Z$ is an \gls{rlwe} encryption of 0 under the secret key $s$ (effectively rows of public keys), $\mu$ is the message and $G$ is the gadget matrix.
 
 \begin{equation}
     \label{eq:rgsw}
     C = Z + \mu \cdot G
 \end{equation}
 
-% \textcolor{magenta}{I show in \autoref{sec:impl:rgsw} that each row $C_i$ can be constructed directly...}
-While \eqref{eq:rgsw} is sufficient to construct $\mathsf{RGSW}_s(\mu)$, we can speed up the process by directly encrypting each row. (Note \gls{rgsw} can be viewed as a flat vector of $2\ell$ \gls{rlwe} ciphertexts where the first $\ell$ modify $a$ and the last $\ell$ modify $b$).
+\noindent\textcolor{red}{\textbf{Notation: We use $\mathsf{RLWE}_s(\mu) = (a, b)$ throughout, where $b = a\cdot s + \mu + \epsilon$ (since $\Delta = 1$ in BGV). OpenFHE internally uses the order $(b, a)$ — this affects only the layout, not the math.}}
 
-\noindent\textcolor{red}{\textbf{Maybe use $\mathsf{RLWE} = (b, a)$ like OpenFHE uses in e.g. $\to$\texttt{GetElements()}? In which case the top and bottom rows swap place.}}
+While \eqref{eq:rgsw} is sufficient to construct $\rgsw{\mu}$, we can speed up the process by directly encrypting each row. Note \gls{rgsw} can be viewed as a flat vector of $2\ell$ \gls{rlwe} ciphertexts where the first $\ell$ modify $a$ (we call these the \emph{top} rows) and the last $\ell$ modify $b$ (the \emph{bot} rows).
 
-\noindent\textcolor{magenta}{\textbf{Implementation details below, but ultimately not used}}
-
-\newpage
 \begin{corollary}
 \label{corollary:rgsw:bottom}
-For an \gls{rgsw} ciphertext $C$ encrypting a message $\mu$ under $s$, the $(\ell + i)$-th row $(0 \leq i < \ell)$ is equivalent to: 
+For an \gls{rgsw} ciphertext $C$ encrypting a message $\mu$ under $s$, the $(\ell + i)$-th row $(0 \leq i < \ell)$ is equivalent to:
 \begin{equation}
-    C_{\ell + i} = \mathsf{RLWE}_s(\mu B^i/\Delta)
+    C_{\ell + i} = \rlwe{\mu B^i / \Delta}
 \end{equation}
 
-\begin{proof} 
+\begin{proof}
     Follows from the definitions \eqref{eq:rgsw} and \eqref{eq:gadget-matrix}.
     \begin{align*}
-        Z_i + \mu\cdot G_i &= \mathsf{RLWE}_s(0) + \mu \cdot(0, g_i) \\
+        Z_i + \mu\cdot G_i &= \rlwe{0} + \mu \cdot(0, g_i) \\
             &= (a, a\cdot s + \epsilon) + (0, \mu\cdot B^i) \\
-            &= (a, a\cdot s +\mu B^i + \epsilon) \\
-            &= \mathsf{RLWE}_s(\mu B^i/\Delta)
+            &= (a, a\cdot s + \mu B^i + \epsilon) \\
+            &= \rlwe{\mu B^i/\Delta}
     \end{align*}
 \end{proof}
 \end{corollary}
 
-\noindent The same approach shows the first $\ell$ rows can be constructed as an \gls{rlwe} encryption $c_i = \mathsf{RLWE}_s(-s\mu B^i/\Delta)$ for $0 \leq i <\ell$ (\autoref{lemma:rgsw:top}). However, calculating $s\cdot \mu$ is not trivial in practice, and it's faster to simply modifying the $a$ component of a fresh $\mathsf{RLWE}(0)$ encryption. % TODO: Create from scratch
-\autoref{alg:rgsw} creates $\mathsf{RGSW}_s(\mu)$ in $\mathcal{O}(\ell)$ steps (but can only be performed on the client-side as it requires $s$). 
+\noindent The same approach shows the first $\ell$ rows can be constructed as an \gls{rlwe} encryption $c_i = \rlwe{-s\mu B^i/\Delta}$ for $0 \leq i <\ell$ (\autoref{lemma:rgsw:top}). However, calculating $s\cdot \mu$ is not trivial in practice, and it's faster to simply modify the $a$ component of a fresh $\rlwe{0}$ encryption. \autoref{alg:rgsw} creates $\rgsw{\mu}$ in $\mathcal{O}(\ell)$ steps (but can only be performed on the client-side as it requires $s$).
 
 %% Generate RGSW on client-side
 \input{Algorithms/rgsw-client}
 
-\noindent\textcolor{red}{Note: we focus on BGV, where $\Delta = 1$, which simplifies the algorithm even more.}
-
-\ifnotes
-\subsubsection{In BGV-RNS}
-In \gls{rns}, each coefficient $b_i \in R_q$ is represented as a set of $k$ residues mod $q_i$ where $q = q_0q_1\cdots q_{k-1}$, such that $b_i$ is reconstructed using \gls{crt}.
-\fi
+\noindent\textcolor{red}{Note: we focus on BGV, where $\Delta = 1$, which simplifies the algorithm.}
 
 \subsection{Parameter Choice}
-The choice of basis $B$ and decomposition parameter $\ell$ is one and the same. For a given basis, the message polynomial $\mu$ is rewritten into $\log_B(\mu)$ base-$B$ digits. Therefore $\ell \geq \log_B(\mu)$, otherwise the RGSW does not encode all the digits, and $\ell \leq \log_B(\mu)$ because more $B$-digits would always be 0. The value of $\ell$ is then squeezed and must equal the number of base-$B$ digits that encodes all $\mu$ values allowed by the scheme.
+\label{sec:rgsw:params}
+
+The choice of basis $B$ and decomposition parameter $\ell$ is one and the same. For a given basis, the message polynomial $\mu$ is rewritten into $\log_B(\mu)$ base-$B$ digits. Therefore $\ell \geq \log_B(\mu)$ (otherwise the RGSW does not encode all the digits) and $\ell \leq \log_B(\mu)$ (otherwise more $B$-digits would always be 0). The value of $\ell$ is squeezed and must equal the number of base-$B$ digits that encodes all $\mu$ values allowed by the scheme.
+
+For BGV-RNS with $q = \prod_{i=0}^{k-1} q_i$ and 60-bit primes $q_i$, this gives $\ell = \lceil \log_B q \rceil = \sum_i \lceil \log_B q_i \rceil$. Even with a large base such as $B = 2^{30}$, $\ell$ is on the order of $2k$, growing linearly with the multiplicative depth.
 
 %%------------------%%
 %% EXTERNAL PRODUCT %%
 %%------------------%%
-\newpage
-\subsection{External Product}
+\subsection{External Product (textbook)}
+\label{sec:rgsw:extprod}
+
 \ifnotes
-\textcolor{magenta}{The purpose of using RGSW \emph{is} to get ``access'' to the external product, which allows homomorphic multiplication without the expensive relinearization step.}
+\textcolor{magenta}{The purpose of using RGSW is to get ``access'' to the external product, which allows homomorphic multiplication without the expensive relinearization step.}
 \fi
-First defined in \cite{cryptoeprint:2018/421}? The external product \eqref{eq:externalprod} is defined between an \gls{rlwe} and a \gls{rgsw} ciphertext, and outputs an \gls{rlwe} ciphertext without needing to use homomorphic multiplication (and thus relinearization). The external product uses a \emph{decomposition matrix} $G^{-1}$ that has the \emph{gadget property} \eqref{eq:gadget-property}, which effectively ``undoes'' the effect of the gadget matrix $G$ (with some error $\leq B/2$, assuming $x$ has binary elements).
+
+First defined in \cite{cryptoeprint:2018/421}. The external product \eqref{eq:externalprod} is defined between an \gls{rlwe} and a \gls{rgsw} ciphertext, and outputs an \gls{rlwe} ciphertext without using homomorphic multiplication (and thus relinearization). The external product uses a \emph{decomposition matrix} $G^{-1}$ that has the \emph{gadget property} \eqref{eq:gadget-property}, which effectively ``undoes'' the effect of the gadget matrix $G$ (with some error $\leq B/2$, assuming $x$ has binary elements).
 
 \begin{align}
     \label{eq:gadget-property}
@@ -90,135 +90,228 @@ First defined in \cite{cryptoeprint:2018/421}? The external product \eqref{eq:ex
     x \boxdot Y &= G^{-1}(x)\cdot Y
 \end{align}
 
-
-\subsection{BGV-RNS Optimizations}
-Some key observations allow us to much more efficiently port the \gls{rgsw} operations to BGV-RNS. 
-
-\begin{enumerate}
-    \item RNS ciphertexts are decomposed by \gls{crt} using $\{ q_i \} \;\forall\; i$ as a basis.
-    \item If we choose $g = (q_0, q_1, \dots, q_\ell)$ as the gadget vector, then we get gadget de/composition for ``free'' as it is already baked into the RNS structure
-\end{enumerate}
-
-\ifnotes
-\textbf{No homomoprhic multiplication:}
+Correctness follows by linearity: writing $Y = \rgsw{\mu_y} = Z + \mu_y G$ and $x = \rlwe{\mu_x} = (a, as + \mu_x + \epsilon')$,
 \begin{align}
-    x\boxdot Y &= G^{-1}(x)\cdot Y \\
-    &= G^{-1}(x)\cdot(Z + \mu_y\cdot G) \\
-    &= G^{-1}(x)\cdot Z + \mu_y \cdot G^{-1}(x)\cdot G \\
-    &= \underbrace{G^{-1}(x)\cdot Z}_{A} + \underbrace{\mu_y \cdot (x + \epsilon)}_{B}
+    x \boxdot Y &= G^{-1}(x) \cdot (Z + \mu_y G) \\
+                &= \underbrace{G^{-1}(x) \cdot Z}_{\text{small noise}} \;+\; \mu_y \cdot G^{-1}(x) \cdot G \\
+                &\approx \mu_y \cdot x = \rlwe{\mu_x \mu_y} \pmod{q}.
 \end{align}
 
-\textbf{Term A:}
-???
+\subsection{Internal Product (textbook)}
+\label{sec:rgsw:intprod}
 
-\textbf{Term B:}
-Since $x = (b, a) = (as + \Delta \mu_x + \epsilon')$ we get:
-\begin{align}
-   \mu_y\cdot &(as + \Delta \mu_x + \epsilon, a + \epsilon) \\
-   &(as\cdot\mu_y + \Delta \mu_x\mu_y + \epsilon, a\mu_y + \epsilon) \\
-   &((a\mu_y)\cdot s + \Delta (\mu_x\mu_y) + \epsilon, (a\mu_y) + \epsilon) \\
-   &\mathsf{RLWE}_s(\mu_x\mu_y) + \epsilon
-\end{align}
-
-% As mentioned eariler, this does not use homomoprhic multiplication. \textcolor{red}{Show that this does not use (homomorphic) multiplication:} 
-
-% \begin{align}
-%     x \mod{B}
-% \end{align}
-
-\newpage
-\fi
-\ifnotes
-\subsubsection{Gadget Decomposition}
-The gadget encodes the message as digits in base $B$. To reconstruct the message $m$, we therefore need to find a decryption function such that:
+The \emph{internal product} \eqref{eq:intprod} multiplies two RGSW ciphertexts, producing a third RGSW ciphertext. Each row of $B$ is itself an RLWE ciphertext (\autoref{corollary:rgsw:bottom}), so the internal product is $2\ell$ external products, one per row, repacked as an RGSW.
 
 \begin{equation}
-      \mathsf{Dec}(\cdot): R_q \to R^{\ell} \quad s.t.\quad \langle \mathsf{Dec}(x), g\rangle = x \pmod{Q}
-\end{equation}
-
-Then $x\boxdot Y = \langle \mathsf{Dec}(x), Y\rangle$
-
-% Encodes the message as digits in base $B$, which limits the noise to $B/2$ per level $\approx \mathcal{O}(B\log{B}) = \mathcal{O}(B\ell)$ instead of ...
-
-% The RGSW really encodes $\mu$ as digits in $B$. In general, for each component of a vector, the gadget composition takes $B^i$. Let $v_B$ be $v$ in base $B$.
-
-\begin{equation}
-    (v_0, v_1, \dots, v_{\ell-1}) \cdot g = v_0 + v_1B + \dots + v_{\ell - 1} B^{\ell - 1} = v_B
-\end{equation}
-
-A general gadget matrix for a $k$-dimensional vector then becomes: 
-\begin{equation}
-    G = I_k \otimes g
-\end{equation}
-
-And the decomp:
-\begin{align}
-    G^{-1}(x)\cdot G &= G^{-1}(x)\cdot(I_k\otimes g) = x + \epsilon \\
-    G^{-1}(x) &= (I_k \otimes g)^{-1}(x + \epsilon)
-\end{align}
-
-In our case, each component of the vector $v$ is an \gls{rlwe} encryption $(b,a)$, so $k = 2$. 
-\begin{equation}
-    G^{-1}(x) = 
-    \begin{pmatrix}
-        g & 0 \\
-        0 & g
-    \end{pmatrix}
-    ^{-1}
-    (a + \epsilon, b + \epsilon) = 
-    \frac{1}{}
-\end{equation}
-
-
-From \label{eq:rgsw} we can see that we are gadgeting the message $\mu$. In other words, assuming we are encrypting bits, $\mu$ is encoded into base $B$ digits in each component of our ciphertext(s). 
-\begin{equation}
-    Z + \mu B
-\end{equation}
-
-In one dimension, the gadget property \eqref{eq:gadget-property} for a decomposition vector $g^{-1}$ undoes the gadget:
-\begin{equation}
-    (v_0 + v_1B + \dots + v_{\ell - 1} B^{\ell - 1}) \cdot g^{-1} = (v_0, v_1, \dots , v_{\ell - 1})
-\end{equation}
-
-\subsubsection{Constructing Decomp Matrix}
-????????
-
-\subsubsection{Placing}
-Let $u \in \{0,1\}$.
-
-\begin{equation}
-    \mathsf{RLWE}_s(v) \boxdot \mathsf{RGSW}_s(u) = 
-\end{equation}
-
-Alternative: just show 1) it exists and 2) this matrix has the property
-\fi
-
-\newpage
-
-\subsection{Internal Product}
-RGSW $\times$ RGSW
-
-\begin{equation}
-    A \boxtimes B = 
+    \label{eq:intprod}
+    A \boxtimes B =
     \begin{bmatrix}
         A \boxdot b_0 \\
         A \boxdot b_1 \\
         \vdots \\
-        A \boxdot b_\ell
+        A \boxdot b_{2\ell - 1}
     \end{bmatrix}
 \end{equation}
 
+The cost is therefore $\mathcal{O}(\ell)$ external products, or $\mathcal{O}(\ell^2)$ total ring multiplications.
+
+%%-----------------------------------%%
+%% V2: Hybrid-Keyswitch RNS Gadget   %%
+%%-----------------------------------%%
 \newpage
+\subsection{The Hybrid-Keyswitch RNS Gadget}
+\label{sec:rgsw:hybrid}
+
+The textbook gadget $g = (1, B, \dots, B^{\ell-1})$ from \autoref{sec:rgsw:params} pays a steep price in BGV-RNS: $\ell \approx 2k$ rows, each a full \gls{rlwe} ciphertext. The \emph{hybrid keyswitch} construction (used by OpenFHE for relinearization) replaces this with an RNS-native gadget of length $\dnum$ where typically $\dnum \in \{2, 3, 4\}$, independent of $B$. We adapt it to RGSW.
+
+The idea: instead of decomposing each coefficient into base-$B$ digits, we decompose the \emph{tower index} $i$ into a small number of partitions, and use the QP-basis identity from \autoref{lem:P-cancel} to cancel the gadget factor.
+
+\subsubsection{Q-partitions}
+
+Partition the $k$ RNS towers of $Q$ into $\dnum$ contiguous groups of $\alpha = \lceil k / \dnum \rceil$ towers each (the last group may be shorter):
+\begin{equation}
+    \label{eq:partitions}
+    \mathsf{part}_j = \{ i \in [0, k) : j \alpha \leq i < (j+1)\alpha \}, \qquad j \in [0, \dnum).
+\end{equation}
+Let $Q_j = \prod_{i \in \mathsf{part}_j} q_i$ so that $Q = \prod_{j=0}^{\dnum - 1} Q_j$. In OpenFHE, $\dnum$ is set via \texttt{CCParams::SetNumLargeDigits}, and $\alpha$ is exposed as \texttt{numPerPartQ}.
+
+\subsubsection{The partition-indicator gadget element}
+
+For each partition $j$, define the QP-element $g_j \in R_{QP}$ tower-by-tower:
+\begin{equation}
+    \label{eq:gj}
+    g_j[i] =
+    \begin{cases}
+        [P]_{q_i} \pmod{q_i} & i \in \mathsf{part}_j \quad (Q\text{-side}) \\
+        0                    & i \in [0, k) \setminus \mathsf{part}_j \quad (Q\text{-side}) \\
+        0                    & i \in P\text{-side}
+    \end{cases}
+\end{equation}
+
+That is: $g_j$ is the QP element holding the value $[P]_{q_i}$ in those $Q$-towers that belong to partition $j$, and zero everywhere else. The constants $[P]_{q_i}$ are precomputed in OpenFHE as \texttt{cryptoParams->GetPModq()}.
+
+\begin{remark}
+The textbook gadget $g_i = B^i$ used a single integer per row; the hybrid gadget $g_j$ uses an entire QP-element per row, but the element is sparse (zero outside one Q-partition) and its non-zero entries are determined by the auxiliary modulus $P$.
+\end{remark}
+
+\subsubsection{Digit decomposition}
+
+Given $c \in R_Q$, define the $j$-th digit $\mathsf{Decomp}_j(c) \in R_{QP}$ as the basis-extension of $c$'s partition-$j$ slice into all of $QP$. Concretely, take the residues $\{ c \bmod q_i : i \in \mathsf{part}_j \}$ as a polynomial in $R_{Q_j}$, then \textsf{ApproxSwitchCRTBasis} from $Q_j$ to $QP$. This gives a vector of $\dnum$ elements in $R_{QP}$, one per partition.
+
+In OpenFHE this routine is \texttt{KeySwitchHYBRID::EvalKeySwitchPrecomputeCore}.
+
+\begin{lemma}[Gadget identity]
+\label{lem:gadget-identity}
+For any $c \in R_Q$,
+\begin{equation}
+    \label{eq:gadget-identity}
+    \sum_{j=0}^{\dnum-1} \mathsf{Decomp}_j(c) \cdot g_j \;\equiv\; P \cdot c \pmod{Q},
+    \qquad \equiv\; 0 \pmod{P}.
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Examine each tower of $QP$ separately.
+
+\noindent\emph{Q-side, tower $i \in \mathsf{part}_j$:} For the partition $j' = j$ that contains $i$, $\mathsf{Decomp}_j(c)[i] = c[i]$ exactly --- the partition-$j$ slice contains tower $i$ natively, no basis extension needed. And $g_j[i] = [P]_{q_i}$, so the contribution is $c[i] \cdot [P]_{q_i} \equiv P \cdot c[i] \pmod{q_i}$. For all other partitions $j' \neq j$, $g_{j'}[i] = 0$, contributing nothing. Total: $P \cdot c[i] \pmod{q_i}$.
+
+\noindent\emph{P-side, tower $i$:} $g_j[i] = 0$ for all $j$, so the sum is $0$.
+\end{proof}
+
+Compare \eqref{eq:gadget-identity} with the textbook $\sum_i u_i \cdot B^i = c$: the two play the same role, but the hybrid form picks up a free factor of $P$ on the $Q$-side that we will cancel with \textsf{ApproxModDown} (\autoref{lem:P-cancel}).
+
+\subsubsection{V2 RGSW format}
+\label{sec:rgsw:v2-format}
+
+Define $\rgsw{m}$ as two arrays of $\dnum$ pairs in $R_{QP}^2$ each:
+\begin{align}
+    \label{eq:rgsw-v2-top}
+    b_j^{\mathsf{top}} + a_j^{\mathsf{top}} \cdot s &\;\approx\; m \cdot s \cdot P \cdot g_j \pmod{QP} \\
+    \label{eq:rgsw-v2-bot}
+    b_j^{\mathsf{bot}} + a_j^{\mathsf{bot}} \cdot s &\;\approx\; m \cdot P \cdot g_j \pmod{QP}
+\end{align}
+for $j \in [0, \dnum)$. The factor $P$ on the right-hand side comes from $g_j$ (whose non-zero entries are $[P]_{q_i}$); we factor it out as a separate $P$ for clarity in the derivations below. This is implemented in \texttt{EncryptRGSW} (\autoref{alg:rgsw-v2}).
+
+%% V2 RGSW encryption algorithm
+\begin{algorithm}[ht!]
+\caption{V2 \gls{rgsw} encryption (server-side, mirrors hybrid keyswitch)}
+\label{alg:rgsw-v2}
+\begin{algorithmic}[1]
+    \State \textbf{Input:} secret key $s \in R_Q$; message $m \in R_t$; partition count $\dnum$
+    \State \textbf{Output:} $\rgsw{m}$ in V2 format
+    \State Encode $m \in R_t$ as $m_Q \in R_Q$, then extend $s \to s_{QP} \in R_{QP}$
+    \For{$j = 0,\dots,\dnum - 1$}
+        \For{$\mathsf{side} \in \{\mathsf{top}, \mathsf{bot}\}$}
+            \State Sample $a \leftarrow U(R_{QP})$ and $e \leftarrow \mathsf{DGG}(R_{QP})$
+            \State Let $\mathsf{payload}_Q = m_Q \cdot s$ (top) or $m_Q$ (bot)
+            \For{tower $i \in [0, \mathsf{sizeQ} + \mathsf{sizeP})$}
+                \If{$i \in \mathsf{part}_j$ (Q-side)}
+                    \State $b[i] \gets -a[i] \cdot s_{QP}[i] + e[i] + [P]_{q_i} \cdot \mathsf{payload}_Q[i]$
+                \Else
+                    \State $b[i] \gets -a[i] \cdot s_{QP}[i] + e[i]$
+                \EndIf
+            \EndFor
+            \State Store $(a, b)$ as $(a_j^{\mathsf{side}}, b_j^{\mathsf{side}})$
+        \EndFor
+    \EndFor
+    \State \Return $\{(a_j^{\mathsf{top}}, b_j^{\mathsf{top}}), (a_j^{\mathsf{bot}}, b_j^{\mathsf{bot}})\}_{j=0}^{\dnum - 1}$
+\end{algorithmic}
+\end{algorithm}
+
+The structure mirrors \texttt{KeySwitchHYBRID::KeySwitchGenInternal} exactly, with the message $m$ playing the role of the ``old'' secret key in the keyswitch.
+
+\subsubsection{V2 External product, derived}
+\label{sec:rgsw:v2-extprod}
+
+Given an RLWE ciphertext $x = (a_x, b_x) \in R_Q^2$ encrypting $m_x$ (so $b_x + a_x s \approx m_x \pmod{q}$) and an RGSW ciphertext $Y = \rgsw{m_y}$ in V2 format, compute:
+
+\begin{enumerate}
+    \item $\mathsf{vDig}[j] = \mathsf{Decomp}_j(b_x), \quad \mathsf{uDig}[j] = \mathsf{Decomp}_j(a_x)$ for $j \in [0, \dnum)$.
+    \item Inner products in $R_{QP}$:
+    \begin{align}
+        r_0 &= \sum_j \mathsf{uDig}[j] \cdot b_j^{\mathsf{top}} + \mathsf{vDig}[j] \cdot b_j^{\mathsf{bot}} \\
+        r_1 &= \sum_j \mathsf{uDig}[j] \cdot a_j^{\mathsf{top}} + \mathsf{vDig}[j] \cdot a_j^{\mathsf{bot}}
+    \end{align}
+    \item Output $(\mathsf{ApproxModDown}(r_1), \mathsf{ApproxModDown}(r_0)) \in R_Q^2$.
+\end{enumerate}
+
+\begin{lemma}[V2 external product correctness]
+\label{lem:v2-extprod}
+$\mathsf{ApproxModDown}(r_0) + \mathsf{ApproxModDown}(r_1) \cdot s \approx m_x \cdot m_y \pmod q$.
+\end{lemma}
+
+\begin{proof}
+Compute $r_0 + r_1 \cdot s$ in $R_{QP}$ using \eqref{eq:rgsw-v2-top}--\eqref{eq:rgsw-v2-bot}:
+\begin{align}
+    r_0 + r_1 s &= \sum_j \mathsf{uDig}[j] \cdot \big(b_j^{\mathsf{top}} + a_j^{\mathsf{top}} s\big) + \mathsf{vDig}[j] \cdot \big(b_j^{\mathsf{bot}} + a_j^{\mathsf{bot}} s\big) \\
+                &\approx \sum_j \mathsf{uDig}[j] \cdot m_y \cdot s \cdot P \cdot g_j + \sum_j \mathsf{vDig}[j] \cdot m_y \cdot P \cdot g_j \\
+                &= m_y \cdot s \cdot P \cdot \underbrace{\sum_j \mathsf{uDig}[j] \cdot g_j}_{\equiv P \cdot a_x} \;+\; m_y \cdot P \cdot \underbrace{\sum_j \mathsf{vDig}[j] \cdot g_j}_{\equiv P \cdot b_x} \tag{by \autoref{lem:gadget-identity}} \\
+                &\equiv m_y \cdot P^2 \cdot (a_x s + b_x) \pmod{Q} \\
+                &\approx m_y \cdot P^2 \cdot m_x \pmod{Q}.
+\end{align}
+On the $P$-side, both gadget sums are $0$ (\autoref{lem:gadget-identity}), so $r_0 + r_1 s \equiv 0 \pmod{P}$. Applying \autoref{lem:P-cancel} to $\mathsf{ApproxModDown}$:
+\begin{equation}
+    \mathsf{ApproxModDown}(r_0) + \mathsf{ApproxModDown}(r_1) \cdot s \approx \frac{m_y \cdot P^2 \cdot m_x}{P} = m_y \cdot P \cdot m_x \cdot \frac{1}{P} \equiv m_x m_y \pmod q,
+\end{equation}
+since the second \textsf{ApproxModDown} application strips the remaining $P$ factor.
+\end{proof}
+
+\noindent\textcolor{magenta}{\textbf{Implementation note.} \autoref{lem:v2-extprod} corresponds line-by-line to \texttt{EvalExternalProduct} in \texttt{src/core/context.cpp}. Step 1 is \texttt{EvalKeySwitchPrecomputeCore} (lines 99--101), step 2 is the inner loop (lines 114--129), step 3 is \texttt{ApproxModDownToQ} (lines 132--133). The total cost is \emph{2 ModUps + $2\dnum \cdot \mathsf{sizeQP}$ pointwise multiplies + 2 ApproxModDowns} --- versus $2\ell \approx 4k$ full RLWE rows in the textbook version.}
+
+\subsubsection{V2 Internal product, derived}
+\label{sec:rgsw:v2-intprod}
+
+For each row $(a_j^{\mathsf{side}}, b_j^{\mathsf{side}})$ of $B = \rgsw{m_B}$, observe that it is an RLWE-shaped pair in $R_{QP}$ encrypting $m_B \cdot P \cdot g_j$ (or $m_B \cdot s \cdot P \cdot g_j$ for top rows). To produce the corresponding row of $\rgsw{m_A m_B}$, we apply the external product action of $A$ and re-fit into the V2 format:
+
+\begin{enumerate}
+    \item Project the row from $R_{QP}$ to $R_Q$ via \textsf{ApproxModDown}, cancelling the gadget's $P$ factor (\autoref{lem:P-cancel}). The result is an RLWE ciphertext in $R_Q$ encrypting $m_B \cdot g_j$ (bot) or $m_B \cdot g_j \cdot s$ (top), where $g_j$ is interpreted as the $Q$-only indicator (value $1$ on partition $j$, $0$ elsewhere).
+    \item Apply the V2 external product of $A$ to this row. The result is an RLWE ciphertext in $R_Q$ encrypting $m_A \cdot m_B \cdot g_j$ (or with an extra $\cdot s$ for top).
+    \item Lift back to $R_{QP}$ by multiplying each $Q$-tower by $[P]_{q_i}$ and zeroing the $P$-side. This restores the V2 format \eqref{eq:rgsw-v2-top}--\eqref{eq:rgsw-v2-bot} with $m \mapsto m_A m_B$.
+\end{enumerate}
+
+This is implemented in \texttt{EvalInternalProduct} (\texttt{context.cpp:287--381}). The cost is $2\dnum$ external products plus the round-trip overhead, i.e.\ $\mathcal{O}(\dnum^2)$ ring multiplications --- versus the textbook $\mathcal{O}(\ell^2) \approx \mathcal{O}(k^2)$.
+
+\subsubsection{Per-level alignment}
+\label{sec:rgsw:level-align}
+
+When $x$ has been mod-reduced to $Q_\ell \subset Q$ (some subset of the towers), the digit decomposition automatically returns fewer digits ($\mathsf{numPartQ_\ell} \leq \dnum$), and the inner loop indexes into the full-$Q$ RGSW with offset $\delta = \mathsf{sizeQ} - \mathsf{sizeQ_\ell}$ to skip dropped towers. This is the same trick OpenFHE's \texttt{EvalFastKeySwitchCoreExt} uses, and gives mod-reduced $x \boxdot Y$ for free without re-encrypting the RGSW at each level.
+
+\subsubsection{V1 vs V2: comparison}
+\label{sec:rgsw:v1-vs-v2}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lll}
+\toprule
+& \textbf{V1 (per-tower BV)} & \textbf{V2 (RNS digit)} \\
+\midrule
+Gadget length & $\ell = \sum_i \lceil \log_B q_i \rceil \approx 2k$ & $\dnum$, typically $2$--$4$ \\
+Gadget element & integer scalar $B^i$ & QP-element $g_j$ with $[P]_{q_i}$ \\
+Per-row primitive & full \gls{rlwe} ciphertext & raw \texttt{DCRTPoly} pair in QP \\
+Decomposition & per-coefficient base-$B$ extraction & one \texttt{ApproxSwitchCRTBasis} per side \\
+Gadget property & $\sum_i u_i B^i = c$ & $\sum_j \mathsf{uDig}[j] \cdot g_j \equiv P \cdot c \pmod Q$ \\
+Auxiliary cancellation & none & $\mathsf{ApproxModDown}$ removes $P$ \\
+External product cost & $2\ell$ \texttt{ScalarMult+EvalAdd} & 2 ModUps + $2\dnum$ inner-product steps + 2 ApproxModDowns \\
+Per-level alignment & manual & automatic via $\delta$-skip \\
+Internal product cost & $\mathcal{O}(\ell^2)$ & $\mathcal{O}(\dnum^2)$ \\
+\bottomrule
+\end{tabular}
+\caption{V1 (textbook) vs V2 (hybrid-keyswitch) RGSW. The V2 form reduces the inner loop length by $\ell / \dnum \approx k/2$, replaces ciphertext-level operations with \texttt{DCRTPoly}-level operations, and reuses OpenFHE's hybrid-keyswitch machinery for digit decomposition and modulus reduction.}
+\label{tab:v1-vs-v2}
+\end{table}
+
+The novel angle: in V2 the gadget identity \eqref{eq:gadget-identity} carries an extra factor of $P$, exactly the auxiliary modulus that \textsf{ApproxModDown} cancels. The external product therefore fuses three operations into a single coherent pass: digit decomposition (ModUp), inner product against the gadget rows, and removal of the auxiliary modulus (ModDown) --- the same machinery as relinearization, with $\dnum$ as the single shared parameter (\texttt{SetNumLargeDigits}).
 
 %%-----------------------%%
 %% Homomorphic Expansion %%
 %%-----------------------%%
+\newpage
 \subsection{RLWE-to-RGSW Expansion from ORAM}
 \ifnotes
 \begin{itemize}
     \item We want to use RGSW to avoid relinearization
     \item We want to send packed ciphertexts to save on communication
-    \item Therefore, we send RLWE and convert to RGSW on the server 
+    \item Therefore, we send RLWE and convert to RGSW on the server
     \item (Requires a single RGSW encryption $\mathsf{RGSW}(-s)$ to be sent as well)
     \item 1 RLWE for the index bits = size $\ell$
     \item $\ell$ RGSW's for the index bits = size $2\ell \times 2$ or smth
@@ -272,32 +365,6 @@ Finally, the substitution is a bit more complex... Uses an automorphism key to r
 \fi
 
 
-% \begin{algorithm}
-% \caption{HomExpand}
-% \label{alg:HomExpand}
-% \begin{algorithmic}[1]
-%     \State \textbf{Input:}  A set
-%            $\mathcal{S} = \bigl\{c_j=(a_j,b_j)\bigr\}_{j=1}^{2\ell}$
-%            of \gls{rlwe} ciphertexts under an auxiliary key $s'$, where $c_j$
-%            encrypts $\bigl\lfloor q/\beta^{(j-1)\bmod\ell}\bigr\rfloor\cdot m$
-%     \State \textbf{Output:} An \gls{rgsw} ciphertext
-%            $\mathbf{C}\in\mathcal{R}_q^{2\ell\times 2}$
-%     \State Initialise $\mathbf{C}\leftarrow\mathbf{0}^{2\ell\times 2}$,
-%            $\;j\leftarrow 1$
-%     \For{$c=(a,b)\in\mathcal{S}$}
-%         \State $(a,b)\leftarrow\mathsf{KS}_{s'\to s}(a,b)$
-%                \Comment{Re-encrypt under target key $s$}
-%         \State $(a,b)\leftarrow\mathsf{ModSwitch}_{\,q'\to q}(a,b)$
-%                \Comment{Reduce noise via modulus switching}
-%         \State $\mathbf{C}[j,\,:\,]\leftarrow(a,\,b)$
-%                \Comment{Assign as $j$-th row of RGSW matrix}
-%         \State $j\leftarrow j+1$
-%     \EndFor
-%     \State \Return $\mathbf{C}$
-% \end{algorithmic}
-% \end{algorithm}
-
-
 %%----------------%%
 %%                %%
 %%----------------%%
@@ -308,5 +375,5 @@ New paper!
 %%----------------%%
 %% IMPLEMENTATION %%
 %%----------------%%
-\newpage % Covered by lemma 2.1
+\newpage
 \input{Chapters/02-Related/impl}
