@@ -1,0 +1,186 @@
+% \begin{remark}
+    Now consider the $j$-th element of $P_{Q}(a)$ and recall that $Q = q_0q_1\dots q_k$. The factor $\hat{Q}_j = Q/q_j$ is a product of every $q_i$ except $q_j \; \therefore\;$ the $i$-th tower of $P_{Q}(a)[j]$ is a multiple of $q_j$ and becomes $0$ when $i\not= j$. Further, when $i = j$ then the factor $\hat{Q}_i^{-1}\cdot\hat{Q}_i = 1$. As a consequence, the $i$-th element of $P_Q(a)$ is a CRT polynomial where all towers are 0, except for the $i$-th tower which is equal to $a$'s $i$-th tower. 
+     
+    If we expand $P_Q(a)$ so that the elements are displayed in coefficient form \eqref{form:coef}, the entries along the diagonal of the matrix-form $P_Q(a)$ are exactly the towers of $a$, while the non-diagonal elements/towers are 0. 
+    
+    \begin{gather*}
+        a_j\cdot \hat{Q}_i^{-1}\cdot\hat{Q}_i = \begin{cases}
+            a & i = j \\
+            0 & i \not= j
+        \end{cases}
+    \\
+    \\
+        \implies\quad P_Q(a) \cong 
+        \left(
+            \begin{array}{c|c|c|c} 
+                [a]_{q_0} & 0 & \cdots & 0 \\ 
+                0 & [a]_{q_1} & \cdots & 0 \\
+                \vdots & \vdots & \ddots & \vdots \\
+                0 & 0 & \cdots & [a]_{q_k} \\
+            \end{array}
+        \right)
+    \\
+        = (a\cdot e_0, a\cdot e_1, \dots, a\cdot e_{k-1})
+        = a\cdot I_k^{\mathsf{RNS}} = a\cdot g 
+    \\ 
+    \\
+        \text{where } [a]_{q_i} = ([c_0]_{q_0}, [c_1]_{q_0}, \dots, [c_{N-1}]_{q_i}) 
+\end{gather*}
+% \end{remark}
+
+
+\begin{remark}
+    \label{remark:hps}
+    The 0-towers that are not on the diagonal of $P_Q(a)$ adds no information. Therefore, evaluating $P_Q(a)$ is free as it contains exactly the same information as $a$. The same is true for $D_Q(a)$ by definition. More on this in \autoref{sec:impl:hps}.
+\end{remark}
+
+\subsubsection{HPS External Product}
+Let $e_i$ be the RNS basis polynomials, i.e. $e_0 = 1 \overset{coef}{\to} (1, 0, 0, \dots )$ and $e_1 = x \overset{coef}{\to} (0, 1, 0, \dots )$ and so on. We define the gadget vector $g = (e_0, \dots, e_1)$ as the RNS basis. Then the RGSW/external product definitions follow naturally, and we can chose $G^{-1}(x) = G^{-1}(x) = [D_Q(x_0) \;|\; D_Q(x_1)]$ as it satisfies $G^{-1}(x)\cdot G = x$. \textcolor{red}{The hidden link to HPS is that $P_Q(m) = m\cdot g$ aka. $C = Z + I_2\otimes P_Q(a)$ and $G^{-1}(x)\cdot G = x$ via CRT.}
+
+%\ifnotes
+    \begin{gather*}
+        G = I_2\otimes e = \left(
+        \begin{array}{c|c}
+             e_0 & 0  \\
+             \vdots & \vdots \\
+             e_{k-1} & 0 \\
+             \hline
+             0 & e_0 \\
+             \vdots & \vdots \\
+             0 & e_{k-1} \\
+        \end{array}
+        \right), \quad
+        G^{-1}(x) = 
+        \begin{bmatrix}
+            D_Q(x_0) \\ D_Q(x_1)
+        \end{bmatrix}^\intercal
+        % = 
+        % \left(
+        % \begin{array}{ccc|ccc}
+        %     [x_0]_{q_0} & \cdots & [x_0]_{q_{k-1}} & [x_1]_{q_0} & \cdots & [x_1]_{q_{k-1}} \\
+        % \end{array}
+        % \right)
+    \\
+        G^{-1}(x)\cdot G = 
+        \left(
+        \begin{array}{ccc|ccc}
+            [x_0]_{q_0} & \cdots & [x_0]_{q_{k-1}} & [x_1]_{q_0} & \cdots & [x_1]_{q_{k-1}}
+        \end{array}
+        \right) \cdot \left(
+        \begin{array}{c|c}
+             e_0 & 0  \\
+             \vdots & \vdots \\
+             e_{k-1} & 0 \\
+             \hline
+             0 & e_0 \\
+             \vdots & \vdots \\
+             0 & e_{k-1} \\
+        \end{array}
+        \right)
+    \\
+        = \left(
+        \begin{array}{c|c}
+            \sum\limits_{i=0}^{k-1} [x_0]_{q_i}\cdot e_i& \sum\limits_{i=0}^{k-1} [x_1]_{q_i}\cdot e_i
+        \end{array}
+        \right)
+        \overset{CRT}{=} (x_0, x_1) = x
+    \\
+    \\
+        \text{So the definitions \eqref{def:rgsw} and \eqref{def:external_product} are valid for this gadget.} \\
+        \text{And the external product is } x\boxdot Y = G^{-1}(x)\cdot Y \pmod{Q} 
+    \\ 
+    \\
+        G^{-1}(x) \cdot (Z + m_y\cdot G)                  \\ %\pmod{Q} \\
+        G^{-1}(x)\cdot Z + m_y \cdot (G^{-1}(x)\cdot G)   \\ %\pmod{Q} \\
+        \underset{\text{noisy }\rlwe(0)}{\underbrace{G^{-1}(x)\cdot Z}} \quad +\, \underset{\rlwe(m_y\cdot m_x)}{\underbrace{m_y \cdot x}} %\pmod{Q}
+    \end{gather*}
+% \fi
+
+\textcolor{red}{\textbf{Basically this whole section boils down to "do BV on the towers instead of the full polynomial"..?}}
+
+\subsubsection{Noise}
+Scales by $k\cdot\max_i\|q_i\|/2$ instead of $Q/2$ ($\sum_i q_i = k\cdot2^{60}$ instead of $\prod_i q_i = 2^{60\cdot k}$)?
+
+%\ifnotes
+    \noindent The noise is coming from the $\rlwe(0)$ on the lhs and $m_y\cdot \epsilon$ on the lhs. The noise for the rhs is obviously 0 or $\epsilon$ since we assume the message $m_y\in \{0,1\}$ is binary. The lhs is bounded in the worst case by...
+    
+    \begin{gather*}
+        G^{-1}(x)\cdot Z = 
+        % \left(
+        % \begin{array}{ccc|ccc}
+        %     [x_0]_{q_0} & \cdots & [x_0]_{q_{k-1}} & [x_1]_{q_0} & \cdots & [x_1]_{q_{k-1}} \\
+        % \end{array}
+        % \right)
+        \begin{pmatrix}
+            [x_0]_{q_0} \\ 
+            \vdots \\ 
+            [x_0]_{q_{k-1}} \\
+            [x_1]_{q_0} \\ 
+            \vdots \\
+            [x_1]_{q_{k-1}}
+        \end{pmatrix}^\intercal
+        \cdot
+        \begin{pmatrix}
+            a_0^z\cdot s + \epsilon_0 & a_0^z \\
+            \vdots \\
+            a_{2k-1}^z\cdot s + \epsilon_{2k-1} & a_{2k-1}^z
+        \end{pmatrix}
+    \\
+    \\
+        \leq 
+        \begin{pmatrix}
+            [x_0]_{q_0} \\ 
+            \vdots \\ 
+            [x_0]_{q_{k-1}} \\
+            [x_1]_{q_0} \\ 
+            \vdots \\
+            [x_1]_{q_{k-1}}
+        \end{pmatrix}^\intercal
+        \cdot
+        \begin{pmatrix}
+            a_0\cdot s + \epsilon & a_0 \\
+            \vdots \\
+            a_{2k-1}\cdot s + \epsilon & a_{2k-1}
+        \end{pmatrix}
+        \text{ where } \epsilon = \max_i\|\epsilon_i\|
+    \\
+    \\
+        \left(
+        \begin{array}{cc}
+             \sum\limits_{i=0}^{k-1} [x_0]_{q_0} &  \\
+             & 
+        \end{array}
+        \right)
+    \end{gather*}
+    
+    % \newpage
+    
+    % Actual calculation:
+    
+    % \begin{gather*}
+    %     G^{-1}(x) \cdot Y 
+    % \\
+    % \\
+    %     (
+    %     \begin{array}{ccc|ccc}
+    %         [x_0]_{q_0} & \cdots & [x_0]_{q_{k-1}} & [x_1]_{q_0} & \cdots & [x_1]_{q_{k-1}}
+    %     \end{array}
+    %     )
+    %     \left(
+    %     \begin{array}{c|c}
+    %         a_0\cdot s + m^{(0)} + \epsilon_0 & a_0 \\
+    %         \vdots & \vdots \\
+    %         a_{k-1}\cdot s + m^{(k-1)} + \epsilon_{k-1} & a_{k-1} \\
+    %         \hline
+    %         a_k\cdot s + \epsilon_k & a_k + m^{(0)} \\
+    %         \vdots & \vdots \\
+    %         a_{2k-2}\cdot s + \epsilon_{2k-2} & a_{2k-2} + m^{(k-1)} \\
+    %     \end{array}
+    %     \right)
+    % \\
+    % \\
+    %     = (\sum_{i=0}^{k-1} [x_0]_{q_i} \cdot (z_0 + [m]_{q_i})
+    % \end{gather*}
+    
+    % \newpage
+%\fi

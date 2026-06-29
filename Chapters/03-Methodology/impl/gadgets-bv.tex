@@ -1,0 +1,235 @@
+
+\subsection{BV (Double Decomposition)}
+This is the closest to TFHE. As HPS is too noisy, we use digit decomposition on each \textit{tower} in parallel (rather than the true polynomial). Hence we call this ``\textit{double decomposition}''.
+
+\subsubsection{Power of Base}
+As remarked earlier \autoref{remark:hps}, the HPS optimization makes the CRT decomposition free as it is already required by the RNS/NTT system we are working in. Thus, layering in another decomposition (in this case digit decomposition) only requires performing the second decomposition on each tower/limb of the RNS representation.
+
+% $P_Q(a) \cong a\cdot I_\ell$ where $k$ ($\ell$) is a constant linked to the current context (number of moduli for $Q = q_0q_1\dots q_k$). This means $P_Q(a)$ can be uniquely represented by its input; a single \texttt{DCRTPoly} $a$. We can therefore store $P_Q(a)$ as a dense matrix with the exact same form as a \texttt{DCRTPoly} in evaluation mode \eqref{form:eval}. 
+
+\begin{gather*}
+\quad \hps{P}(a) \cong 
+\begin{bmatrix} 
+    [a]_{q_0} & 0 & \cdots & 0 \\ 
+    0 & [a]_{q_1} & \cdots & 0 \\
+    \vdots & \vdots & \ddots & \vdots \\
+    0 & 0 & \cdots & [a]_{q_k} \\
+\end{bmatrix}
+= a\cdot I_k \\
+\text{compact storage }\quad \swarrow\hspace{7cm} % TODO: Move to tikz
+\\
+\hspace{3.5cm}
+\begin{bmatrix}
+    [a]_{q_0}\\ 
+    [a]_{q_1}\\
+    \vdots \\
+    [a]_{q_k} \\
+\end{bmatrix} 
+=
+\begin{bmatrix}
+    c_0 \bmod{p_0} & c_1 \bmod{p_0} & \dots & c_{N-1}\bmod{p_0} \\
+    c_0 \bmod{p_1} & c_1 \bmod{p_1} & \dots & c_{N-1}\bmod{p_1} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    c_0 \bmod{p_k} & c_1 \bmod{p_k} & \dots & c_{N-1}\bmod{p_k}
+\end{bmatrix} \;\,
+\\
+\text{decompose}\quad\quad\downarrow\hspace{6.6cm}
+\\
+% \hspace{1.4cm}
+\bv{P}(a) \cong
+\begin{bmatrix}
+    [\hat{a}]_{q_0}\\ 
+    [\hat{a}]_{q_1}\\
+    \vdots \\
+    [\hat{a}]_{q_k} \\
+\end{bmatrix}
+=
+\begin{bmatrix} 
+    \textcolor{blue}{[a]_{q_0}} & \textcolor{green}{[aB]_{q_0}} & \cdots & [aB^{\ell-1}]_{q_0} \\ 
+    \textcolor{blue}{[a]_{q_1}} & \textcolor{green}{[aB]_{q_1}} & \cdots & [aB^{\ell-1}]_{q_1} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \textcolor{blue}{[a]_{q_k}} & \textcolor{green}{[aB]_{q_k}} & \cdots & [aB^{\ell-1}]_{q_k} \\
+\end{bmatrix}
+\hspace{0.15cm}
+%\ifnotes
+\\
+\text{equivalent}\quad\quad\updownarrow\hspace{6.6cm}
+\\
+\hspace{1.4cm}
+\begin{bmatrix}
+    [a\cdot g]_{q_0}\\ 
+    [a\cdot g]_{q_1}\\
+    \vdots \\
+    [a\cdot g]_{q_k} \\
+\end{bmatrix}
+\cong
+\begin{bmatrix} 
+    \textcolor{blue}{[a]_{q_0}} & \textcolor{green}{[aB]_{q_0}} & \cdots & [aB^{\ell-1}]_{q_0} \\ 
+    \textcolor{blue}{[a]_{q_1}} & \textcolor{green}{[aB]_{q_1}} & \cdots & [aB^{\ell-1}]_{q_1} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \textcolor{blue}{[a]_{q_k}} & \textcolor{green}{[aB]_{q_k}} & \cdots & [aB^{\ell-1}]_{q_k} \\
+\end{bmatrix} 
+%\fi
+\\
+\hspace{1cm}\swarrow\hspace{.3cm}\mathsf{NTT} 
+\\
+\begin{pmatrix}
+    \textcolor{blue}{a}, \textcolor{green}{aB}, \dots aB^{\ell-1}
+\end{pmatrix}_\mathsf{DCRT}
+\end{gather*}
+
+Note that $\hat{a}$ is a vector of polynomials (the gadget decomposition of $a$), $a$ is a polynomial, and $c_i$ are the coefficients of $a$. When we apply the second decomposition, $a \to \hat{a}$, we get a 3-dimensional matrix of residues $\iff$ a 2-dimensional matrix of polynomial residues $\iff$ a vector of RNS polynomials $\therefore \bv{P}(a) \leftrightarrow (a, aB, \dots aB^{\ell-1})$.
+
+Then constructing $P_Q(a)$ is in some way equivalent to constructing $\hat{a}$, and the only difference between $P_Q(a)$ and $\hat{a}$ in practice are the indices of the elements as we ignore the 0-towers. In other words we can construct $\hat{a}$ and in the external product skip any computations that involves a 0-tower.
+
+% \begin{corollary}[RGSW-BV Correctness]
+%     Let $G = I_2\otimes P(1)$. Is this the correct $G$?
+%     \begin{proof}
+%         Digit decomposition: 
+%     \end{proof}
+% \end{corollary}
+
+\begin{definition}[RGSW-BV Data Structure]
+    We define a data structure representing an RGSW ciphertext as a vector of RLWE ciphertexts. Let $G = I_2\otimes \bv{P}(1) = I_2\otimes \hps{P}(g)$ and $G^{-1}(x) = [\hps{D}(x_0)|\hps{D}(x_1)]$ using the BV gadgets... 
+
+    \begin{gather}
+        C = Z + mG = Z + m\begin{pmatrix}
+            P(1) & 0 \\
+            \vdots & \vdots \\
+            P(1) & 0 \\
+            0 & P(1) \\
+            \vdots & \vdots \\
+            0 & P(1)
+        \end{pmatrix}
+    \end{gather}
+
+    Let $m_0 = m_0\cdot P(1)$
+
+    %%%
+    %%% Encrypt
+    %%%
+    \begin{algorithm}
+    \caption{Encrypt RGSW-BV}
+    \label{alg:rgsw:bv}
+    \begin{algorithmic}[1]
+    \Require Ring element $m$ in NTT form and decomposition parameter $\ell$
+    \Ensure RGSW as matrix of $2\times k \ell$ polynomials
+    
+    \end{algorithmic}
+    \end{algorithm}
+\end{definition}
+
+\begin{definition}[RGSW-BV External Product]
+    To calculate the external product using the BV decomposition using the RNS basis $\mathcal{B}_Q$ and decomposition parameter $\ell$, % such that $\max_i\|q_i\|$ can be expressed by 
+    we 
+
+    
+
+    And the external product:
+    \begin{gather}
+        x\boxdot Y = G^{-1}(x)\cdot Y \\
+        G^{-1}(x)(Z + m_y\cdot G) \\
+        G^{-1}(x)\cdot Z + m_y\cdot (G\cdot G^{-1}(x)) \\
+        G^{-1}(x)\cdot Z + m_y \cdot x
+    \end{gather}
+\end{definition}
+
+For the most optimal result, we flatten the loop to allow effective parallelization of each tower: 
+%%%
+%%% Encrypt
+%%%
+\begin{algorithm}
+\caption{Encrypt RGSW (optimized)}
+\label{alg:rgsw:encrypt}
+\begin{algorithmic}[1]
+\Require Polynomial $m$ and param $\ell$
+\Ensure RGSW as matrix of $2\times k \ell$ polynomials
+
+\State Initialize a vector $\mathbf{C}$ of $2 \cdot k \cdot \ell$ RLWE ciphertexts
+
+\For{$row \in [0, 2\cdot k \cdot \ell)$ \textbf{in parallel}}
+    \State $h \leftarrow \lfloor row / (k\ell) \rfloor $
+    \State $j \leftarrow \lfloor (row \bmod{k\ell}) / \ell \rfloor$
+    \State $i \leftarrow \lfloor (row \bmod{k\ell}) \bmod{\ell} \rfloor$
+
+    \State $z \leftarrow \mathsf{RLWE}(0) = (c_0, c_1)$
+    \State $c_h[j] \leftarrow [c_h[j] + mB^i]_{q_j}$
+    \State $\mathbf{C}[h k \ell + j \ell + i] = z$
+\EndFor
+
+\State \Return $\mathbf{C}$
+\end{algorithmic}
+\end{algorithm}
+
+
+
+\subsubsection{Decomposition}
+Digit extraction is performed in the coefficient domain. This is the main inefficiency in the HPS/BV-RNS gadget scheme. Let $\check{a} = ([d_0]_B, [d_1]_B, \cdots, [d_{k-1}]_B)$ denote the decomposition of $a$ using \autoref{alg:lsb-decomp}. As $D_Q(a) = \left( \imod{a}{0}, \imod{a}{1}, \cdots, \imod{a}{i}\right) = a$, the decomposition into $D_Q(\check{a})$ is equivalent to finding $\left( D_Q(d_0), D_Q(d_1), \cdots, D_Q(d_{k-1})\right)$.
+
+% \begin{gather*}
+%     \mathsf{DCRT}(a) 
+% \\
+% \hspace{1cm} \downarrow \;\mathsf{INTT}
+% \\
+% \mathsf{Coef}(a) =
+% \begin{pmatrix}
+%     c_0 \bmod{p_0} & c_1 \bmod{p_0} & \dots & c_{N-1}\bmod{p_0} \\
+%     c_0 \bmod{p_1} & c_1 \bmod{p_1} & \dots & c_{N-1}\bmod{p_1} \\
+%     \vdots & \vdots & \ddots & \vdots \\
+%     c_0 \bmod{p_k} & c_1 \bmod{p_k} & \dots & c_{N-1}\bmod{p_k}
+% \end{pmatrix}
+% \\
+% \hspace{2cm}\downarrow \;\text{decompose}
+% \\
+% \mathsf{Coef}(\check{a}) = 
+%     \begin{pmatrix}
+%         ? & ? & \cdots & ? \\
+%         ? & ? & \cdots & ? \\
+%         \vdots & \vdots & \ddots & \vdots \\
+%         ? & ? & \cdots & ? \\
+% \end{pmatrix}
+% \end{gather*}
+
+\begin{table}[h]
+\centering
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{c|cccc}
+    & \textbf{Digit 0} ($B^0$) & \textbf{Digit 1} ($B^1$) & $\cdots$ & \textbf{Digit $\ell-1$} ($B^{\ell-1}$) \\
+    \hline
+    \textbf{Tower $q_0$} & $d_{0,0}$ & $d_{0,1}$ & $\cdots$ & $d_{0,\ell-1}$ \\
+    \textbf{Tower $q_1$} & $d_{1,0}$ & $d_{1,1}$ & $\cdots$ & $d_{1,\ell-1}$ \\
+    $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ \\
+    \textbf{Tower $q_{k-1}$} & $d_{k-1,0}$ & $d_{k-1,1}$ & $\cdots$ & $d_{k-1,\ell-1}$ \\
+\end{tabular}
+\caption{The $k \times \ell$ structure of the Double-CRT Decomposition $D_Q(c)$.}
+\end{table}
+
+\newpage
+% \subsubsection{External Product}
+% Equivalent to $\ell$ external products in theory:
+
+% \begin{equation}
+%     \label{eq:external-product:optimized}
+%     \textcolor{red}{a\boxdot B = \sum_{i=0}^{k} a_i \cdot B_i}
+% \end{equation}
+
+\subsubsection{Modulo Powers-of-2}
+The modulo operation is slow because it cannot be done in parallell. If we assume $B = 2^b$ is a power of 2 --- which we can enforce by accepting $\log(B) = b$ as the input parameter instead of $B$ --- then we can use the fact that right-shift \textcolor{red}{$(a \gg b) = a \bmod{2^b}$ or something} to make the modulo operation into a bit-wise (and thus easily parallellizable) operation.
+
+\begin{algorithm}
+\caption{Optimized Branchless Signed LSB Decomposition ($B = 2^b$)}
+\begin{algorithmic}[1]
+\Require Coefficient $a \in \mathbb{Z}$, bit-width $b$, number of digits $\ell$
+\Ensure Vector of signed digits $\mathbf{d} = (d_0, d_1, \dots, d_{\ell-1})$ where $d_j \in [-2^{b-1}, 2^{b-1})$
+\State $a' \gets a$
+\State $\text{mask} \gets 2^b - 1$
+\For{$j = 0$ to $\ell - 1$}
+    \State $u \gets a' \ \& \ \text{mask}$ \Comment{Extract the lowest $b$ bits}
+    \State $\text{carry} \gets u \gg (b - 1)$ \Comment{Extract the highest bit of $u$ (1 or 0)}
+    
+    \State $d_j \gets u - (\text{carry} \ll b)$ \Comment{Branchlessly shift to negative range}
+    \State $a' \gets (a' \gg b) + \text{carry}$ \Comment{Shift down and add the carry}
+\EndFor
+\State \Return $\mathbf{d}$
+\end{algorithmic}
+\end{algorithm}

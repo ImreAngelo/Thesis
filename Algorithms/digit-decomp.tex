@@ -1,0 +1,32 @@
+%%%
+%%% Signed digit decomposition (optimized for B = 2^b)
+%%%
+\begin{algorithm}
+\caption{Signed LSB Base-$B$ Decomposition}
+\label{alg:lsb-decomp}
+\begin{algorithmic}[1]
+\Require Coefficient $a \in \mathbb{Z}$, base $B = 2^b$, number of digits $\ell$
+\Ensure Vector of signed digits $\mathbf{d} = (d_0, d_1, \dots, d_{\ell-1})$ where $d_j \in [-B/2, B/2)$
+\State $a' \gets a$
+\For{$j = 0$ to $\ell - 1$}
+    \State $d_j \gets a' \pmod B$ \Comment{Extract the lower bits}
+    \If{$d_j \ge B/2$}
+        \State $d_j \gets d_j - B$ \Comment{Shift to signed range}
+    \EndIf
+    \State $a' \gets \frac{a' - d_j}{B}$ \Comment{Shift down and apply the carry}
+\EndFor
+\State \Return $\mathbf{d}$
+\end{algorithmic}
+\end{algorithm}
+
+% function ExtractDigit(poly_coeff, j, b_bits):
+%     mask = (1 << b_bits) - 1
+%     shift = j * b_bits
+%     result_poly = new Polynomial()
+    
+%     # Iterate through the N coefficients of the polynomial
+%     for x from 0 to N - 1:
+%         # Standard bitwise shift and mask to isolate the digit
+%         result_poly[x] = (poly_coeff[x] >> shift) & mask
+        
+%     return result_poly

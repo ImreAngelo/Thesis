@@ -1,9 +1,11 @@
+
+\ifclaude
 \section{Residue Number System}
 \label{sec:rns}
 
 The lattice-based schemes BFV, BGV, and CKKS all operate in a polynomial ring $R_q = \mathbb{Z}_q[X]/(X^N + 1)$ where $q$ is the \emph{ciphertext modulus}. To support a multiplicative depth $L$, $q$ must be on the order of $2^{60L}$ bits or more --- far larger than a 64-bit machine word. Doing arithmetic on such large numbers natively would require expensive multi-precision routines for every coefficient operation.
 
-The \gls{rns} sidesteps this by representing each coefficient as a tuple of small residues, then performing arithmetic component-wise. The reconstruction is given by the \gls{crt}.
+A \gls{rns} sidesteps this by representing each coefficient as a tuple of small residues, then performing arithmetic component-wise. The reconstruction is given by the \gls{crt}.
 
 \subsection{The Chinese Remainder Theorem}
 \label{sec:rns:crt}
@@ -81,3 +83,4 @@ Multiplication by $P$ on the $Q$-side is well-defined modulo $Q$ (since $P$ is i
 \end{proof}
 
 \noindent\textcolor{magenta}{This lemma is the engine driving the V2 RGSW external product: the gadget $g_j$ defined in \autoref{sec:rgsw:hybrid} packages a free factor of $P$ into each row, and \textsf{ApproxModDown} is what removes it on the way out.}
+\fi

@@ -11,14 +11,39 @@
 \DeclareGraphicsExtensions{.pdf,.jpg}
 \graphicspath{{./figs/}}
 
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
 \newif\ifnotes
-% \notestrue % Uncomment to see notes
+\newif\ifclaude
+% \notestrue    % Uncomment to see notes
+% \claudetrue   % Uncomment to see sections written fully or partially by AI
 
 %% Uncomment the following in case you want subfigures; note that there will be a warning for the caption package
 % \let\subcaption\undefined
 % \let\subfloat\undefined
 % \usepackage[bf]{caption}
 % \usepackage{subcaption}
+
+%%
+\newcommand{\rlwe}{\mathsf{RLWE}}
+\newcommand{\rgsw}{\mathsf{RGSW}}
+
+\newcommand{\paramDecomp}{$\ell$}
+\newcommand{\dnum}{\mathsf{dnum}}
+% \newcommand{\rlwe}[1]{\mathsf{RLWE}_s(#1)}
+% \newcommand{\rgsw}[1]{\mathsf{RGSW}_s(#1)}
+\newcommand{\round}[1]{\left\lfloor #1 \right\rceil}
+\newcommand{\basemod}[2]{\left[#1\right]_{#2}}
+\newcommand{\omod}[1]{\basemod{#1}{\omega}}
+\newcommand{\qmod}[1]{\basemod{#1}{Q}}
+\newcommand{\imod}[2]{\basemod{#1}{q_{#2}}}
+\newcommand{\decomp}[1]{D_{\omega, Q}(#1)}
+\newcommand{\recomp}[1]{P_{\omega, Q}(#1)}
+\newcommand{\del}[2]{\basemod{#2 \left(\frac{Q_i}{q_{#1}}\right)^{-1}}{q_{#1}}}
+\newcommand{\pel}[2]{\basemod{#2 \left(\frac{Q_i}{q_{#1}}\right)}{Q_i}}
+\newcommand{\ntt}[1]{\mathsf{NTT}(#1)}
+
 
 \loadglsentries{glossary}
 \ifthesis
@@ -88,12 +113,12 @@
 \pagestyle{ruled}
 
 % \include{example_chapter}
-\include{Chapters/00-Notes/0-index}
+% \include{Chapters/00-Notes/0-index}
 \include{Chapters/01-Background}
-\include{Chapters/02-Related/0-index}
-\include{Chapters/Methodology}
-\include{Chapters/Results}
-\include{Chapters/Conclusion}
+\include{Chapters/02-Related}
+\include{Chapters/03-Methodology}
+\include{Chapters/04-Results}
+\include{Chapters/05-Conclusion}
 %% include here the other chapters
 
 \printbibliography[title=\listreferencename]
@@ -109,9 +134,7 @@
 }
 %% include below possible appendices (chapters)
 
-\input{Appendix/algebra}
-\input{Appendix/ntt}
-
+\input{Appendix/index}
 
 \else
 % produce the problem description to be signed and submitted within one month after start

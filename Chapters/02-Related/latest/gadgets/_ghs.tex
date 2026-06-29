@@ -1,0 +1,20 @@
+
+\subsection{Gentry-Halevi-Smart}
+The GHS technique, first introduced by Gentry, Halevi and Smart in \autocite{cryptoeprint:2012/099}, is a faster method of performing keyswitching in RNS than the previous method. Later the method was improved by the BEHZ authors \autocite{cryptoeprint:2016/510}.
+% This method is faster than BEHZ/HPS but halves the depth each iteration. ???
+At a high level, the GHS technique involves three steps: 
+\begin{enumerate}
+    \item Generate a public key $\mathsf{Enc}(b\cdot P)$ in $QP$
+    \item Lift the ciphertext $\mathsf{Enc}(a)$ into a higher basis $Q \to QP$
+    \item Apply the gadget operation in $QP$ to get $\mathsf{Enc}(a \cdot b \cdot P) + \epsilon \pmod{QP}$
+    \item Modulus switch the result $QP\to Q$ to get $\mathsf{Enc}(a \cdot b) + \epsilon/P \pmod{Q}$
+\end{enumerate}
+
+The relevant result of \autocite{cryptoeprint:2012/099} for our purpose was finding a way to approximate modulus switching in the evaluation representation of a polynomial, and using this to device the GHS keyswitching technique. Later, \autocite{cryptoeprint:2016/510} proposed a fast approximation to the base extension/lifting, operating on the CRT representation of a polynomial. The \textit{extra} noise from the operation is divided by $P$ in the ``mod down'', so the noise added by the technique itself $\epsilon\approx |\frac{Q}{P}|$ is approximately 1 if Q and P are chosen to be the same bit-length ($\implies 1\times \epsilon_{ks}$).
+
+% \begin{definition}[Base Extension]
+%     We have an RNS polynomial $a \in \mathcal{B}_P$ in evaluation format, and want to express the same polynomial as $a \in \mathcal{B}_{QP}$ in an extended basis $\mathcal{B}_{QP}$.
+% \end{definition}
+
+\subsubsection{Gadget decomposition}
+Does not exactly fit inside the established framework as $\langle D(x), D'(y)\rangle = x\cdot y \cdot P \pmod{Q}$ and the $P$ is removed as a separate step in the external product.

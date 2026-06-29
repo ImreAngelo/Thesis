@@ -1,5 +1,18 @@
 \section{Implementation Details}
 
+A ciphertext is:
+
+\begin{equation}
+    (c_o, c_1) \implies c_0 + c_1\cdot s \equiv m + tv \pmod{Q}
+\end{equation}
+
+In BGV:
+
+\begin{equation}
+    (c_0, c_0\cdot s + m + \epsilon) \implies c_0 + c_0\cdot s + m + \epsilon = c_0(s
+\end{equation}
+
+
 \subsection{RGSW Encryption (textbook form)}
 \label{sec:impl:rgsw}
 

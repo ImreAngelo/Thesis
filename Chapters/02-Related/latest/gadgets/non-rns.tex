@@ -1,0 +1,9 @@
+\section{Naive Approach}
+This section highlights why its so slow.
+
+In BV digit decomposition with $\ell = \lfloor\log_{\omega}{Q} \rceil + 1$:
+\begin{align*}
+    D_{Q}({a}) &= a\cdot\overbrace{\left(\omod{1}, \omod{\round{\frac{1}{\omega}}}, \cdots, \omod{\round{\frac{1}{\omega^{-\ell}}}}  \right)}^{\text{gadget vector } g} \\
+    P_{Q}({a}) &= \left(\qmod{a}, \qmod{a\omega}, \cdots, \qmod{a\omega^{\ell}}  \right)
+\end{align*}
+

@@ -223,3 +223,57 @@
     keywords = {Privacy computing, Secure multi-party computing (MPC) protocol, Multi-key homomorphic encryption, Ring learning with errors, Relinearization},
     abstract = {Most previous RLWE-based multi-key homomorphic encryptions (MKHEs) need to perform complex relinearization operations on ciphertext products to complete the evaluation of circuits of bounded polynomial depth. In this process, many intermediate ciphertexts or keys are needed for computing, resulting in inefficient computing and redundant storage. We propose a more efficient RLWE-based MKHE without relinearization operations to squeeze the storage space provided for homomorphic computation. Firstly, a controllable factor is introduced into the party’s ciphertexts, delineating the ciphertext as a component-like factor in preparation for concatenate operations. Secondly, we construct a tightened RGSW ciphertext extension algorithm that can directly work on the party’s original ciphertext. The extended ciphertext no longer needs to be converted, so no conversion keys are required. Again, by combining the concatenate and bit decomposition techniques, we construct new matching homomorphic computation algorithms, which ensure that the ciphertext product or sum is consistent in morphology with the extended ciphertext. The homomorphic multiplication algorithm allows the resultant ciphertext to directly participate in the next round of homomorphic operations without relinearization. Finally, we propose a specific RLWE-based MKHE scheme and provide the decryption process. Our analysis shows that our scheme guarantees IND-CPA security and performs efficient homomorphic computations correctly without relinearization operations.}
 }
+
+
+%%
+%% RNS
+%%
+
+% OpenFHE summary
+@misc{cryptoeprint:2021/204,
+      author = {Andrey Kim and Yuriy Polyakov and Vincent Zucca},
+      title = {Revisiting Homomorphic Encryption Schemes for Finite Fields},
+      howpublished = {Cryptology {ePrint} Archive, Paper 2021/204},
+      year = {2021},
+      url = {https://eprint.iacr.org/2021/204}
+}
+
+% BEHZ
+@misc{cryptoeprint:2016/510,
+      author = {Jean-Claude Bajard and Julien Eynard and Anwar Hasan and Vincent Zucca},
+      title = {A Full {RNS} Variant of {FV} like Somewhat Homomorphic Encryption Schemes},
+      howpublished = {Cryptology {ePrint} Archive, Paper 2016/510},
+      year = {2016},
+      url = {https://eprint.iacr.org/2016/510}
+}
+
+% HPS
+@misc{cryptoeprint:2018/117,
+      author = {Shai Halevi and Yuriy Polyakov and Victor Shoup},
+      title = {An Improved {RNS} Variant of the {BFV} Homomorphic Encryption Scheme},
+      howpublished = {Cryptology {ePrint} Archive, Paper 2018/117},
+      year = {2018},
+      doi = {10.1007/978-3-030-12612-4_5},
+      url = {https://eprint.iacr.org/2018/117}
+}
+
+% GHS
+@misc{cryptoeprint:2012/099,
+      author = {Craig Gentry and Shai Halevi and Nigel P.  Smart},
+      title = {Homomorphic Evaluation of the {AES} Circuit},
+      howpublished = {Cryptology {ePrint} Archive, Paper 2012/099},
+      year = {2012},
+      url = {https://eprint.iacr.org/2012/099}
+}
+
+
+% FHE Textbook
+@misc{fhetextbook,
+      title={The Beginner's Textbook for Fully Homomorphic Encryption}, 
+      author={Ronny Ko},
+      year={2026},
+      eprint={2503.05136},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR},
+      url={https://arxiv.org/abs/2503.05136}, 
+}
