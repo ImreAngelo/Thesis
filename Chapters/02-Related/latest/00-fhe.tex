@@ -1,0 +1,66 @@
+\renewcommand{\vec}[1]{\overrightarrow{\mathbf{#1}}}
+
+\section{Fully Homomorphic Encryption}
+\begin{itemize}
+    \item Capabilities of (F)HE
+    \item Maybe: Difference between leveled, fully, etc.
+    \item We care about polynomials in the ring $R_q = \mathbb{Z}_q[X]/(X^N-1)$
+    \item \gls{rlwe} decision/search problem?
+    \item Focus on BGV (and TFHE in next section)
+\end{itemize}
+
+%%
+%% RLWE
+\begin{definition}[RLWE ciphertext] $\vec{x} \in R_q^2$ containing a (randomly generated) \textit{public element} $a$ and secret element $a\cdot s + \Delta m + \epsilon$ derived from a persistent secret key $s$ and randomly sampled noise $\epsilon$, where $\Delta$ is the noise scale and $m\in R_t$ is the plaintext message being encrypted.
+    \begin{gather} % \vec{x}
+        \rlwe(m) = (b, a) = (a\cdot s + \Delta m + \epsilon, a) \\
+        s \overset{\$}{\leftarrow} \{-1,0,1\}^N,\quad \epsilon \overset{\$}{\leftarrow} \chi, \quad a \overset{\$}{\leftarrow} \chi
+    \end{gather}
+
+    An RLWE ciphertext $\vec{x}$ encrypting a message $m$ under the secret key $s$ is denoted $\rlwe_s(m)$, but if the secret key is understood from context then $\rlwe(m)$ is typically used.
+\end{definition}
+
+\begin{itemize}
+    \item Most FHE schemes support homomorphic addition and multiplication, and admits one of these for \textit{free}, in the sense that...
+    \item For example RSA has free multiplication, BGV has free addition. 
+\end{itemize}
+
+%%
+%% BGV ADDITION
+\begin{definition}[BGV addition.]
+    \begin{equation}
+        \vec{x} + \vec{y} = (b_x, a_x) + (b_y, a_y) = \rlwe_s(m_x + m_y)
+    \end{equation}
+    \begin{proof}
+        \begin{gather*}
+            % \vec{x} + \vec{y} = (b_x, a_x) + (b_y, a_y) \\
+            (a_x s + \Delta m_x + \epsilon_x, a_x) + (a_y s + \Delta m_y + \epsilon_y, a_y) \\
+            ((a_x +a_y )s + \Delta (m_x+m_y) + (\epsilon_x + \epsilon_y), a_x + a_y) \\
+            \text{Let } a = (a_x + a_y) \text{ and } \epsilon = (\epsilon_x + \epsilon_y)\\
+            \therefore \vec{x} + \vec{y} = (as + \Delta(m_x + m_y) + \epsilon, a) = \rlwe_s(m_x + m_y)
+        \end{gather*}
+    \end{proof}
+\end{definition}
+
+\begin{itemize}
+    \item BGV multiplication is more complicated + expensive and not used in sPAR. 
+    \item Requires relinearization to manage noise without bootstrapping.
+\end{itemize}
+
+%%
+%% MODULUS SWITCHING
+\begin{definition}[Modulus Switching]
+    Explained now because its different in RNS (important)
+\end{definition}
+
+%%
+%% OTHER
+\begin{definition}[Boostrapping]
+    Homomorphically evaluate decryption circuit to reset noise.
+\end{definition}
+
+\begin{definition}[Keyswitching]
+    The process of converting a message to being encrypted under a different secret key.
+\end{definition}
+
+\newpage

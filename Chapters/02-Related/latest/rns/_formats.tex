@@ -25,7 +25,7 @@ Let $Q = q_0\dots q_{k-1}$ with $gcd(q_i, q_j) = 1 \;\forall\; i\not= j$, so tha
 
 %%
 %% COEFFICIENT FORMAT
-\begin{definition}[RNS/CRT Form]
+\begin{definition}[CRT Form]
     Given a polynomial $a \in R_q$ where $q = q_0q_1\dots q_{k-1}$ is chosen as a product of $k$ small primes (small meaning they each fit inside a computer register), each coefficient $c_i$ is uniquely represented by its $k$ residues via the Chinese Remainder Theorem. Then the \emph{CRT form} of $a$ \eqref{form:crt} is a collection of smaller polynomials ($\bmod{p_i}$) called \textit{towers}, \textit{residues} or \textit{limbs}. 
     
     \begin{equation}
@@ -48,14 +48,20 @@ Let $Q = q_0\dots q_{k-1}$ with $gcd(q_i, q_j) = 1 \;\forall\; i\not= j$, so tha
     \end{equation}
 \end{definition}
 
-\textcolor{red}{Informal:} Due to the nature of modular arithmetic, addition/subtraction of two polynomials in $R_Q$ is equivalent to adding/subtracting their CRT forms (modulo $p_i$). As each element fits within a computer word, each pair of elements can be added/subtracted in parallel.
+\begin{itemize}
+    \item Addition/subtraction of two polynomials in $R_Q$ is equivalent to adding/subtracting their CRT forms (modulo $p_i$)
+    \item As each element fits within a computer word, each pair of elements can be added/subtracted in parallel.
+\end{itemize}
 
 % \noindent Clearly, the $i$-th column of \eqref{form:crt} is a CRT problem for $c_i$, so converting between this and the canonical form $\sum_{i=0}^{N-1}c_iX^i$ or vector form $(c_0,c_1,\dots, c_{N-1})$ is easy. \textcolor{red}{\textbf{Note that confusingly ``coefficient format'' is used in OpenFHE about this form specifically, NOT the ``vector'' form which is normally used in the literature... kjært barn har mange navn..}}
 
 \begin{remark}
-\textcolor{red}{Rather confusingly, OpenFHE calls this form \emph{Coefficient} format. Both D/CRT forms are represented by an \texttt{DCRTPoly} object, so a polynomial in CRT form is represented by a \texttt{DCRTPoly} object in \texttt{Format::Coefficient} mode.}
+    \textcolor{red}{Rather confusingly, OpenFHE calls this form \emph{Coefficient} format. Both RNS forms are represented by an \texttt{DCRTPoly} object, so a polynomial in CRT form is represented by a \texttt{DCRTPoly} object in \texttt{Format::Coefficient} mode.}
+    \begin{figure}[ht!]
+        \centering
+        \includegraphics[width=0.4\linewidth]{Figures/representations.png}
+    \end{figure}
 \end{remark}
-
 
 %%
 %% EVALUATION FORMAT
@@ -77,7 +83,12 @@ Let $Q = q_0\dots q_{k-1}$ with $gcd(q_i, q_j) = 1 \;\forall\; i\not= j$, so tha
             \vdots \\
             \ntt{a\bmod q_k}
         \end{pmatrix}
+        =
+        \begin{pmatrix}
+            \hat{a}_{0,0} & ...
+        \end{pmatrix}
     \end{equation}
+    
 \end{definition}
 
 %%

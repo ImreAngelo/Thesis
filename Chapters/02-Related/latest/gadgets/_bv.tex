@@ -12,7 +12,7 @@
 % \fi
 
 \subsection{Brakerski-Vaikuntanathan}
-Although we cannot use \textit{digit} decomposition, RNS is itself based on a different decomposition: \textit{CRT} decomposition. This means we can decompose an RNS polynomial using the RNS primes themselves as a basis (\textcolor{red}{where the $\mathcal{B}_Q$ notation usually comes from!} as shown in \cite{cryptoeprint:2016/510, cryptoeprint:2021/204}. % At level $1$ (s.t. $Q = Q_i$ in the notation of \cite{cryptoeprint:2021/204}) this becomes:
+Although we cannot use \textit{digit} decomposition, RNS is itself based on a different decomposition: \textit{CRT} decomposition. This means we can decompose an RNS polynomial using the RNS primes themselves as a basis as shown in \cite{cryptoeprint:2016/510, cryptoeprint:2021/204}. % At level $1$ (s.t. $Q = Q_i$ in the notation of \cite{cryptoeprint:2021/204}) this becomes:
 \begin{align}
     \label{eq:bv:d}
     D_{Q}({a}) &= \left(\imod{a\left(\frac{Q}{q_0}\right)^{-1}}{0},\dots,\imod{a\left(\frac{Q}{q_i}\right)^{-1}}{i}\right) \\
@@ -29,39 +29,34 @@ Although we cannot use \textit{digit} decomposition, RNS is itself based on a di
 \end{lemma}
 
 % \noindent\textbf{HPS Optimization}
-It was later shown by Halevi, Polyakov and Shoup \cite{cryptoeprint:2018/117} that the factors can be moved into $P_Q(a)$ without violating \autoref{lemma:bv_gadget}. Since $[(Q/q_i)^{-1}]_{q_i}[Q/q_i] = 1$ in tower $j = i$ and 0 in towers $j\not= i$, this optimization effectively makes the decomposition free as $P_Q(a) \cong a_{\mathsf{limbs}}\cdot I_k$ where $k$ is the number of RNS limbs.
+It was later shown by Halevi, Polyakov and Shoup \cite{cryptoeprint:2018/117} that the factors can be moved into $P_Q(a)$ without violating Lemma \ref{lemma:bv_gadget}. Since $[(Q/q_i)^{-1}]_{q_i}[Q/q_i] = 1$ in tower $j = i$ and 0 in towers $j\not= i$, this optimization effectively makes the decomposition free as both $\hps{D}(a) \cong a_\mathsf{limbs}$ and $\hps{P}(a) \cong a_{\mathsf{limbs}}\cdot I_k$ contains the same information as $a$, and is only structured differently. For convenience we let $\hat{q}_i = {Q}/{q_i}$ so we can write the elements of $\hps{P}(a)$ as $a[\hat{q}_i^{-1}]_{q_i} [\hat{q}_i]_{Q}$.
 
-\begin{align*}
-    D_Q(a) &= \left( \imod{a}{0}, \imod{a}{1}, \cdots, \imod{a}{i}\right)\\
-    P_Q(a) &= \left( a\cdot\imod{\left(\frac{Q}{q_0}\right)^{-1}}{0} \cdot \qmod{\frac{Q}{q_0}}, \dots, a\cdot\imod{\left(\frac{Q}{q_i}\right)^{-1}}{i} \cdot \qmod{\frac{Q}{q_i}} \right)
-\end{align*}
+\begin{align}
+    \hps{D}(a) &= \left( \imod{a}{0}, \imod{a}{1}, \cdots, \imod{a}{i}\right)\\
+    \hps{P}(a) &= \left( a\cdot\imod{\hat{q}_0^{-1}}{0} \cdot \qmod{\hat{q}_0}, \dots, a\cdot\imod{\hat{q}_\ell^{-1}}{i} \cdot \qmod{\hat{q}_\ell} \right)
+\end{align}
 
-% \noindent\textcolor{red}{Note that $[(Q/q_i)^{-1}]_{q_i}[Q/q_i] = 1$ in tower $j = i$ and 0 in towers $j\not= i$. See \autoref{sec:impl:hps} for why this is especially useful.}
+\begin{itemize}
+    \item This saves many unnecessary calculations in practice (see \autoref{sec:impl})
+    \item The factors $[\hat{q}_i^{-1}]_{q_i} [\hat{q}_i]_{Q}$ are static and can be pre-calculated
+\end{itemize}
 
 % Maybe promote to sub/section after discussing all the main gadget types, because it can be applied to every gadget
 \subsection{Double Decomposition}
-
-
-By \autoref{the:gadget}, we can use these gadget vectors to define an external product. (Also optimized heavily in \autoref{sec:impl:hps}.) However, the noise added scales with $\sum_{i}q_i/2 \leq k\cdot \max_i\{q_i\}/2$ (\textcolor{red}{Cite error bounds from TFHE paper}). This is fine when only applied once, for example in keyswitching, but quickly becomes unmanageable when using \textit{internal} products \eqref{def:internal_product}.
-
-To combat this, we can add a second layer of decomposition using the classic BV technique with $g = (1, B, \cdots, B^{\ell-1})$. I started this section by saying this method is slow, and that still rings true as digit decomposition cannot be performed in RNS/DCRT mode. However, due to the gadgets, the coefficients of $a$ \textbf{are} the coefficient/canonical representations of the smaller polynomials $a\pmod{q_i}$. By applying the technique to each RNS digit individually, we:
-\begin{enumerate}
-    \item avoid multi-precision arithmetic even in $D_Q(a)$
-    \item convert to RNS coefficient mode instead of canonical (standard coefficient)
-    \item can apply $P_Q(a)$ fully in evaluation mode
-\end{enumerate}
-
-\newcommand{\gadgetformat}[2]{{#1}_{\mathsf{\tiny #2}}}
-\newcommand{\hps}[1]{\gadgetformat{#1}{HPS}}
-\newcommand{\bv}[1]{\gadgetformat{#1}{BV}}
+\begin{itemize}
+    \item By \autoref{the:gadget}, we can use these gadget vectors to define an external product. 
+    \item The noise added scales with $\sum_{i}q_i \leq k\cdot \max_i\{q_i\}$ (\textcolor{red}{Cite error bounds from TFHE paper}) 
+    \item Fine for keyswitching, but too large for some applications like internal products \eqref{def:internal_product}.
+    \item To combat this, we can add a second layer of decomposition to each decomposed element using the classic gadget technique with $g = (1/\beta, \dots,1/\beta^{\ell-1})$.
+    \item As each element is a ring element in $R_{q}$ for some small $q$ that fits inside a computer register/word, applying this method does not incur the performance penalty of using multi-precision integers.
+    \item This can be represented as $\bv{D}(a) = \bv{P}(a\cdot g^{-1}(a))$ and $\bv{D}(a) = \bv{P}(a\cdot g)$ where $g = ($ and $g^{-1}(a)$ satisfies $g^{-1}(a)\cdot g = x$), but this results in a matrix $\bv{P}\in R^{2\times k}_q$. To fit this within our established framework, we simply flatten $R^{\ell\times k}_q \to R^{1\times k\ell}_q$.
+\end{itemize}
 
 \begin{corollary}[Correctness of Double Decomposition]
-    Applying digit decomposition to each element of $\hps{P}(a)$ individually yields a valid external product by \autoref{the:gadget}.
+    Applying digit decomposition to each element of $\hps{P}(a)$ individually yields a valid external product by \autoref{the:gadget}. The proof changes only structurally when $P_{BV}(m)$ and $D_{BV}(n)$ are flattened.
 
-    \textcolor{red}{Does not matter wether the decomposition is first or last $Decomp(P_{HPS}(a))$ or $P_{HPS}(Decomp(a))$}
-
-    \begin{proof}
-        Let $\bv{P}(a) = \hps{P}(a\cdot g)$ and $D_{BV}(a) = D_{HPS}(a\cdot g^{-1})$ where $g = ()$ and $g^{-1}$ is the digit extraction of $n$ such that $g^{-1}(n)\cdot g = n$. Using the fact that $P_{HPS}(\cdot), D_{HPS}(\cdot)$ satisfies the exact gadget property \eqref{property:gadget}, we see that the same is true for $P_{BV}(\cdot), D_{BV}(\cdot)$:
+    \begin{proof}[Proof Sketch]
+        Let $\bv{P}(a) = \hps{P}(a\cdot g)$ and $D_{BV}(a) = D_{HPS}(a\cdot g^{-1})$ where $g = (1, \beta, \dots, \beta^{\ell-1})$ and $g^{-1}$ is the digit extraction of $n$ such that $g^{-1}(n)\cdot g = n$. Using the fact that $P_{HPS}(\cdot), D_{HPS}(\cdot)$ satisfies the exact gadget property \eqref{property:gadget}, we see that the same is true for $P_{BV}(\cdot), D_{BV}(\cdot)$:
         \begin{gather}
             \langle P_{BV}(m), D_{BV}(n)\rangle = \langle P_{HPS}(m\cdot g), D_{HPS}(n\cdot g^{-1})\rangle \pmod{Q}\\
             = (m\cdot g) \cdot (n\cdot g^{-1}) = m\cdot n \cdot (g^{-1}\cdot g) \pmod{Q} \\
@@ -73,9 +68,10 @@ To combat this, we can add a second layer of decomposition using the classic BV 
 \end{corollary}
 
 \begin{remark}
-    \textit{Now $\ell$ covers $\max_i\{q_i\}$ and the RGSW has $k\cdot\ell$ rows. This is the same length required if $\ell$ covers the entire $Q$ as we would have $k$ less numbers but each number would be $k$ digits longer. For example, with $\ell_{small} = 2$ and $Q=q_0q_1 \implies k = 2$ we get $2\cdot k \cdot \ell_{small} =2\cdot 2\cdot 2 = 8$ RGSW rows and the noise is equivalent to having $\ell_{big} = 4 \implies 2\cdot\ell_{big} = 8$ RGSW rows over $Q$. The results is the same, the number of rows is the same, the noise is the same, its just faster to calculate over each $q_i$ individually.}
+    \textcolor{red}{Now $\ell$ covers $\max_i\{q_i\}$ and the RGSW has $k\cdot\ell$ rows. This is the same length required if $\ell$ covers the entire $Q$ as we would have $k$ less numbers but each number would be $k$ digits longer. For example, with $\ell_{small} = 2$ and $Q=q_0q_1 \implies k = 2$ we get $2\cdot k \cdot \ell_{small} =2\cdot 2\cdot 2 = 8$ RGSW rows and the noise is equivalent to having $\ell_{big} = 4 \implies 2\cdot\ell_{big} = 8$ RGSW rows over $Q$. The results is the same, the number of rows is the same, the noise is the same, its just faster to calculate over each $q_i$ individually.}
 \end{remark}
 
+Double decomposition 
 
 \ifnotes
     \newpage
@@ -96,12 +92,10 @@ To combat this, we can add a second layer of decomposition using the classic BV 
     %     C = Z + m\cdot G = Z + P_Q(\hat{m})\otimes I_2
     % \end{equation*}
     
-    
     \newpage
-    
-    
-    
-    
+\fi
+
+\ifnotes
     \newpage
     \newpage
     \newcommand{\coef}[2]{c_{#1}\bmod{q_{#2}}}
@@ -370,4 +364,7 @@ To combat this, we can add a second layer of decomposition using the classic BV 
     
     \noindent\textbf{Noise Growth (revisited)}
     Manageable but not optimal. It is now bounded by $B/2$, but performance is still poor as $\ell$ is quite high ($\ell$ digits must cover $\max_i{\|q_i\|}$).
+
+\newpage
+\newpage
 \fi

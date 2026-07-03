@@ -5,6 +5,11 @@ This section details the fundamental building blocks of the \gls{spar} protocol,
 
 % If time allows, this section also details HomExpand, which decreases the bandwidth (allowing the clients/users to send a single rlwe that is then expanded into a series of RGSW ciphertexts encrypting each bit of the index).
 
+\newcommand{\gadgetformat}[2]{{#1}_{\mathsf{\tiny #2}}}
+\newcommand{\hps}[1]{\gadgetformat{#1}{HPS}}
+\newcommand{\bv}[1]{\gadgetformat{#1}{BV}}
+
+\input{Chapters/02-Related/latest/00-fhe}
 \input{Chapters/02-Related/latest/rgsw}
 \input{Chapters/02-Related/latest/rns}
 \input{Chapters/02-Related/latest/gadgets}

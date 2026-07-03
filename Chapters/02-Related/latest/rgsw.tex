@@ -5,9 +5,9 @@
 \begin{itemize}
     \item TFHE bootstrapping achieves fast evaluation of binary circuits. 
     \item It is based on (approximating) \textit{gadget decomposition}. 
-    \item Asymmetry in noise scaling of GSW ciphertexts.
-    \item Decomposition \cite{fhetextbook}: \textit{a mathematical technique used to represent a number in a smaller base (radix) while preserving its value} $\gamma = \gamma_0\frac{q}{\beta_0} + \dots + \gamma_\ell\frac{q}{\beta_\ell}$
-    \item Gadget \cite{fhetextbook}: \textit{generalized form of number decomposition} $\gamma = \gamma_0g_0 + \dots + \gamma_\ell g_\ell$
+    \item Asymmetry in noise scaling of GSW ciphertexts; sum of small errors is smaller than product of large errors.
+    % \item Decomposition \cite{fhetextbook}: \textit{a mathematical technique used to represent a number in a smaller base (radix) while preserving its value} $\gamma = \gamma_0\frac{q}{\beta_0} + \dots + \gamma_\ell\frac{q}{\beta_\ell}$
+    % \item Gadget \cite{fhetextbook}: \textit{generalized form of number decomposition} $\gamma = \gamma_0g_0 + \dots + \gamma_\ell g_\ell$
 \end{itemize}
 
 \ifnotes
@@ -35,8 +35,7 @@
 \end{definition}
 \fi
 
-\begin{definition}[RGSW Ciphertext]
-A (Ring) GSW ciphertext \eqref{def:rgsw}.. where $Z$ is a vector of $2\ell$ (fresh) \gls{rlwe} %$\rlwe_s(0)$ 
+\begin{definition}[RGSW ciphertext] \eqref{def:rgsw} where $Z$ is a vector of $2\ell$ (fresh) \gls{rlwe} %$\rlwe_s(0)$ 
 encryptions of 0. The message $m\in \{0,1\}$, and $G = I_2\otimes g$ where $g$ is the \textit{gadget vector}, typically defined as $g=(1, 1/B, \dots, 1/B^{\ell-1})$. 
 
 \begin{equation}
@@ -49,19 +48,21 @@ encryptions of 0. The message $m\in \{0,1\}$, and $G = I_2\otimes g$ where $g$ i
     \textcolor{red}{An \gls{rlwe} ciphertext is a vector $(b,a) = (a\cdot s + \Delta m + \epsilon)$ (and in scale-invariant schemes such as BGV, $\Delta = 1$). Typically the chosen gadget vector is $g = (1, B, \cdots, B^{\ell - 1})$. Therefore the RGSW ciphertext \eqref{def:rgsw} can be viewed as 2 sets of $\ell$ RLWE encryptions where the first set contains $\rlwe(mB^i)$ and the second set contains $\rlwe(-s\cdot mB^i)$ for $0 \leq i < \ell$.}
 \fi
 
-\begin{definition}[Gadget Property.]
-    Two mappings $D(m)$ and $P(n)$ have the gadget property (wrt. $Q$) iff.
+\textcolor{red}
+{
+    \begin{definition}[Gadget Property.]
+        Two mappings $D(m)$ and $P(n)$ have the gadget property (wrt. $Q$) iff.
+        \begin{equation}
+            \label{property:gadget}
+            \langle D(m), P(n)\rangle = m\cdot n \pmod{Q}
+        \end{equation}
+    \end{definition}
+    The external product approximates the gadget property by defining a gadget matrix $G$ and inverse gadget matrix $G^{-1}(x)$ s.t.
     \begin{equation}
-        \label{property:gadget}
-        \langle D(m), P(n)\rangle = m\cdot n \pmod{Q}
+        \label{def:approx_gadget_prop}
+        G^{-1}(x)\cdot G = x + \epsilon \approx x \pmod{Q}
     \end{equation}
-\end{definition}
-
-The external product approximates the gadget property by defining a gadget matrix $G$ and inverse gadget matrix $G^{-1}(x)$ s.t.
-\begin{equation}
-    \label{def:approx_gadget_prop}
-    G^{-1}(x)\cdot G = x + \epsilon \approx x \pmod{Q}
-\end{equation}
+}
 
 
 \begin{definition}[External Product] $\boxdot$ defines a product between an \gls{rlwe} and an \gls{rgsw} ciphertext. $G^{-1}(x)$ satisfies the approximate gadget property \eqref{def:approx_gadget_prop}.
@@ -86,9 +87,14 @@ The external product approximates the gadget property by defining a gadget matri
 \end{gather}
 \end{definition}
 
+
+
 \subsection{Generalization}
-The TFHE scheme \cite{cryptoeprint:2018/421} explicitly uses the gadget vector $g = (1, 1/B, \dots, 1/B^{\ell})$ \textcolor{red}{\texttt{Dec} algorithm}, but it should be noted that any choice of $G$ and $G^{-1}$ that satisfy the (inexact) gadget property \eqref{def:approx_gadget_prop} is sufficient to define a valid RGSW ciphertext. \ifnotes\textcolor{red}{TODO: establish this is true or cite, although it is trivial.}\fi 
-For later it will be particularly helpful to establish constructively that/how any pair of vectors that satisfy the gadget property \eqref{property:gadget} can be used to find valid gadget matrices.
+\begin{itemize}
+    \item We are not limited to the gadget vector $g = (1, 1/B, \dots, 1/B^{\ell})$ and \texttt{Dec}
+    \item Any choice of $G$ and $G^{-1}(x)$ that satisfy \eqref{def:approx_gadget_prop} works
+    \item For later it is helpful to establish constructively how any pair of vectors that satisfy \eqref{property:approx_gadget_prop} can be used to find valid gadget matrices.
+\end{itemize}
 
 \ifnotes
 \begin{gather}
@@ -102,7 +108,7 @@ For later it will be particularly helpful to establish constructively that/how a
 
 \begin{theorem}%[Generalized Gadget RGSW]
     \label{the:gadget} % equal-length pair of vectors
-    Any pair $D(a), P(b)$ that satisfies the approximate gadget property \eqref{def:approx_gadget_prop} defines an RGSW ciphertext \eqref{def:rgsw} and a valid external product \eqref{def:external_product} such that $\mathsf{RLWE}(a)\boxdot\mathsf{RGSW}(b) = \mathsf{RLWE}(a\cdot b)$. 
+    Any pair $D(a), P(b) \in \mathbb{Z}_{Q}^{\ell}$ that satisfies the approximate gadget property \eqref{def:approx_gadget_prop} defines an RGSW ciphertext \eqref{def:rgsw} and a valid external product \eqref{def:external_product} such that $\mathsf{RLWE}(a)\boxdot\mathsf{RGSW}(b) = \mathsf{RLWE}(a\cdot b)$. 
     Further, a valid (inverse) gadget matrix is given by:
     \begin{align}
         G &= I_2\otimes P(1)\\
@@ -110,7 +116,7 @@ For later it will be particularly helpful to establish constructively that/how a
     \end{align}
     
     \begin{proof}
-        The inexact gadget property holds for $G= I_2\otimes P(1)$ and $G^{-1}(x) = [D(x_0)|D(x_1)]$.
+        1. The inexact gadget property holds for $G= I_2\otimes P(1)$ and $G^{-1}(x) = [D(x_0)|D(x_1)]$.
         \begin{align*}
             G^{-1}(x)\cdot G &= [D(x_0)|D(x_1)] \begin{pmatrix}
                 P(1) & 0 \\
@@ -121,20 +127,19 @@ For later it will be particularly helpful to establish constructively that/how a
             \\ &= [x_0, x_1] + [\epsilon_0, \epsilon_1] = x + \epsilon \pmod{Q}
         \end{align*}
         
-        If the inexact gadget property holds, then the external product is valid.
-
-        \begin{gather}
+        2. If the inexact gadget property holds, then the external product is valid.
+        \begin{gather*}
             G^{-1}(x)\cdot G = x + \epsilon_G \pmod{Q} \\
             x\boxdot Y = G^{-1}(x)\cdot (Z + m_y\cdot G) \\
             G^{-1}(x)\cdot Z + (G^{-1}(x)\cdot G)m_y \\
             G^{-1}(x)\cdot Z + (x + \epsilon_G)\cdot m_y \\
-            G^{-1}(x)\cdot Z + x\cdot m_y + \epsilon_G \cdot m_y \\
-        \end{gather}
+            G^{-1}(x)\cdot Z + x\cdot m_y + \epsilon_G \cdot m_y
+        \end{gather*}
 
         The middle term $x\cdot m_y = (a\cdot s + m_x + \epsilon, a)\cdot m_y = ((am_y)s + (m_ym_x) + m_y\epsilon, am_y)$. By setting $a' = a\cdot m_y, \epsilon' = \epsilon \cdot m_y$ its clear that this becomes a valid RLWE encryption of $m_y\cdot m_x$ from $(a's + m_x\cdot m_y + \epsilon', a')$.
 
         The left term $G^{-1}(x)\cdot Z$ evaluates to an RLWE encryption of 0 with some non-zero noise. (Here $g^{-1}_i$ denotes the $i$-th element of $G^{-1}(x)$, not necessarily the inverse of $g$...)
-        \begin{gather}
+        \begin{gather*}
             G^{-1}(x)\cdot Z = 
             \begin{pmatrix}
                 g^{-1}_0 & \cdots &
@@ -150,16 +155,13 @@ For later it will be particularly helpful to establish constructively that/how a
             \begin{array}{cc}
                 \sum_{i=0}^{2\ell - 1}g^{-1}_ib_i, & \sum_{i=0}^{2\ell - 1}g^{-1}_ia_i 
             \end{array}
-            \right)
-        \end{gather}
-
-        Let $a_z = \sum_{i=0}^{2\ell - 1}g^{-1}_ia_i$, and observe that the first element becomes
-        \begin{gather}
-            \sum_{i=0}^{2\ell - 1}g^{-1}_ib_i = \sum_{i=0}^{2\ell - 1}g^{-1}_i(a_i\cdot s + \epsilon_i) \\
-            \sum_i g^{-1}_i a_i\cdot s + \sum_i g^{-1}_i e_i \\
-            s\left(\sum_i g^{-1}_i a_i\right) + \sum_i g^{-1}_i e_i \\
-            a_z\cdot s + \epsilon_z
-        \end{gather}
+            \right) \\
+            \text{Let }a_z = \sum_{i=0}^{2\ell - 1}g^{-1}_ia_i \text{, and observe that the first element becomes} \\
+        % \end{gather*}
+        % \begin{gather*}
+            \sum_{i=0}^{2\ell - 1}g^{-1}_ib_i = \sum_{i=0}^{2\ell - 1}g^{-1}_i(a_i\cdot s + \epsilon_i) = \sum_i g^{-1}_i a_i\cdot s + \sum_i g^{-1}_i e_i \\
+            s\left(\sum_i g^{-1}_i a_i\right) + \sum_i g^{-1}_i e_i = s(a_z) + (\epsilon_z) = a_z\cdot s + \epsilon_z
+        \end{gather*}
 
         $\therefore \quad x\boxdot Y = \mathsf{RLWE}_s(0) + \mathsf{RLWE_s(m_x\cdot m_y) + (\epsilon_{G}\cdot m_y) = \mathsf{RLWE}_s(m_x\cdot m_y)}$
     \end{proof}
@@ -173,7 +175,7 @@ For later it will be particularly helpful to establish constructively that/how a
 \end{remark}
 
 \subsection{Noise}
-Each term is a source of noise:
+Each term has a source of noise:
 \begin{itemize}
     \item $\epsilon_z = \sum_i g^{-1}_i\epsilon_i$
     \item $\epsilon' = m_y\cdot \epsilon$
@@ -188,6 +190,6 @@ Each term is a source of noise:
     \item $g^{-1}_i$ are also from the gadget, but is less controllable as it also depends on $x$. A good choice of gadget is therefore one that satisfies the exact gadget property and has small elements in $G^{-1}(x)$. 
 \end{itemize}
 
-The choice of gadget affects the noise and some gadgets are \textit{better} than others, as they add less noise during the external product! Ideally we want to use a decomposition that has the \textit{exact} gadget property, to minimize noise the noise from the \textit{``error (left) term``}.
+$\therefore$ The choice of gadget affects the noise and some gadgets are \textit{better} than others, as they add less noise during the external product! Ideally we want to use a decomposition that has the \textit{exact} gadget property, to minimize noise the noise from the \textit{``error (left) term``}.
 
 % As we will see, we still need digit decomposition as in the original scheme to keep noise near constant, but the next sections will show how to do this in an RNS-native way (first decompose using the RNS primes, then decompose the towers).

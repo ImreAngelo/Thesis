@@ -1,22 +1,15 @@
 %%-----------------------%%
 %% Homomorphic Expansion %%
 %%-----------------------%%
-\section{RLWE-to-RGSW Expansion}
+\textcolor{red}{\section{RLWE-to-RGSW Expansion}}
+\begin{itemize}
+    \item Use RGSW to avoid relinearization of binary numbers
+    \item For communication overhead we want send packed RLWE ciphertexts to the server
+    \item We wish to strike a balance between the cheap communication cost of packed \gls{rlwe} and the fast multiplication of \gls{rgsw}
+    \item Solution: send packed RLWE ciphertexts and \textit{expand} them into RGSW homomorphically on the server 
+\end{itemize}
 
 \subsection{ORAM}
-\ifnotes
-    \begin{itemize}
-        \item We want to use RGSW to avoid relinearization
-        \item We want to send packed ciphertexts to save on communication
-        \item Therefore, we send RLWE and convert to RGSW on the server
-        \item (Requires a single RGSW encryption $\mathsf{RGSW}(-s)$ to be sent as well)
-        \item 1 RLWE for the index bits = size $\ell$
-        \item $\ell$ RGSW's for the index bits = size $2\ell \times 2$ or smth
-        \item Expanding = size $2\ell$ or something
-    \end{itemize}
-\fi
-As established in \autoref{sec:rgsw}, \gls{rgsw} ciphertexts are enticing because the external product allows us to perform (binary) homomorphic multiplication without relinearization. However, the size of \gls{rgsw} makes the communication costs very high in a communication protocol. We wish to strike a balance between the cheap communication cost of packed \gls{rlwe} and the fast multiplication of \gls{rgsw}. The solution is to send \gls{rlwe} ciphertexts from the client, and \emph{expand} them homomorphically on the server.
-
 Solution from \autocite{chillotti:onionring:2019}. \textbf{HomExpand:} Expands an \gls{rlwe} ciphertext into an \gls{rgsw} ciphertext.
 
 This expansion is described in Algorithm 4 of \cite{chillotti:onionring:2019}, which builds on Algorithms 3 and 8 from the same paper. The algorithms are listed below (in slightly different notation) as \autoref{alg:ORAM:4}, \autoref{alg:ORAM:3}, and \autoref{alg:ORAM:8}, respectively.

@@ -2,6 +2,13 @@
 \subsection{BV (Double Decomposition)}
 This is the closest to TFHE. As HPS is too noisy, we use digit decomposition on each \textit{tower} in parallel (rather than the true polynomial). Hence we call this ``\textit{double decomposition}''.
 
+\subsubsection{New}
+\begin{align}
+    \bv{P}(a) = ()\\
+    a \in R_q
+\end{align}
+
+
 \subsubsection{Power of Base}
 As remarked earlier \autoref{remark:hps}, the HPS optimization makes the CRT decomposition free as it is already required by the RNS/NTT system we are working in. Thus, layering in another decomposition (in this case digit decomposition) only requires performing the second decomposition on each tower/limb of the RNS representation.
 
