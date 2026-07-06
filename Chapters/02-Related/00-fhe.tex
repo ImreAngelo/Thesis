@@ -59,5 +59,3 @@ Homomorphic multiplication in BGV is considerably more complicated and expensive
 
 \subsection{BGV}
 The implementation of this thesis is in the BGV cryptosystem, which places the message in the \textit{least} significant bits of the ciphertext: $\Delta = 1$ and the noise is scaled by the plaintext modulus, $\epsilon = t\cdot \epsilon_{\mathsf{rlwe}}$, giving $b = a\cdot s + m + t\epsilon_{\mathsf{rlwe}}$. Decryption computes $m = \left[[b - a\cdot s]_q\right]_t$, which is correct as long as the noise does not wrap around $q$.
-
-\newpage

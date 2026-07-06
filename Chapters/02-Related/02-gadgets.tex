@@ -1,4 +1,3 @@
-\newpage
 \section{Noise Management Techniques in RNS}
 \begin{itemize}
     \item A problem that arises in several areas of FHE is that of multiplying a ciphertext by some large number while keeping the error low.
@@ -8,13 +7,7 @@
     (a\cdot s + \Delta m + \epsilon) \cdot X = aX\cdot s + \Delta Xm + X\epsilon
 \end{equation}
 
-% \begin{itemize}
-%     \item Problem: multiplying large ciphertext with large number = large noise.
-%     \item In this section we recall different variants of key switching used in the literature and examine their techniques for managing this noise growth, and how they can be instantiated in an RNS context. % Key-switching procedures can be applied equivalently to BGV or BFV ciphertexts. In the following, we detail them for BGV ciphertexts.
-%     \item First, the concept of gadget decomposition is introduced
-% \end{itemize}
 
-% Several homomorphic procedures reduce to the same core task: given a full-size element $a ∈ R_Q (‖a‖∞ ≈ Q)$ and low-noise encryptions of related material, compute an encryption of a·b. Done naively — multiplying an encryption of b by a — the output noise is a·e, scaled by ‖a‖∞ ≈ Q: immediately fatal. Two independent remedies exist: make the multiplicand small, by decomposing a into digits and pairing them against correspondingly scaled encryptions (gadget decomposition); or make the noise small relative to the modulus, by performing the product over an extended modulus PQ and scaling down by P (modulus extension). The methods in the literature — BV, GHS, and hybrid key switching — are points in this two-parameter design space, and this section develops both ingredients before assembling them.
 
 \subsection{Gadget Decomposition}
 \textcolor{purple}{\textit{Decomposition}; a technique used to represent a number in a smaller base (radix) while preserving its value.} % Taken from https://fhetextbook.github.io/Decomposition.html#decomposition
@@ -88,36 +81,3 @@ Brakerski and Vaikuntanathan \cite{cryptoeprint:2011/277} introduced the idea of
     \item BV and GHS represent a spectrum
     \item Combination of the two techniques
 \end{itemize}
-
-
-
-%% 
-%% SKELETON
-\newpage
-\section{Noise Management Techniques in RNS}
-% intro: the core problem + the two dials (no key switching specifics)
-
-\subsection{Gadget Decomposition}
-% definitions only: digit decomp, gadget property, gadget decomposition
-% (your current draft, corrected — see below)
-
-\subsection{Gadget Constructions}          % the rehomed catalog
-% - trivial gadget D(a)=(a), P(b)=(b): exact, digit bound Q/2  (one line; seeds GHS)
-% - radix gadget: exact, digit bound β/2, ℓ_ω components
-% - the CRT gadget: obstruction narrative, unfolded [BEHZ16] form,
-%   gadget lemma via idempotents, folding remark, HPS form = limb lookup
-% - composition lemma + per-limb instantiation
-% - grouped-CRT gadget (dnum digits of α limbs each)  (one display; seeds Hybrid)
-
-\subsection{Modulus Extension}             % the wrapper
-% - the over-ℤ strengthening (Σ D(a)_j g_j = a + κQ, κ small)
-% - lift to PQ, key carries factor P, inner product, ApproxModDown (cite RNS section)
-% - noise: gadget term divided by P, plus rounding term; FastBConv overflow
-%   absorbed into effective digit bound (remark)
-% - security caveat: RLWE now at modulus PQ
-
-\subsection{Key-Switching Methods}         % or three short sibling subsections
-% BV     = CRT gadget (opt. per-limb),  P = 1
-% GHS    = trivial gadget,              P ≈ Q
-% Hybrid = grouped-CRT gadget,          P ≈ Q̃
-% + the (gadget, P) table, noise/cost/key-size comparison, historical citations
