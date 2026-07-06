@@ -40,12 +40,19 @@ Homomorphic multiplication in BGV is considerably more complicated and expensive
 %%
 %% MODULUS SWITCHING
 \begin{definition}[Modulus Switching]
-    The process of converting a ciphertext $\vec{x}\in R_q^2$ into a ciphertext $\vec{x}'\in R_{q'}^2$ encrypting the same message under a smaller modulus $q' < q$, by rescaling and rounding
-    \begin{equation}
-        \vec{x}' = \left\lceil \frac{q'}{q}\, \vec{x} \right\rfloor,
-    \end{equation}
-    where the rounding is chosen such that $\vec{x}' \equiv \vec{x} \pmod{t}$ to preserve correct decryption. The noise is scaled by the same factor $q'/q$ (plus a small rounding term), so modulus switching is the primary tool for noise management in leveled schemes. Its realization in RNS is different and will be revisited in \autoref{sec:rns-base-conversion}.
+    The process of converting a ciphertext $\vec{x}\in R_Q^2$ encrypted under a ciphertext modulus $Q$ into a ciphertext $\vec{x}'\in R_{Q'}^2$ encrypted under a different modulus $Q'$, while ensuring that both ciphertexts still decrypt to the same message. 
+    
+    Scaling the message by a factor of $Q'/Q$ and rounding to the nearest integer achieves this, 
+    
+    This process is typically the primary tool for noise management in leveled schemes, as scaling down the modulus also scales down the noise, allowing further computation without bootstrapping.
 \end{definition}
+
+    % The process of converting a ciphertext $\vec{x}\in R_q^2$ into a ciphertext $\vec{x}'\in R_{q'}^2$ encrypting the same message under a smaller modulus $q' < q$, by rescaling and rounding
+%     \begin{equation}
+%         \vec{x}' = \left\lceil \frac{q'}{q}\, \vec{x} \right\rfloor,
+%     \end{equation}
+%     where the rounding is chosen such that $\vec{x}' \equiv \vec{x} \pmod{t}$ to preserve correct decryption. The noise is scaled by the same factor $q'/q$ (plus a small rounding term), so modulus switching is the primary tool for noise management in leveled schemes. Its realization in RNS is different and will be revisited in \autoref{sec:rns-base-conversion}.
+% \end{definition}
 
 %%
 %% OTHER
