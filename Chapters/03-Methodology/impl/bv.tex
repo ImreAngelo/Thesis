@@ -1,16 +1,12 @@
 
 \subsection{BV (Double Decomposition)}
-This is the closest to TFHE. As HPS is too noisy, we use digit decomposition on each \textit{tower} in parallel (rather than the true polynomial). Hence we call this ``\textit{double decomposition}''.
-
-\subsubsection{New}
-\begin{align}
-    \bv{P}(a) = ()\\
-    a \in R_q
-\end{align}
-
 
 \subsubsection{Power of Base}
-As remarked earlier \autoref{remark:hps}, the HPS optimization makes the CRT decomposition free as it is already required by the RNS/NTT system we are working in. Thus, layering in another decomposition (in this case digit decomposition) only requires performing the second decomposition on each tower/limb of the RNS representation.
+\begin{itemize}
+    \item As remarked in \autoref{}, the HPS gadget is equivalent to limb look-up on RNS polynomials: $\hps{P}(a) \cong a\cdot I_k$
+    \item \autoref{} also shows we can use the standard BV gadget on each limb of an RNS polynomial.
+    \item The resulting gadget contains mostly 0's, and the structure is known.
+\end{itemize}
 
 % $P_Q(a) \cong a\cdot I_\ell$ where $k$ ($\ell$) is a constant linked to the current context (number of moduli for $Q = q_0q_1\dots q_k$). This means $P_Q(a)$ can be uniquely represented by its input; a single \texttt{DCRTPoly} $a$. We can therefore store $P_Q(a)$ as a dense matrix with the exact same form as a \texttt{DCRTPoly} in evaluation mode \eqref{form:eval}. 
 

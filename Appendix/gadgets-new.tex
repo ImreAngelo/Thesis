@@ -1,0 +1,442 @@
+\newif\iffable
+\fabletrue    % Uncomment to see instructions from claude fable
+
+\chapter{RNS Gadgets}
+% \ifnotes
+%     Recall that:
+%     \begin{equation*}
+%     a = (c_0, c_1, \dots c_{N-1}) \pmod{Q} =
+%     \begin{pmatrix}
+%         c_0 \bmod{q_0} & c_1 \bmod{q_0} & \dots & c_{N-1}\bmod{q_0} \\
+%         c_0 \bmod{q_1} & c_1 \bmod{q_1} & \dots & c_{N-1}\bmod{q_1} \\
+%         \vdots & \vdots & \ddots & \vdots \\
+%         c_0 \bmod{q_k} & c_1 \bmod{q_k} & \dots & c_{N-1}\bmod{q_k}
+%     \end{pmatrix}
+%     \end{equation*}
+% \fi
+
+\section{RNS Gadgets}
+\iffable{
+    \color{purple}
+    \begin{itemize}
+        \item Establish HPS, BV and GHS/Hybrid gadgets, commonly used in RNS keyswitching
+        \item BV family
+        \begin{itemize}
+            \item HPS, closely related to BEHZ
+            \item BV per limb 
+        \end{itemize}
+        \item GHS
+        \item Hybrid
+    \end{itemize}
+}\fi
+
+\subsection{Brakerski-Vaikuntanathan}
+\begin{itemize}
+    \item Digit decomposition is common in keyswitching and other applications, including \gls{gsw} ciphertexts and TFHE \cite{cryptoeprint:2012/099, cryptoeprint:2018/421, cryptoeprint:2011/277}
+    \item Used extensively in \cite{BV}; decomposition-only key switching called BV-style
+    \item Not directly applicable in RNS without multi-precision integers, but some 'translations' exist
+\end{itemize}
+
+\subsubsection{HPS Gadget}
+\begin{itemize}
+    \item First instantiated in \cite{cryptoeprint:2016/510}
+    \item Uses CRT instead of number decomposition
+\end{itemize}
+
+\begin{align}
+    \label{eq:bv:d}
+    D_{Q}({a}) &= \left(\imod{a\left(\frac{Q}{q_0}\right)^{-1}}{0},\dots,\imod{a\left(\frac{Q}{q_i}\right)^{-1}}{i}\right) \\
+    \label{eq:bv:p}
+    P_{Q}({a}) &= \left(\qmod{a\frac{Q}{q_0}},\dots,\qmod{a\frac{Q}{q_i}}\right) 
+    % = \left([a\hat{q}_0^{-1}]_{q_0},\dots,[a\hat{q}_{k-1}^{-1}]_{q_{k-1}}\right)
+\end{align}
+
+\begin{lemma}
+    \label{lemma:bv_gadget}
+    The vectors \eqref{eq:bv:d} and \eqref{eq:bv:p} satisfy the gadget property.
+    \begin{equation}
+        \langle D_Q(a), P_Q(b)\rangle = a\cdot b \pmod{Q}
+    \end{equation}
+\end{lemma}
+
+\begin{itemize}
+    \item Let $\hat{q}_j = Q/q_j$
+    \item Halevi, Polyakov and Shoup \cite{cryptoeprint:2018/117} showed that the $\hat{q_j}$ factors can be moved into $P_Q(a)$ without violating Lemma \ref{lemma:bv_gadget}
+    \item This makes the decomposition free for an RNS polynomial, as it simply isolates each tower
+\end{itemize}
+
+\begin{align}
+    \hps{D}(a) &= \left( \imod{a}{0}, \imod{a}{1}, \cdots, \imod{a}{i}\right)\\
+    \hps{P}(a) &= \left( a\cdot\imod{\hat{q}_0^{-1}}{0} \cdot \qmod{\hat{q}_0}, \dots, a\cdot\imod{\hat{q}_\ell^{-1}}{i} \cdot \qmod{\hat{q}_\ell} \right)
+\end{align}
+
+\begin{lemma}
+    The HPS gadget applied to an RNS (CRT) polynomial is free, and equivalent to isolating each limb.
+    \begin{equation*}
+        \text{Let } e_j = [\hat{q}_j^{-1}]_{q_j}\cdot\hat{q}_j \bmod{Q}, \text{ then }
+        e_j \bmod{q_i} = \begin{cases}
+            1 & i = j \\
+            0 & i \not= j
+        \end{cases}
+    \end{equation*}
+    \begin{equation*}
+        \text{and } \hps{P}(a) = (a\cdot e_0, a\cdot e_1, \dots, a\cdot e_{k - 1})
+    \end{equation*}
+    \begin{proof}
+        \begin{align*}
+            i = j &\;\implies\; e_j \equiv \hat{q}_j^{-1}\cdot 0 \equiv 0 &\pmod{q_i} \\
+            i \not= j &\;\implies\; e_j \equiv \hat{q}_j^{-1}\cdot \hat{q}_j \equiv 1 &\pmod{q_i}
+        \end{align*}
+    \end{proof}
+\end{lemma}
+
+\begin{itemize}
+    \item Note: The $e_j$ factors are static and can be pre-calculated
+\end{itemize}
+ 
+% \begin{equation}
+%     \text{When the tower index $i$ is } 
+%     \begin{cases}
+%         i \not= j,      & \hat{Q}_j \equiv Q/q_j \equiv  ({q_0\cdots q_{i}\cdots q_{k-1}})/q_j \equiv n\cdot q_i \equiv 0 \pmod{q_i} \\
+%         i = j,  & \hat{Q}_j^{-1}\hat{Q}_j \equiv 1 \pmod{q_i} 
+%     \end{cases}
+% \end{equation}
+
+\iffable{
+    \color{red}
+    \subsection{Brakerski-Vaikuntanathan}
+    % --- Method in the abstract, modulus-agnostic ---
+    \begin{itemize}
+        \item BV \cite{BV11} = decomposition-only key switching: no modulus extension,
+              everything stays at modulus $Q$
+        \item Split ciphertext element into small digits $D(a)$; key encrypts $s$ scaled by
+              matching constants $P(s)$; correctness via gadget property
+              $\langle D(a), P(b)\rangle \equiv a\cdot b \pmod{Q}$ (ref.\ abstract gadget section)
+        \item Noise governed by digit size: $v_{\mathrm{ks}} = \langle D(c_1), \vec{e}\,\rangle$,
+              so $\|v_{\mathrm{ks}}\|_\infty$ scales with $\max_j \|D(c_1)_j\|_\infty$
+        \item Classical instantiation: radix-$\omega$ digits of each coefficient,
+              $D_\omega(a) = (a_0, \dots, a_{\ell_\omega-1})$ with $a = \sum_m a_m \omega^m$,
+              $P_\omega(b) = (b, b\omega, \dots, b\omega^{\ell_\omega - 1})$, digits bounded by $\omega/2$
+        \item Transition / the problem: radix decomposition reads off the \emph{positional}
+              representation of a coefficient --- in RNS this is never materialized;
+              coefficients exist only as residues mod $q_j$, and reconstructing the
+              multiprecision value would defeat the purpose of RNS
+    \end{itemize}
+    
+    \subsubsection{RNS Instantiation}
+    \begin{itemize}
+        \item Resolution: no reconstruction needed --- \emph{the CRT is itself a decomposition}
+        \item Each residue $\imod{a}{j}$ is a word-sized digit; the CRT reconstruction formula
+              \begin{equation*}
+                  a \equiv \sum_j \imod{a\,\hat{q}_j^{-1}}{j} \cdot \hat{q}_j \pmod{Q},
+                  \qquad \hat{q}_j = Q/q_j
+              \end{equation*}
+              expresses $a$ as a linear combination of digits with fixed constants ---
+              exactly the shape of a gadget
+        \item Formalizing yields the RNS gadget, first given in \cite{cryptoeprint:2016/510}:
+    \end{itemize}
+    \begin{align}
+        \label{eq:bv:d}
+        D_{Q}(a) &= \left(\imod{a\,\hat{q}_0^{-1}}{0},\; \dots,\; \imod{a\,\hat{q}_\ell^{-1}}{\ell}\right) \\
+        \label{eq:bv:p}
+        P_{Q}(a) &= \left(\qmod{a\,\hat{q}_0},\; \dots,\; \qmod{a\,\hat{q}_\ell}\right)
+    \end{align}
+    
+    \begin{lemma}[Gadget property of the RNS gadget]
+        \label{lemma:bv_gadget}
+        $\langle D_Q(a), P_Q(b)\rangle \equiv a\cdot b \pmod{Q}$.
+        % Proof device: CRT idempotents e_j = [q̂_j^{-1}]_{q_j} · q̂_j mod Q,
+        % e_j ≡ 1 (mod q_j), e_j ≡ 0 (mod q_i) for i ≠ j, hence Σ_j e_j ≡ 1 (mod Q);
+        % then ⟨D_Q(a), P_Q(b)⟩ ≡ ab · Σ_j e_j ≡ ab (mod Q).
+    \end{lemma}
+    
+    \begin{itemize}
+        \item Remark (invariance under folding): the lemma is invariant under moving
+              per-coordinate constants between $D$ and $P$ --- the $j$-th summands differ
+              by a multiple of $q_j \hat{q}_j = Q$
+        \item HPS \cite{cryptoeprint:2018/117} exploit this: move the
+              $\imod{\hat{q}_j^{-1}}{j}$ factors from $D_Q$ into $P_Q$:
+    \end{itemize}
+    \begin{align}
+        \hps{D}(a) &= \left( \imod{a}{0},\; \imod{a}{1},\; \dots,\; \imod{a}{\ell}\right)\\
+        \hps{P}(a) &= \left( a\cdot\imod{\hat{q}_0^{-1}}{0}\cdot\qmod{\hat{q}_0},\;
+                       \dots,\; a\cdot\imod{\hat{q}_\ell^{-1}}{\ell}\cdot\qmod{\hat{q}_\ell} \right)
+                    = \left(a\cdot e_0,\; \dots,\; a\cdot e_\ell\right)
+    \end{align}
+    \begin{itemize}
+        \item $\hps{D}(a)$ is exactly the RNS representation of $a$: decomposition is
+              \emph{free} for an RNS polynomial --- limb lookup, zero arithmetic
+        \item The $e_j = \imod{\hat{q}_j^{-1}}{j}\cdot\hat{q}_j \bmod Q$ are the CRT
+              idempotents (textbook CRT, same objects as in the proof of
+              Lemma~\ref{lemma:bv_gadget}); static, precomputed into the key at keygen
+        \item Noise unchanged by folding: digit bound $q_j/2$ in both forms
+        \item Closing / forward pointer: digits bounded by $\tilde{q}/2$ with
+              $\tilde{q} = \max_j q_j$, so noise scales with limb size;
+              when smaller digits are needed, each limb --- now word-sized --- can itself
+              be radix-decomposed (next section). Note: the CRT gadget is what makes
+              radix decomposition applicable again
+    \end{itemize}
+    
+    \subsubsection{Per-Limb Digit Decomposition}
+    \begin{itemize}
+        \item Goal: reduce digit size from $\tilde{q}/2$ to $\omega/2$ for radix $\omega < \tilde{q}$
+        \item Key fact: radix-$\omega$ decomposition of a digit is an \emph{exact integer
+              identity}, $d_j = \sum_m \omega^m d_{j,m}$ over $\mathbb{Z}$ --- so it
+              composes with \emph{any} gadget whose digits are small integer representatives
+    \end{itemize}
+    
+    \begin{lemma}[Gadget composition]
+        \label{lemma:double_decomp}
+        Let $(D, P)$ satisfy the gadget property with integer digit representatives
+        $|D(a)_j| \le q_j/2$. Then
+        \begin{align*}
+            D'(a) &= \left(d_{j,m}\right)_{j,m},
+            \qquad \text{where } D(a)_j = \sum_m \omega^m d_{j,m},\; |d_{j,m}| \le \omega/2 \\
+            P'(b) &= \left(\omega^m \cdot P(b)_j\right)_{j,m}
+        \end{align*}
+        satisfies $\langle D'(a), P'(b)\rangle \equiv a\cdot b \pmod{Q}$.
+        % Proof: substitute the radix expansion into ⟨D(a), P(b)⟩, apply linearity. Two lines.
+    \end{lemma}
+    
+    \begin{itemize}
+        \item Instantiation with the RNS gadget (HPS form): $D'(a)$ = radix decomposition
+              of each limb of the RNS representation
+              \begin{align*}
+                  D'(a) &= \left( \left(\imod{a}{j}\right)_m \right)_{j,m}, \qquad
+                  P'(b) = \left( b \cdot \omega^m e_j \right)_{j,m}
+              \end{align*}
+        \item Still no scalar multiplications on the ciphertext side: all constants
+              ($e_j$, $\omega^m$) live in $P'$, precomputable; ciphertext side is limb
+              lookup + word-sized radix split
+        \item Cost/noise tradeoff: $\ell_{\omega,\tilde{q}} = \lfloor\log_\omega \tilde{q}\rfloor + 1$
+              times more gadget components (key size, NTTs), digits shrink
+              $\tilde{q}/2 \to \omega/2$; noise bound as in \cite{cryptoeprint:2021/204},
+              App.~B.2.1 (second level of decomposition)
+        \item Naming remark: no modulus extension is performed, so this remains a BV-type
+              key switch; we refer to it simply as \emph{BV} in the remainder of this
+              thesis (and in the implementation)
+        \item Remark (forward pointer): Lemma~\ref{lemma:double_decomp} applies to any
+              gadget with small integer digits --- in particular to the digits of hybrid
+              key switching (Section~\ref{sec:hybrid})
+    \end{itemize}
+}\fi
+
+
+% \newpage
+% \iffable{
+%     \color{purple}
+
+%     \textbf{The "broadcast" is not an operation — it's just what a small integer looks like in RNS.}
+%     A digit $d$ is a small signed integer, $|d| \le B/2$. Your gadget theorem needs $D(c)$ to be a vector of small ring elements in $R_Q$, because each digit polynomial gets multiplied against a full RGSW row (whose mask and noise occupy all $k$ towers — only the $m\cdot G$ part is sparse). And the RNS representation of the integer $d$ is, by definition,
+    
+%     $$d \;\longmapsto\; \big([d]{q_0}, [d]{q_1}, \dots, [d]{q{k-1}}\big),$$
+    
+%     which for $d \ge 0$ is literally the number $d$ written $k$ times, and for $d < 0$ is $q_t - |d|$ in each tower. That's the entire "broadcast": storing a small integer in RNS form. In a non-RNS implementation this step wouldn't even be a line of code — a digit would just be a ring element. It only looks like a named, load-bearing operation in context-bv.cpp:245-250 because OpenFHE's data layout forces you to materialize every tower explicitly, and because signed digits need the per-tower negative encoding. In the thesis it deserves one sentence, not a name: "each digit $d_{j,i}$ is a small integer; we lift it to $R_Q$ by reducing it modulo each $q_t$." I'd drop the word "broadcast" entirely from both the write-up and, if you feel like it, the code comments.
+    
+%     So Decompose is conceptually just two steps, one interesting and one trivial:
+    
+%     Per-tower digit extraction (the interesting one): for each tower $j$, coefficient-wise signed base-$B$ decomposition of the single-word representative of $[c]_{q_j}$. No multiprecision, no CRT reconstruction — this is the payoff of the whole construction.
+%     Lift to $R_Q$ (the trivial one): each digit, being a small integer, is written into all towers as above, then NTT'd. The only real cost here is the $k$ NTTs per digit polynomial — that's the honest bottleneck of the external product, worth one remark.
+    
+%     \textbf{The one sentence that makes the whole optimization constructive.}
+%     Here is the framing I'd hang everything on, because it turns the "0-towers are skipped" hand-wave into a precise statement:
+    
+%     In RNS layout, multiplying by $e_j = [\hat q_j^{-1}]_{q_j}\hat q_j$ is not a computation — it is array indexing. Since $a\cdot e_j$ is zero in every tower except tower $j$ (where it equals $[a]_{q_j}$), "multiply by $e_j$" means "select row $j$ of the limb matrix."
+    
+%     Look at your code through that lens and notice: the idempotents $e_j$ never appear anywhere in it. PowersOfBase doesn't compute $m B^i e_j$ and then discard zero towers — it computes only the $k\ell$ limbs $[mB^i]{q_j}$ that are nonzero (context-bv.cpp:184-188), and EncryptRGSW performs the "multiplication by $e_j$" by indexing tower $j$ (context-bv.cpp:115-117). Likewise the layer-1 decomposition $D^{(1)}(c) = ([c]{q_0},\dots,[c]{q{k-1}})$ costs nothing — it's reading the limbs you already have — which is why Decompose jumps straight to digit extraction per tower. The optimized algorithms are what you get when every multiplication by $e_j$ and every evaluation of $D^{(1)}$ is replaced by indexing. That is the constructive story, and it's exactly what makes the pseudocode fall out.
+    
+%     (One correction to your framing: the zero-tower skipping lives on the $P$/gadget side — PowersOfBase and EncryptRGSW. In Decompose nothing is zero; what's exploited there is input locality: the $\ell$ digit polynomials of group $j$ read only limb $j$. Both are consequences of the same sparsity fact, but they're different claims, and stating them separately will make the algorithms easier to justify.)
+% }\fi
+
+
+\newpage
+\chapter{Implementation}
+\section{Brakerski-Vaikuntanathan}
+As established, digit-decomposing each RNS prime with $\ell$ digits is equivalent to digit-decomposing the full polynomial with $k\cdot\ell$ digits, where $Q = \prod_{i=0}^{k-1}q_i$ or the basis $\mathcal{B}_{Q}$.
+
+\subsection{Powers of Base}
+\begin{enumerate}
+    \item $a \to (a, aB, \dots, B^{\ell-1})$
+    \item $g = (1, B, \cdots, B^{\ell}, B, \dots, B, B^2, \dots, B^{\ell-1}, \dots B^{\ell-1})$ ??
+\end{enumerate}
+
+\begin{algorithm}
+\caption{Powers of Base (Optimized)}
+\label{alg:bv:p}
+\begin{algorithmic}[1]
+\Require RNS coefficients $x = ([x]_{q_0}, ..., [x]_{q_{k-1}})$, base $B = 2^{b}$, number of digits $\ell$
+\Ensure $\ell$ RNS/CRT polynomials $(a, aB, \dots, B^{\ell-1})$
+\State Initialize a vector $x'$ of size $\ell$
+\For{$i \in [0, \ell)$ \textbf{in parallel}}
+    \For{$j \in [0, k)$}
+        \State $x'_i[j] := x[j] \cdot B^{i} \bmod{q_j}$
+    \EndFor
+\EndFor
+\State \Return $x'$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{itemize}
+    \item $B$ (or $\ell$) is implicit from $\ell = \lfloor\log_{B}{(|\max_i{q_i}|)}\rfloor + 1$, and since $B = 2^b$ is a power of 2 we get $\ell = \lfloor \log(\max_i{q_i})/b)\rfloor + 1$.
+    \item $B^i$ or $B^i \bmod{q_j}$ can be calculated ahead of time. 
+    \item The for loop can be flattened to $0 \leq idx < k\cdot \ell$ to allow more parallelization.
+    \item For maximum efficiency, the function can be encoded into the encryption function.
+    \item The fully optimized encryption functions becomes:
+\end{itemize}
+
+\begin{algorithm}
+\caption{Encrypt BV-RGSW (Optimized)}
+\label{alg:bv:encrypt}
+\begin{algorithmic}[1]
+\Require Plaintext $m = ([m]_{q_0}, ..., [m]_{q_{k-1}})$, base $B = 2^{b}$, number of digits $\ell$
+\Ensure $\rgsw(m)$ with $2k\ell$ rows
+\State Initialize a vector $C$ of $2k\ell$ \texttt{DCRTPoly} objects $(c_0, c_1)$
+\State Set $m$ to RNS-coefficients mode
+\For{$idx \in [0, \ell\cdot k)$ \textbf{in parallel}}
+    \State $(i, j) \gets [\lfloor idx / \ell \rfloor, \; idx \bmod{\ell}]$
+    \State $mg \gets m[j] \cdot B^{i} \bmod{q_j}$
+    \Comment{Retrieve $B^i\bmod{q_j}$ from lookup table}
+    \State $C_{idx} \gets \mathsf{HE.Encrypt}(0) + (\mathsf{NTT}(mg), 0)$
+    \State $C_{idx + \ell} \gets \mathsf{HE.Encrypt}(0) + (0, \mathsf{NTT}(mg))$
+\EndFor
+\State \Return $C$
+\end{algorithmic}
+\end{algorithm}
+
+% \newpage
+
+% \begin{minted}[bgcolor=gray]{c++}
+% std::vector<Poly> ExtendedContextBVImpl::PowersOfBase(const Poly& input) const 
+% {
+%     const auto n_towers = this->GetElementParams()->GetParams().size();
+
+%     std::vector<Poly> result(m_ell);
+%     result[0] = input;
+
+% #pragma omp parallel for 
+%     for (size_t i = 1; i < m_ell; i++) {
+%         Poly scaled(input.GetParams(), input.GetFormat(), true);
+
+%         for (size_t j = 0; j < n_towers; j++) {
+%             auto factor = GetPower(i, j);
+%             auto limb = input.GetElementAtIndex(j).Times(factor);
+%             scaled.SetElementAtIndex(j, std::move(limb));
+%         }
+
+%         result[i] = std::move(scaled);
+%     }
+
+%     return result;
+% }
+% \end{minted}
+
+% \begin{minted}[bgcolor=gray]{c++}
+% RGSW ExtendedContextBVImpl::EncryptRGSW(const PublicKey& pk, const Plaintext& pt) const 
+% {
+%     // clang-format off
+%     const auto msg = pt->GetElement<Poly>();
+%     const auto zero = IsCoefPackedPlaintext(pt)
+%         ? this->MakeCoefPackedPlaintext({0})
+%         : this->MakePackedPlaintext({0});
+%     // clang-format on
+
+%     std::vector<Poly> digits = PowersOfBase(msg);
+
+%     const size_t k = msg.GetNumOfElements();
+%     const size_t half = k * m_ell;
+%     const size_t full = 2 * half;
+
+%     RGSW rows(full);
+
+%     // For noiseless mode, encrypt zero once so we can clone its metadata
+%     RLWE noiseless_template;
+%     if (!noisy) {
+%         noiseless_template = this->Encrypt(pk, zero);
+%     }
+
+% #pragma omp parallel for num_threads(lbcrypto::OpenFHEParallelControls.GetThreadLimit(full))
+%     for (size_t row = 0; row < full; row++) {
+%         size_t l = row / half;    // 0 for Upper (c_0), 1 for Lower (c_1)
+%         size_t rem = row % half;  // The flat index within the current half
+%         size_t j = rem / m_ell;   // The target tower [0 to k-1]
+%         size_t i = rem % m_ell;   // The base power   [0 to ell-1]
+
+%         RLWE ct;
+%         if (!noisy) {
+%             ct = noiseless_template->CloneEmpty();
+%             Poly c0(this->GetElementParams(), Format::EVALUATION, true);
+%             Poly c1(this->GetElementParams(), Format::EVALUATION, true);
+%             ct->SetElements({std::move(c0), std::move(c1)});
+%         } else {
+%             ct = this->Encrypt(pk, zero);
+%         }
+%         auto elements = ct->GetElements();
+
+%         auto target_limb = elements[l].GetElementAtIndex(j);
+%         target_limb += digits[i].GetElementAtIndex(j);
+%         elements[l].SetElementAtIndex(j, std::move(target_limb));
+%         ct->SetElements(std::move(elements));
+%         rows[row] = std::move(ct);
+%     }
+
+%     return rows;
+% }
+% \end{minted}
+
+\newpage
+
+\subsection{Decompose}
+\begin{enumerate}
+    \item 
+\end{enumerate}
+
+\begin{algorithm}
+\caption{BV Decompose (Optimized)}
+\label{alg:bv:d}
+\begin{algorithmic}[1]
+\Require Coefficients $x = ([x]_{q_0}, ..., [x]_{q_{k-1}})$, base $B = 2^b$, number of digits $\ell$
+\Ensure $\ell$ polynomials of signed digits $(d_0, d_1, \dots, d_{\ell-1})$ where $d_j \in [-B/2, B/2)$
+\State $a' \gets a$
+\For{xxxx}
+    \State xxxx
+    
+\EndFor
+\State \Return $\{d\}$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{itemize}
+    \item Optimized/folded form:
+\end{itemize}
+
+\begin{algorithm}
+\caption{External Product $x \boxdot Y$ (Optimized BV-RGSW)}
+\label{alg:bv:extprod}
+\begin{algorithmic}[1]
+    \Require RLWE ciphertext $x = (x_0, x_1) \in R_q^2$, RGSW ciphertext $Y=\rgsw(m)$ with $2k\ell$ rows, base $B = 2^b$, decomposition parameter/digits $\ell$
+    \Ensure RLWE ciphertext encrypting $m \cdot m_x$
+    
+    \State $\mathsf{acc} \gets (0, 0)$
+    \Comment{accumulator in evaluation (NTT) form}
+
+    \For{$c\in \{0, 1\}$}
+        \Comment{decompose each ciphertext component}
+        \For{$idx \in [0, \ell \cdot k)$ \textbf{in parallel}}
+            \State $(i, j) \gets [\lfloor idx/\ell \rfloor,\; idx \bmod \ell]$
+        
+            \State $r \gets [x_c]_{q_j}$
+            \Comment{$j$-th CRT residue, coefficient form}
+            
+            \State $d_{idx} \gets \mathsf{Digit}_B(r, i)$
+            \Comment{$i$-th base-$B$ digit; coeffs in $[0,B)$ or $(-B/2,B/2]$}
+
+            \State $\tilde{d}_{idx} \gets \mathsf{CRTExtend}(d_{idx})$
+            \Comment{lift small digit poly to all $k$ moduli, then NTT}
+            
+        \EndFor
+        \State $\mathsf{acc} \gets \mathsf{acc} + \sum_{idx} \tilde{d}_{idx} \cdot Y_{idx + c \cdot k\ell}$
+        \Comment{2 poly mults per row}
+    \EndFor
+    \State \Return $\mathsf{acc}$
+\end{algorithmic}
+\end{algorithm}

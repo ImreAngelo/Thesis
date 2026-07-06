@@ -48,22 +48,22 @@ encryptions of 0. The message $m\in \{0,1\}$, and $G = I_2\otimes g$ where $g$ i
     \textcolor{red}{An \gls{rlwe} ciphertext is a vector $(b,a) = (a\cdot s + \Delta m + \epsilon)$ (and in scale-invariant schemes such as BGV, $\Delta = 1$). Typically the chosen gadget vector is $g = (1, B, \cdots, B^{\ell - 1})$. Therefore the RGSW ciphertext \eqref{def:rgsw} can be viewed as 2 sets of $\ell$ RLWE encryptions where the first set contains $\rlwe(mB^i)$ and the second set contains $\rlwe(-s\cdot mB^i)$ for $0 \leq i < \ell$.}
 \fi
 
-\textcolor{red}
-{
-    \begin{definition}[Gadget Property.]
-        Two mappings $D(m)$ and $P(n)$ have the gadget property (wrt. $Q$) iff.
-        \begin{equation}
-            \label{property:gadget}
-            \langle D(m), P(n)\rangle = m\cdot n \pmod{Q}
-        \end{equation}
-    \end{definition}
-    The external product approximates the gadget property by defining a gadget matrix $G$ and inverse gadget matrix $G^{-1}(x)$ s.t.
-    \begin{equation}
-        \label{def:approx_gadget_prop}
-        G^{-1}(x)\cdot G = x + \epsilon \approx x \pmod{Q}
-    \end{equation}
-}
+% \textcolor{red}
+% {
+%     \begin{definition}[Gadget Property.]
+%         Two mappings $D(m)$ and $P(n)$ have the gadget property (wrt. $Q$) iff.
+%         \begin{equation}
+%             \label{property:gadget}
+%             \langle D(m), P(n)\rangle = m\cdot n \pmod{Q}
+%         \end{equation}
+%     \end{definition}
+% }
 
+The external product approximates the gadget property by defining a gadget matrix $G$ and inverse gadget matrix $G^{-1}(x)$ s.t.
+\begin{equation}
+    \label{def:approx_gadget_prop}
+    G^{-1}(x)\cdot G = x + \epsilon \approx x \pmod{Q}
+\end{equation}
 
 \begin{definition}[External Product] $\boxdot$ defines a product between an \gls{rlwe} and an \gls{rgsw} ciphertext. $G^{-1}(x)$ satisfies the approximate gadget property \eqref{def:approx_gadget_prop}.
 \begin{gather}
@@ -108,15 +108,16 @@ encryptions of 0. The message $m\in \{0,1\}$, and $G = I_2\otimes g$ where $g$ i
 
 \begin{theorem}%[Generalized Gadget RGSW]
     \label{the:gadget} % equal-length pair of vectors
-    Any pair $D(a), P(b) \in \mathbb{Z}_{Q}^{\ell}$ that satisfies the approximate gadget property \eqref{def:approx_gadget_prop} defines an RGSW ciphertext \eqref{def:rgsw} and a valid external product \eqref{def:external_product} such that $\mathsf{RLWE}(a)\boxdot\mathsf{RGSW}(b) = \mathsf{RLWE}(a\cdot b)$. 
-    Further, a valid (inverse) gadget matrix is given by:
+    Any pair $D(a),\; P(b) \in \mathbb{Z}_{Q}^{\ell}$ that satisfies the approximate gadget property \eqref{def:approx_gadget_prop} defines an RGSW ciphertext \eqref{def:rgsw} and a valid external product \eqref{def:external_product} such that $\mathsf{RLWE}(a)\boxdot\mathsf{RGSW}(b) = \mathsf{RLWE}(a\cdot b)$ \textcolor{red}{(assuming the noise is not too large)} with the (inverse) gadget matrix:
     \begin{align}
+        \label{tfhe:general:G}
         G &= I_2\otimes P(1)\\
+        \label{tfhe:general:Ginv}
         G^{-1}(x) &= [D(x_0)|D(x_1)]
     \end{align}
     
     \begin{proof}
-        1. The inexact gadget property holds for $G= I_2\otimes P(1)$ and $G^{-1}(x) = [D(x_0)|D(x_1)]$.
+        First, observe that the inexact gadget property holds for \eqref{tfhe:general:G} and \eqref{tfhe:general:Ginv}.
         \begin{align*}
             G^{-1}(x)\cdot G &= [D(x_0)|D(x_1)] \begin{pmatrix}
                 P(1) & 0 \\
@@ -126,8 +127,8 @@ encryptions of 0. The message $m\in \{0,1\}$, and $G = I_2\otimes g$ where $g$ i
             \\ &= [x_0 \cdot 1 + \epsilon_0, x_1 \cdot 1 + \epsilon_1] 
             \\ &= [x_0, x_1] + [\epsilon_0, \epsilon_1] = x + \epsilon \pmod{Q}
         \end{align*}
-        
-        2. If the inexact gadget property holds, then the external product is valid.
+
+        \textcolor{red}{\textbf{This is probably already established in \cite{cryptoeprint:2018/421}, but is instructive for the error terms:}} Then see that if the inexact gadget property holds, then the external product is valid.
         \begin{gather*}
             G^{-1}(x)\cdot G = x + \epsilon_G \pmod{Q} \\
             x\boxdot Y = G^{-1}(x)\cdot (Z + m_y\cdot G) \\
@@ -138,7 +139,7 @@ encryptions of 0. The message $m\in \{0,1\}$, and $G = I_2\otimes g$ where $g$ i
 
         The middle term $x\cdot m_y = (a\cdot s + m_x + \epsilon, a)\cdot m_y = ((am_y)s + (m_ym_x) + m_y\epsilon, am_y)$. By setting $a' = a\cdot m_y, \epsilon' = \epsilon \cdot m_y$ its clear that this becomes a valid RLWE encryption of $m_y\cdot m_x$ from $(a's + m_x\cdot m_y + \epsilon', a')$.
 
-        The left term $G^{-1}(x)\cdot Z$ evaluates to an RLWE encryption of 0 with some non-zero noise. (Here $g^{-1}_i$ denotes the $i$-th element of $G^{-1}(x)$, not necessarily the inverse of $g$...)
+        The left term $G^{-1}(x)\cdot Z$ evaluates to an RLWE encryption of 0 with some non-zero noise. Let $g^{-1}_i$ be the $i$-th element of $G^{-1}(x)$.
         \begin{gather*}
             G^{-1}(x)\cdot Z = 
             \begin{pmatrix}
@@ -156,12 +157,15 @@ encryptions of 0. The message $m\in \{0,1\}$, and $G = I_2\otimes g$ where $g$ i
                 \sum_{i=0}^{2\ell - 1}g^{-1}_ib_i, & \sum_{i=0}^{2\ell - 1}g^{-1}_ia_i 
             \end{array}
             \right) \\
-            \text{Let }a_z = \sum_{i=0}^{2\ell - 1}g^{-1}_ia_i \text{, and observe that the first element becomes} \\
+            \text{Let }a_z = \sum_{i=0}^{2\ell - 1}g^{-1}_ia_i \text{ and consider the first element} \\
         % \end{gather*}
         % \begin{gather*}
             \sum_{i=0}^{2\ell - 1}g^{-1}_ib_i = \sum_{i=0}^{2\ell - 1}g^{-1}_i(a_i\cdot s + \epsilon_i) = \sum_i g^{-1}_i a_i\cdot s + \sum_i g^{-1}_i e_i \\
-            s\left(\sum_i g^{-1}_i a_i\right) + \sum_i g^{-1}_i e_i = s(a_z) + (\epsilon_z) = a_z\cdot s + \epsilon_z
-        \end{gather*}
+            s\left(\sum_i g^{-1}_i a_i\right) + \sum_i g^{-1}_i e_i = s(a_z) + (\epsilon_z) = a_z\cdot s + \epsilon_z \\
+            \implies\; G^{-1}(x)\cdot Z = (a_zs + \epsilon_z, a_z) = \mathsf{RLWE}(0)
+        \end{gather*}      
+
+        Finally, the third term simply adds some noise (assuming we are using an inexact gadget or $m = 0$).
 
         $\therefore \quad x\boxdot Y = \mathsf{RLWE}_s(0) + \mathsf{RLWE_s(m_x\cdot m_y) + (\epsilon_{G}\cdot m_y) = \mathsf{RLWE}_s(m_x\cdot m_y)}$
     \end{proof}
