@@ -1,31 +1,38 @@
 \section{Noise Management Techniques in RNS}
 \begin{itemize}
     \item A problem that arises in several areas of FHE is that of multiplying a ciphertext by some large number while keeping the error low.
+    \item The techniques covered in this section typically occur in the context of keyswitching, but we remove them entirely from that context and consider only the techniques themselves.
 \end{itemize}
 
 \begin{equation}
     (a\cdot s + \Delta m + \epsilon) \cdot X = aX\cdot s + \Delta Xm + X\epsilon
 \end{equation}
 
+\textcolor{purple}{
+Several core operations require computing the product of a ciphertext element with noisy auxiliary material; performed naively, this scales the noise by a factor as large as $q$. This section covers the standard techniques for controlling this growth: decomposition (BV), modulus extension (GHS), and their combination (Hybrid).
+}
 
 
-\subsection{Gadget Decomposition}
-\textcolor{purple}{\textit{Decomposition}; a technique used to represent a number in a smaller base (radix) while preserving its value.} % Taken from https://fhetextbook.github.io/Decomposition.html#decomposition
+\subsection{Brakerski-Vaikuntanathan}
+Brakerski and Vaikuntanathan~\cite{cryptoeprint:2011/344} first proposed decomposing ciphertext elements into small digits as a means of controlling the noise growth of this operation. The idea has since been generalized into the idea of \emph{gadget decomposition} and applied in a variety of forms, including digit and CRT (RNS) decomposition. Following the convention of~\cite{cryptoeprint:2021/204, cryptoeprint:2022/915}, we refer to this family of decomposition-based techniques collectively as \emph{BV}.
+
+% \textcolor{purple}{\textit{Decomposition}; a technique used to represent a number in a smaller base (radix) while preserving its value.} % Taken from https://fhetextbook.github.io/Decomposition.html#decomposition
 
 \begin{definition}[Digit Decomposition]
     takes an integer $\gamma\in\mathbb{Z}_q$ (for a modulus $q\geq 2$), base $\beta$ and \textit{decomposition parameter} $\ell$, and maps $\gamma$ to a sum of $\ell$ base-$\beta$ digits $\gamma_i \in [0, \beta),\; 0 \leq i < \ell$.  
     
     \begin{equation}
-        \gamma = \gamma_0\frac{q}{\beta} + \gamma_1\frac{q}{\beta^2} + ... \gamma_{\ell - 1}\frac{q}{\beta^{\ell}} = \sum_{i=1}^{\ell-1}\gamma_i\frac{q}{\beta^{i+1}}
+        \gamma = \gamma_0\frac{q}{\beta} + \gamma_1\frac{q}{\beta^2} + ... \gamma_{\ell - 1}\frac{q}{\beta^{\ell}} = \sum_{i=0}^{\ell-1}\gamma_i\frac{q}{\beta^{i+1}}
     \end{equation}
 
-    The \textit{decomposition of} $\mathit{\gamma}$, the digits $\gamma_i$, is denoted $\mathsf{Decomp}(\gamma) = (\gamma_0, \gamma_1, \dots, \gamma_{\ell-1})$.
+    The \textit{decomposition of} $\mathit{\gamma}$ is an ordered list of the $\ell$ base-$\beta$ digits $\gamma_i$ and is denoted $\mathsf{Decomp}(\gamma) = (\gamma_0, \gamma_1, \dots, \gamma_{\ell-1})$.
 \end{definition}
 
-\begin{itemize}
-    \item The concept of decomposition can be generalized as below
-    \item The important property in practice is that...
-\end{itemize}
+%%
+%% Highlight what's imporant for generalizing
+\textcolor{purple}{
+By construction, digit decomposition satisfies $\langle \mathsf{Decomp}(\gamma),\, g \rangle = \gamma$ for the fixed vector $g = (q/\beta, \dots, q/\beta^{\ell})$. The particular form of $g$ is unimportant; what matters is that the identity holds while the entries of $\mathsf{Decomp}(\gamma)$ remain small, since then, scaling $g$ by any $x \in \mathbb{Z}_q$, \[ \langle \mathsf{Decomp}(\gamma),\, x \cdot g \rangle = x \cdot \gamma \pmod q, \] the product $x \cdot \gamma$ is computed with $\gamma$ entering only through its small digits. The gadget property abstracts exactly this: it requires nothing of the maps $D(\gamma) = \mathsf{Decomp}(\gamma)$ and $P(x) = x \cdot g$ beyond that their inner product (approximately) recovers $x \cdot \gamma$ and that the entries of $D(\gamma)$ are small.
+}
 
 \begin{definition}[Gadget Property.]
     Two mappings $P(x), D(y)$ are said to have the gadget property iff. they satisfy \eqref{def:gadget-property} for any pair of integers $(x, y) \in \mathbb{Z}_q^2$ with some small noise $\epsilon \ll q$. If $\epsilon = 0$ then $P(x), D(y)$ are said to have the \textit{exact} gadget property.
@@ -37,7 +44,7 @@
 \end{definition}
 
 \begin{definition}[Gadget Decomposition]
-    generalizes the notion of digit decomposition by replacing the base $\beta$ with a \textit{gadget vector} $g = (g_0, g_1, \dots, g_{\ell-1})$ containing $\ell$ elements, such that $\mathsf{Decomp}(\gamma)$ and $g$ satisfy \eqref{def:gadget-property}.
+    generalizes the notion of digit decomposition by replacing the base $\beta$ with a \textit{gadget vector} $g = (g_0, g_1, \dots, g_{\ell-1})$ containing $\ell$ elements, such that $\mathsf{Decomp}^g(\gamma)$ and $g$ satisfy \eqref{def:gadget-property}.
     
     \begin{equation*}
         \label{def:gadget-decomp}
@@ -49,14 +56,11 @@
     \item Can be applied component-wise to polynomials $\gamma\in R_q$ instead of $\mathbb{Z}_q$
 \end{itemize}
 
-\textcolor{purple}{
-The remainder of this section presents the three noise-management approaches for key switching used in practice. Following the convention of \cite{cryptoeprint:2021/204}, each is named after the authors who introduced its core idea, though the concrete instantiations have since evolved — in particular toward RNS-friendly variants: the BV method, which controls noise purely through gadget decomposition; the GHS method, which uses no decomposition and instead controls noise through a temporary modulus extension; and the hybrid method, which combines both.
-}
-
-\subsection{Brakerski-Vaikuntanathan}
-\textcolor{purple}{
-Brakerski and Vaikuntanathan \cite{cryptoeprint:2011/277} introduced the idea of decomposition-based key switching: rather than multiplying a full-magnitude ciphertext element into a single key, the element is gadget-decomposed and each small digit multiplies a separate key component, so that the key noise is amplified only by digits rather than by a factor of $Q$. We refer to any key switching whose noise control derives entirely from this mechanism as the BV method, regardless of the particular gadget employed.
-}
+\subsubsection{RNS Instantiation}
+\begin{itemize}
+    \item Digit decomp. not compatible with full RNS, however we can use CRT 
+    \item CRT = gadget decomposition
+\end{itemize}
 
 \begin{itemize}
     \item Gadget decomposition
