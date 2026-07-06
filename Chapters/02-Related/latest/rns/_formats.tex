@@ -6,10 +6,10 @@
 \end{itemize}
 
 \begin{definition}[Canonical Form]
-    We are interested in polynomials in the ring $R_q = \mathbb{Z}_q/(X^N+1)$ with degree (up to) $N - 1$ and coefficients in $[-q/2, q/2)$ (centered modulo representation), and different ways to represent this polynomial. The canonical form \eqref{form:canonical} of such a polynomial $a$ is the form everyone is familiar with.
+    We are interested in polynomials in the ring $R_Q = \mathbb{Z}_Q[X]/(X^N+1)$ with degree (up to) $N - 1$ and coefficients in $[-Q/2, Q/2)$ (centered modulo representation), and different ways to represent this polynomial. The canonical form \eqref{form:canonical} of such a polynomial $a$ is the form everyone is familiar with.
     \begin{equation}
         \label{form:canonical}
-        a = c_0 + c_1X + \cdots + c_{N}X^{N-1} = \sum_{i=0}^{N-1} c_iX^i
+        a = c_0 + c_1X + \cdots + c_{N-1}X^{N-1} = \sum_{i=0}^{N-1} c_iX^i
     \end{equation}
 \end{definition}
 
@@ -17,17 +17,17 @@
     As polynomials have a well-known/predictable structure, we can omit the redundant $X$ variable and represent $a\in R_Q$ uniquely by its coefficients. I will refer to (only) this representation \eqref{form:coefficient} as the \emph{coefficient} form.  
     \begin{equation}
         \label{form:coefficient}
-        a = (c_0, c_1, \dots, c_{N}) 
+        a = (c_0, c_1, \dots, c_{N-1})
     \end{equation}
 \end{definition}
 
-Let $Q = q_0\dots q_{k-1}$ with $gcd(q_i, q_j) = 1 \;\forall\; i\not= j$, so that the \gls{crt} allows decomposition into smaller residues. If $\max_i\{q_i\}$ fits in a computer word then we can use \gls{crt} on the coefficients of a polynomial to work exclusively with integers that fit inside a computer word.  
+Let $Q = q_0\dots q_{k-1}$ with $\gcd(q_i, q_j) = 1 \;\forall\; i\not= j$, so that the \gls{crt} allows decomposition into smaller residues. If $\max_i\{q_i\}$ fits in a computer word then we can use \gls{crt} on the coefficients of a polynomial to work exclusively with integers that fit inside a computer word.
 
 %%
 %% COEFFICIENT FORMAT
 \begin{definition}[CRT Form]
-    Given a polynomial $a \in R_q$ where $q = q_0q_1\dots q_{k-1}$ is chosen as a product of $k$ small primes (small meaning they each fit inside a computer register), each coefficient $c_i$ is uniquely represented by its $k$ residues via the Chinese Remainder Theorem. Then the \emph{CRT form} of $a$ \eqref{form:crt} is a collection of smaller polynomials ($\bmod{p_i}$) called \textit{towers}, \textit{residues} or \textit{limbs}. 
-    
+    Given a polynomial $a \in R_Q$ where $Q = q_0q_1\dots q_{k-1}$ is chosen as a product of $k$ small primes (small meaning they each fit inside a computer register), each coefficient $c_i$ is uniquely represented by its $k$ residues via the Chinese Remainder Theorem. Then the \emph{CRT form} of $a$ \eqref{form:crt} is a collection of smaller polynomials ($\bmod{q_i}$) called \textit{towers}, \textit{residues} or \textit{limbs}.
+
     \begin{equation}
     \label{form:crt}
     % \ifnotes
@@ -40,16 +40,16 @@ Let $Q = q_0\dots q_{k-1}$ with $gcd(q_i, q_j) = 1 \;\forall\; i\not= j$, so tha
         =
     % \fi
     \begin{pmatrix}
-        c_0 \bmod{p_0} & c_1 \bmod{p_0} & \dots & c_{N-1}\bmod{p_0} \\
-        c_0 \bmod{p_1} & c_1 \bmod{p_1} & \dots & c_{N-1}\bmod{p_1} \\
+        c_0 \bmod{q_0} & c_1 \bmod{q_0} & \dots & c_{N-1}\bmod{q_0} \\
+        c_0 \bmod{q_1} & c_1 \bmod{q_1} & \dots & c_{N-1}\bmod{q_1} \\
         \vdots & \vdots & \ddots & \vdots \\
-        c_0 \bmod{p_{k-1}} & c_1 \bmod{p_{k-1}} & \dots & c_{N-1}\bmod{p_{k-1}}
+        c_0 \bmod{q_{k-1}} & c_1 \bmod{q_{k-1}} & \dots & c_{N-1}\bmod{q_{k-1}}
     \end{pmatrix}
     \end{equation}
 \end{definition}
 
 \begin{itemize}
-    \item Addition/subtraction of two polynomials in $R_Q$ is equivalent to adding/subtracting their CRT forms (modulo $p_i$)
+    \item Addition/subtraction of two polynomials in $R_Q$ is equivalent to adding/subtracting their CRT forms (modulo $q_i$)
     \item As each element fits within a computer word, each pair of elements can be added/subtracted in parallel.
 \end{itemize}
 
@@ -70,6 +70,7 @@ Let $Q = q_0\dots q_{k-1}$ with $gcd(q_i, q_j) = 1 \;\forall\; i\not= j$, so tha
     \item The \gls{ntt} converts a complex convolution (specifically: cyclic or negacyclic convolution) in the coefficient (CRT?) domain into point-wise multiplication in the NTT domain.
     \item Polynomial multiplication is one such convolution.
     \item We apply \gls{ntt} to the coefficient form $\eqref{form:crt}$
+    \item The negacyclic \gls{ntt} of size $N$ requires each modulus to satisfy $q_i \equiv 1 \pmod{2N}$, which constrains the choice of RNS primes.
 \end{itemize}
 
 \begin{definition}[Double CRT/NTT/Evaluation Form]
@@ -81,11 +82,14 @@ Let $Q = q_0\dots q_{k-1}$ with $gcd(q_i, q_j) = 1 \;\forall\; i\not= j$, so tha
             \ntt{a\bmod q_0} \\
             \ntt{a\bmod q_1} \\
             \vdots \\
-            \ntt{a\bmod q_k}
+            \ntt{a\bmod q_{k-1}}
         \end{pmatrix}
         =
         \begin{pmatrix}
-            \hat{a}_{0,0} & ...
+            \hat{a}_{0,0} & \hat{a}_{0,1} & \dots & \hat{a}_{0,N-1} \\
+            \hat{a}_{1,0} & \hat{a}_{1,1} & \dots & \hat{a}_{1,N-1} \\
+            \vdots & \vdots & \ddots & \vdots \\
+            \hat{a}_{k-1,0} & \hat{a}_{k-1,1} & \dots & \hat{a}_{k-1,N-1}
         \end{pmatrix}
     \end{equation}
     
@@ -95,11 +99,11 @@ Let $Q = q_0\dots q_{k-1}$ with $gcd(q_i, q_j) = 1 \;\forall\; i\not= j$, so tha
 %% CLOSING REMARKS
 The evaluation form \eqref{form:eval} is the preferred form, as it supports parallel addition, subtraction and multiplication, but it still does not natively support \textit{all} necessary operations. Because switching between canonical/vector, CRT and NTT mode is relatively expensive --- requiring (inverse) CRTs and NTTs --- much of the relevant literature \cite{cryptoeprint:2012/099, cryptoeprint:2016/510, cryptoeprint:2018/117, cryptoeprint:2021/204} improves upon existing functions by finding new approaches and approximations that limit the number of format-switches required. 
 \begin{equation*}
-    \raisebox{0.3ex}{\text{ Coefficient }} 
-    \overset{\text{\tiny CRT}}{\underset{\text{\tiny iCRT}}{\overset{\longrightarrow}{\longleftarrow}}} 
-    \raisebox{0.3ex}{\text{ RNS }}
-    \overset{\text{\tiny NTT}}{\underset{\text{\tiny iNTT}}{\overset{\longrightarrow}{\longleftarrow}}} 
-    \raisebox{0.3ex}{\text{ DCRT }}
+    \raisebox{0.3ex}{\text{ Coefficient }}
+    \overset{\text{\tiny CRT}}{\underset{\text{\tiny iCRT}}{\overset{\longrightarrow}{\longleftarrow}}}
+    \raisebox{0.3ex}{\text{ CRT }}
+    \overset{\text{\tiny NTT}}{\underset{\text{\tiny iNTT}}{\overset{\longrightarrow}{\longleftarrow}}}
+    \raisebox{0.3ex}{\text{ Evaluation (DCRT) }}
 \end{equation*}
 
 % Switching between formats is expensive so we try to stay in evaluation mode for as long as possible, only switching to coefficient/CRT form when absolutely required.

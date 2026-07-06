@@ -4,17 +4,17 @@
 \begin{itemize}
     \item Capabilities of (F)HE, privacy preserving
     \item Maybe: Difference between leveled, fully, etc.
-    \item We care about polynomials in the ring $R_q = \mathbb{Z}_q[X]/(X^N-1)$
+    \item We care about polynomials in the ring $R_q = \mathbb{Z}_q[X]/(X^N+1)$
     \item \gls{rlwe} decision/search problem?
     \item Focus on BGV (and TFHE in next section)
 \end{itemize}
 
 %%
 %% RLWE
-\begin{definition}[RLWE ciphertext] $\vec{x} \in R_q^2$ containing a (randomly generated) \textit{public element} $a$ and secret element $a\cdot s + \Delta m + \epsilon$ derived from a persistent secret key $s$ and randomly sampled noise $\epsilon$, where $\Delta$ is the noise scale and $m\in R_t$ is the plaintext message being encrypted.
+\begin{definition}[RLWE ciphertext] $\vec{x} \in R_q^2$ containing a uniformly random \textit{public element} $a$ and the masked element $b = a\cdot s + \Delta m + \epsilon$ derived from a persistent secret key $s$ and randomly sampled noise $\epsilon$, where $\Delta$ is the message scaling factor and $m\in R_t$ is the plaintext message being encrypted.
     \begin{gather} % \vec{x}
         \rlwe(m) = (b, a) = (a\cdot s + \Delta m + \epsilon, a) \\
-        s \overset{\$}{\leftarrow} \{-1,0,1\}^N,\quad \epsilon \overset{\$}{\leftarrow} \chi, \quad a \overset{\$}{\leftarrow} \chi
+        s \overset{\$}{\leftarrow} \{-1,0,1\}^N,\quad \epsilon \overset{\$}{\leftarrow} \chi, \quad a \overset{\$}{\leftarrow} R_q
     \end{gather}
 
     An RLWE ciphertext $\vec{x}$ encrypting a message $m$ under the secret key $s$ is denoted $\rlwe_s(m)$, but if the secret key is understood from context then $\rlwe(m)$ is typically used.
@@ -50,12 +50,16 @@
 %%
 %% MODULUS SWITCHING
 \begin{definition}[Modulus Switching]
-    Explained now because its different in RNS (important)
+    The process of converting a ciphertext $\vec{x}\in R_q^2$ into a ciphertext $\vec{x}'\in R_{q'}^2$ encrypting the same message under a smaller modulus $q' < q$, by rescaling and rounding
+    \begin{equation}
+        \vec{x}' = \left\lceil \frac{q'}{q}\, \vec{x} \right\rfloor,
+    \end{equation}
+    where the rounding is chosen such that $\vec{x}' \equiv \vec{x} \pmod{t}$ to preserve correct decryption. The noise is scaled by the same factor $q'/q$ (plus a small rounding term), so modulus switching is the primary tool for noise management in leveled schemes. Its realization in RNS is different and will be revisited in \autoref{sec:rns-base-conversion}.
 \end{definition}
 
 %%
 %% OTHER
-\begin{definition}[Boostrapping]
+\begin{definition}[Bootstrapping]
     Homomorphically evaluate decryption circuit to reset noise.
 \end{definition}
 
