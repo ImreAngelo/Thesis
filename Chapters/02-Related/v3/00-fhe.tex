@@ -1,13 +1,9 @@
 \renewcommand{\vec}[1]{\overrightarrow{\mathbf{#1}}}
 
 \section{Fully Homomorphic Encryption}
-\begin{itemize}
-    \item Capabilities of (F)HE, privacy preserving
-    \item Maybe: Difference between leveled, fully, etc.
-    \item We care about polynomials in the ring $R_q = \mathbb{Z}_q[X]/(X^N+1)$
-    \item \gls{rlwe} decision/search problem?
-    \item Focus on BGV (and TFHE in next section)
-\end{itemize}
+\gls{he} allows computation directly on encrypted data: an untrusted party can evaluate a function over ciphertexts without learning anything about the underlying plaintexts. Schemes are classified by the computations they support --- \gls{she} and \textit{leveled} schemes evaluate circuits of bounded (multiplicative) depth, while \gls{fhe} supports circuits of arbitrary depth, typically by resetting the accumulated noise through bootstrapping.
+
+Modern \gls{fhe} schemes operate on polynomials in the ring $R_q = \mathbb{Z}_q[X]/(X^N+1)$ and base their security on the hardness of the (decision) \gls{rlwe} problem: distinguishing samples of the form $(a, a\cdot s + \epsilon)$ from uniformly random pairs in $R_q^2$. This section focuses on the BGV scheme \cite{cryptoeprint:2011/277} used by the implementation of this thesis; the required TFHE primitives are presented in a later section.
 
 %%
 %% RLWE
@@ -20,10 +16,7 @@
     An RLWE ciphertext $\vec{x}$ encrypting a message $m$ under the secret key $s$ is denoted $\rlwe_s(m)$, but if the secret key is understood from context then $\rlwe(m)$ is typically used.
 \end{definition}
 
-\begin{itemize}
-    \item Most FHE schemes support homomorphic addition and multiplication, and admits one of these for \textit{free}, in the sense that...
-    \item For example RSA has free multiplication, schemes based on RLWE have free addition. 
-\end{itemize}
+Most \gls{he} schemes support homomorphic addition and multiplication, and admit one of the two for \textit{free}, in the sense that applying the operation directly to the ciphertexts applies it to the underlying plaintexts, without any additional machinery. For example, RSA has free multiplication, while schemes based on \gls{rlwe} have free addition.
 
 %%
 %% BGV ADDITION
@@ -42,10 +35,7 @@
     \end{proof}
 \end{definition}
 
-\begin{itemize}
-    \item BGV multiplication is more complicated + expensive and not used in sPAR. 
-    \item Requires relinearization to manage noise without bootstrapping.
-\end{itemize}
+Homomorphic multiplication in BGV is considerably more complicated and expensive: the product of two ciphertexts has three elements and multiplied noise terms, and requires \textit{relinearization} --- a form of key switching --- to return to two elements and manage the noise growth without bootstrapping. As \gls{spar} performs no such multiplications, the procedure is not detailed further.
 
 %%
 %% MODULUS SWITCHING
@@ -60,7 +50,7 @@
 %%
 %% OTHER
 \begin{definition}[Bootstrapping]
-    Homomorphically evaluate decryption circuit to reset noise.
+    The process of homomorphically evaluating the decryption circuit to reset the noise of a ciphertext, allowing further computation. Bootstrapping is what turns a leveled scheme into a \textit{fully} homomorphic one.
 \end{definition}
 
 \begin{definition}[Keyswitching]
@@ -68,9 +58,6 @@
 \end{definition}
 
 \subsection{BGV}
-\begin{itemize}
-    \item Implementation of this thesis is in the BGV cryptosystem
-    \item Encoding $m$ such that $\Delta = 1$ and $\epsilon = t\cdot \epsilon_{\mathsf{rlwe}}$
-\end{itemize}
+The implementation of this thesis is in the BGV cryptosystem, which places the message in the \textit{least} significant bits of the ciphertext: $\Delta = 1$ and the noise is scaled by the plaintext modulus, $\epsilon = t\cdot \epsilon_{\mathsf{rlwe}}$, giving $b = a\cdot s + m + t\epsilon_{\mathsf{rlwe}}$. Decryption computes $m = \left[[b - a\cdot s]_q\right]_t$, which is correct as long as the noise does not wrap around $q$.
 
 \newpage

@@ -1,9 +1,4 @@
-\begin{itemize}
-    \item In BGV, BFV, CKKS, the ciphertext modulus $q$ is large, much larger than a computer word (typically 64 bits on modern computers)
-    \item Multi-precision arithmetic is know to be slow due to its serial nature
-    \item A \gls{rns} represents numbers as a set of smaller residues of arbitrary size
-    \item In practice: RNS versions of BGV, BFV and CKKS (e.g., OpenFHE only supports the RNS versions of these)
-\end{itemize}
+In BGV, BFV and CKKS the ciphertext modulus $Q$ is large --- much larger than a computer word (typically 64 bits on modern computers). Multi-precision arithmetic is known to be slow due to its serial nature, so implementations avoid it by using a \gls{rns}, which represents large numbers as a set of smaller, independent residues. RNS variants of BGV, BFV and CKKS are the standard in practice; OpenFHE, for example, only supports the RNS versions of these schemes.
 
 \begin{definition}[Canonical Form]
     We are interested in polynomials in the ring $R_Q = \mathbb{Z}_Q[X]/(X^N+1)$ with degree (up to) $N - 1$ and coefficients in $[-Q/2, Q/2)$ (centered modulo representation), and different ways to represent this polynomial. The canonical form \eqref{form:canonical} of such a polynomial $a$ is the form everyone is familiar with.
@@ -48,10 +43,7 @@ Let $Q = q_0\dots q_{k-1}$ with $\gcd(q_i, q_j) = 1 \;\forall\; i\not= j$, so th
     \end{equation}
 \end{definition}
 
-\begin{itemize}
-    \item Addition/subtraction of two polynomials in $R_Q$ is equivalent to adding/subtracting their CRT forms (modulo $q_i$)
-    \item As each element fits within a computer word, each pair of elements can be added/subtracted in parallel.
-\end{itemize}
+Addition and subtraction of two polynomials in $R_Q$ is equivalent to element-wise addition/subtraction of their CRT forms (modulo $q_i$). As each element fits within a computer word, no carries propagate between them, and all pairs of elements can be added or subtracted in parallel.
 
 % \noindent Clearly, the $i$-th column of \eqref{form:crt} is a CRT problem for $c_i$, so converting between this and the canonical form $\sum_{i=0}^{N-1}c_iX^i$ or vector form $(c_0,c_1,\dots, c_{N-1})$ is easy. \textcolor{red}{\textbf{Note that confusingly ``coefficient format'' is used in OpenFHE about this form specifically, NOT the ``vector'' form which is normally used in the literature... kjært barn har mange navn..}}
 
@@ -65,13 +57,9 @@ Let $Q = q_0\dots q_{k-1}$ with $\gcd(q_i, q_j) = 1 \;\forall\; i\not= j$, so th
 
 %%
 %% EVALUATION FORMAT
-\subsection{Number Theoretic Transform} 
-\begin{itemize} % Maybe more details in appendix?
-    \item The \gls{ntt} converts a complex convolution (specifically: cyclic or negacyclic convolution) in the coefficient (CRT?) domain into point-wise multiplication in the NTT domain.
-    \item Polynomial multiplication is one such convolution.
-    \item We apply \gls{ntt} to the coefficient form $\eqref{form:crt}$
-    \item The negacyclic \gls{ntt} of size $N$ requires each modulus to satisfy $q_i \equiv 1 \pmod{2N}$, which constrains the choice of RNS primes.
-\end{itemize}
+\subsection{Number Theoretic Transform}
+% Maybe more details in appendix?
+The \gls{ntt} converts a negacyclic convolution in the coefficient domain into point-wise multiplication in the NTT domain --- and multiplication in $R_{q_i}$ is exactly such a convolution of the coefficient vectors. Applying the \gls{ntt} to each residue (row) of the CRT form \eqref{form:crt} therefore makes polynomial multiplication element-wise as well. The negacyclic \gls{ntt} of size $N$ requires each modulus to satisfy $q_i \equiv 1 \pmod{2N}$, which constrains the choice of RNS primes.
 
 \begin{definition}[Double CRT/NTT/Evaluation Form]
     By applying the \gls{ntt} to the CRT form \eqref{form:crt} we gain the ability to perform polynomial multiplication in parallel, without losing the ability to perform addition/subtraction in parallel.
