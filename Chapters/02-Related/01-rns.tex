@@ -1,4 +1,5 @@
 \section{Residue Number Systems}
+\label{sec:rns}
 In BGV, BFV and CKKS the ciphertext modulus $Q$ is large --- much larger than a computer word (typically 64 bits on modern computers). Multi-precision arithmetic is known to be slow due to its serial nature, so implementations avoid it by using a \gls{rns}, which represents large numbers as a set of smaller, independent residues. RNS variants of BGV, BFV and CKKS are the standard in practice; OpenFHE, for example, only supports the RNS versions of these schemes.
 
 \begin{definition}[Canonical Form]

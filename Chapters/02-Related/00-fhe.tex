@@ -1,6 +1,7 @@
 \renewcommand{\vec}[1]{\overrightarrow{\mathbf{#1}}}
 
 \section{Fully Homomorphic Encryption}
+\label{sec:fhe}
 \gls{he} allows computation directly on encrypted data: an untrusted party can evaluate a function over ciphertexts without learning anything about the underlying plaintexts. Schemes are classified by the computations they support --- \gls{she} and \textit{leveled} schemes evaluate circuits of bounded (multiplicative) depth, while \gls{fhe} supports circuits of arbitrary depth, typically by resetting the accumulated noise through bootstrapping.
 
 Modern \gls{fhe} schemes operate on polynomials in the ring $R_q = \mathbb{Z}_q[X]/(X^N+1)$ and base their security on the hardness of the (decision) \gls{rlwe} problem: distinguishing samples of the form $(a, a\cdot s + \epsilon)$ from uniformly random pairs in $R_q^2$. This section focuses on the BGV scheme \cite{cryptoeprint:2011/277} used by the implementation of this thesis; the required TFHE primitives are presented in a later section.

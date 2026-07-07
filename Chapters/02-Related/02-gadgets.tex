@@ -1,17 +1,15 @@
 \section{Noise Management Techniques in RNS}
-\begin{itemize}
-    \item A problem that arises in several areas of FHE is that of multiplying a ciphertext by some large number while keeping the error low.
-    \item The techniques covered in this section typically occur in the context of keyswitching, but we remove them entirely from that context and consider only the techniques themselves.
-\end{itemize}
-
+\label{sec:gadgets}
+A problem that arises in several areas of \gls{fhe} is that of multiplying a ciphertext by some large, known factor $X\in R_Q$ while keeping the error low. Performed naively, the noise scales together with the message:
 \begin{equation}
-    (a\cdot s + \Delta m + \epsilon) \cdot X = aX\cdot s + \Delta Xm + X\epsilon
+    (a\cdot s + \Delta m + \epsilon) \cdot X = aX\cdot s + \Delta Xm + X\epsilon.
 \end{equation}
 
 \textcolor{purple}{
 Several core operations require computing the product of a ciphertext element with noisy auxiliary material; performed naively, this scales the noise by a factor as large as $q$. This section covers the standard techniques for controlling this growth: decomposition (BV), modulus extension (GHS), and their combination (Hybrid).
 }
 
+These techniques typically occur in the literature in the context of key switching, but we remove them entirely from that context and consider only the techniques themselves.
 
 \subsection{Brakerski-Vaikuntanathan}
 Brakerski and Vaikuntanathan~\cite{cryptoeprint:2011/344} first proposed decomposing ciphertext elements into small digits as a means of controlling the noise growth of this operation. The idea has since been generalized into the idea of \emph{gadget decomposition} and applied in a variety of forms, including digit and CRT (RNS) decomposition. Following the convention of~\cite{cryptoeprint:2021/204, cryptoeprint:2022/915}, we refer to this family of decomposition-based techniques collectively as \emph{BV}.
@@ -19,14 +17,17 @@ Brakerski and Vaikuntanathan~\cite{cryptoeprint:2011/344} first proposed decompo
 % \textcolor{purple}{\textit{Decomposition}; a technique used to represent a number in a smaller base (radix) while preserving its value.} % Taken from https://fhetextbook.github.io/Decomposition.html#decomposition
 
 \begin{definition}[Digit Decomposition]
-    takes an integer $\gamma\in\mathbb{Z}_q$ (for a modulus $q\geq 2$), base $\beta$ and \textit{decomposition parameter} $\ell$, and maps $\gamma$ to a sum of $\ell$ base-$\beta$ digits $\gamma_i \in [0, \beta),\; 0 \leq i < \ell$.  
-    
+    \label{ex:radix_gadget}
+    takes an integer $\gamma\in\mathbb{Z}_q$ (for a modulus $q\geq 2$), base $\beta$ and \textit{decomposition parameter} $\ell$, and maps $\gamma$ to its $\ell$ most significant \textit{signed} base-$\beta$ digits $\gamma_i \in [-\beta/2, \beta/2)$:
     \begin{equation}
-        \gamma = \gamma_0\frac{q}{\beta} + \gamma_1\frac{q}{\beta^2} + ... \gamma_{\ell - 1}\frac{q}{\beta^{\ell}} = \sum_{i=0}^{\ell-1}\gamma_i\frac{q}{\beta^{i+1}}
+        \gamma = \sum_{i=0}^{\ell-1}\gamma_i\frac{q}{\beta^{i+1}} + \epsilon, \qquad |\epsilon| \leq \frac{q}{2\beta^{\ell}},
     \end{equation}
-
-    The \textit{decomposition of} $\mathit{\gamma}$ is an ordered list of the $\ell$ base-$\beta$ digits $\gamma_i$ and is denoted $\mathsf{Decomp}(\gamma) = (\gamma_0, \gamma_1, \dots, \gamma_{\ell-1})$.
+    where the remaining, least significant digits are simply dropped; keeping all digits ($\beta^\ell \geq q$) makes the decomposition exact ($\epsilon = 0$). The \textit{decomposition of} $\mathit{\gamma}$ is the ordered list of the $\ell$ digits and is denoted $\mathsf{Decomp}(\gamma) = (\gamma_0, \gamma_1, \dots, \gamma_{\ell-1})$.
 \end{definition}
+
+\begin{remark}
+    When $q$ is not a power of $\beta$ (e.g.\ the prime moduli of \autoref{sec:rns}) the entries $q/\beta^{i+1}$ are rounded to the nearest integer; the rounding error is absorbed into $\epsilon$.
+\end{remark}
 
 %%
 %% Highlight what's imporant for generalizing
@@ -35,53 +36,57 @@ By construction, digit decomposition satisfies $\langle \mathsf{Decomp}(\gamma),
 }
 
 \begin{definition}[Gadget Property.]
-    Two mappings $P(x), D(y)$ are said to have the gadget property iff. they satisfy \eqref{def:gadget-property} for any pair of integers $(x, y) \in \mathbb{Z}_q^2$ with some small noise $\epsilon \ll q$. If $\epsilon = 0$ then $P(x), D(y)$ are said to have the \textit{exact} gadget property.
-
+    \label{def:gadget}
+    Two mappings $P(x), D(y) \in R_q^\ell$ are said to have the gadget property with \textit{quality} (digit bound) $\beta$ and \textit{precision} $\epsilon$ iff. they satisfy \eqref{def:gadget-property} for any pair of integers $(x, y) \in \mathbb{Z}_q^2$.
     \begin{equation}
         \label{def:gadget-property}
-        \langle P(x), D(y)\rangle = x\cdot y + \epsilon \pmod{q}
+        \langle P(x), D(y)\rangle = x\cdot (y + \epsilon_y) \pmod{q},
+        \qquad |\epsilon_y| \leq \epsilon, \quad \|D(y)\|_\infty \leq \beta
     \end{equation}
+    If $\epsilon = 0$ then $P(x), D(y)$ are said to have the \textit{exact} gadget property.
 \end{definition}
 
 \begin{definition}[Gadget Decomposition]
-    generalizes the notion of digit decomposition by replacing the base $\beta$ with a \textit{gadget vector} $g = (g_0, g_1, \dots, g_{\ell-1})$ containing $\ell$ elements, such that $\mathsf{Decomp}^g(\gamma)$ and $g$ satisfy \eqref{def:gadget-property}.
-    
+    generalizes the notion of digit decomposition by replacing the base $\beta$ with a \textit{gadget vector} $g = (g_0, g_1, \dots, g_{\ell-1})$ containing $\ell$ elements, such that $D(\gamma) = \mathsf{Decomp}^g(\gamma)$ and $P(x) = x\cdot g$ satisfy Def.~\ref{def:gadget}.
+
     \begin{equation*}
         \label{def:gadget-decomp}
-        \gamma + \epsilon = \sum_{i=0}^{\ell - 1} \gamma_i g_i \quad\iff\quad \langle \mathsf{Decomp}(\gamma), g\rangle = \gamma + \epsilon
+        \gamma + \epsilon_\gamma = \sum_{i=0}^{\ell - 1} \gamma_i g_i \quad\iff\quad \langle \mathsf{Decomp}^g(\gamma), g\rangle = \gamma + \epsilon_\gamma
     \end{equation*}
 \end{definition}
 
-\begin{itemize}
-    \item Can be applied component-wise to polynomials $\gamma\in R_q$ instead of $\mathbb{Z}_q$
-\end{itemize}
+All of the above extends coefficient-wise to polynomials $\gamma \in R_q$: the digits become polynomials with small coefficients, and the bounds $\beta$ and $\epsilon$ apply to $\|\cdot\|_\infty$.
 
 \subsubsection{RNS Instantiation}
-\begin{itemize}
-    \item Digit decomp. not compatible with full RNS, however we can use CRT 
-    \item CRT = gadget decomposition
-\end{itemize}
+\label{sec:gadgets:rns}
+Digit decomposition is not directly compatible with RNS: the digits of $\gamma$ are defined by its canonical value, which is not available limb-wise. Extracting them requires reconstructing the coefficients --- an inverse NTT followed by an inverse CRT --- reintroducing the multi-precision detour that RNS is meant to avoid (\autoref{sec:rns-base-conversion}).
 
-\begin{itemize}
-    \item Gadget decomposition
-    \item Named BV after \cite{bv} which first used \textit{bit} decomposition; digit decomposition with $\beta = 2$.
-    \item Digit decomposition is not natively compatible with RNS, at least not over the full polynomial
-    \item First RNS instantiation using CRT decomposition \cite{cryptoeprint:2016/510}
-    \item HPS optimization for specifically keyswitching \cite{cryptoeprint:2018/117}
-    \item Can apply digit decomposition to each residue polynomial
-\end{itemize}
+The CRT structure itself, however, is a gadget. The first RNS instantiation of BV~\cite{cryptoeprint:2016/510} decomposes into residues:
+\begin{equation}
+    \label{eq:crt-gadget}
+    \gadgetformat{D}{CRT}(\gamma) = \left([\gamma]_{q_0}, \dots, [\gamma]_{q_{k-1}}\right), \qquad
+    \gadgetformat{P}{CRT}(x) = \left(x\cdot e_0, \dots, x\cdot e_{k-1}\right), \qquad
+    e_j = \left[\left(\frac{Q}{q_j}\right)^{-1}\right]_{q_j}\cdot\frac{Q}{q_j},
+\end{equation}
+where the $e_j$ are the CRT idempotents: $e_j \equiv 1 \pmod{q_j}$ and $e_j \equiv 0 \pmod{q_{j'}}$ for $j' \neq j$, so that $\sum_j [\gamma]_{q_j}\, e_j \equiv \gamma \pmod{Q}$ --- the exact gadget property with $\ell = k$. Both maps are computed natively in RNS: $\gadgetformat{D}{CRT}$ simply reads off the limbs, and $\gadgetformat{P}{CRT}$ scales them. The drawback is the digit bound $\beta = \max_j q_j/2$, a full machine word, which enters the noise bounds of \autoref{sec:tfhe} linearly. \cite{cryptoeprint:2018/117} (HPS) further optimized this construction for key switching using precomputed factors, as remarked in \autoref{sec:rns-base-conversion}.
+
+To shrink the digits, the CRT gadget is composed with digit decomposition applied \textit{per residue}: each limb $[\gamma]_{q_j}$ is an ordinary word-sized integer, so it can be decomposed into $\ell$ signed base-$\beta$ digits limb-wise, without reconstruction. The composed gadget
+\begin{equation}
+    \label{eq:bv-gadget}
+    \bv{D}(\gamma) = \left(\mathsf{Decomp}\left([\gamma]_{q_j}\right)\right)_{j=0}^{k-1}, \qquad
+    \bv{P}(x) = \left(x\cdot \beta^i e_j\right)_{j,i}
+\end{equation}
+has $k\ell$ digits bounded by $\beta/2$, and is exact whenever $\beta^\ell \geq \max_j q_j$. This is the closest direct translation of TFHE-style decomposition to RNS, and one of the two variants implemented in this thesis (\autoref{chp:methodology}).
 
 \subsection{Gentry-Halevi-Shoup}
-\begin{itemize}
-    \item Pre-scale the key to $QP$ 
-    \item Extends modulus $Q\to QP$ \cite{cryptoeprint:2012/099}
-    \item Drops modulus back to $Q$ after inner product, dividing by $P$ in the process
-    \item Since key was pre-scaled, $\epsilon$ shrinks relative to the message
-    \item Cite to RNS section, base conversion
-\end{itemize}
+\label{sec:gadgets:ghs}
+The GHS method~\cite{cryptoeprint:2012/099} controls noise without any decomposition ($\ell = 1$). Instead, the modulus is temporarily extended from $Q$ to $QP$ for an auxiliary modulus $P$ (\autoref{sec:rns-base-conversion}), and the auxiliary material is pre-scaled by $P$:
+\begin{equation}
+    \label{eq:ghs-gadget}
+    \gadgetformat{D}{GHS}(\gamma) = \mathsf{ModUp}(\gamma) \in R_{QP}, \qquad
+    \gadgetformat{P}{GHS}(x) = [P\cdot x]_{QP},
+\end{equation}
+where $\mathsf{ModUp}$ is the fast base extension of Algorithm~\ref{alg:fast_base_extension}. The product $\gadgetformat{D}{GHS}(\gamma)\cdot\gadgetformat{P}{GHS}(x) = P\cdot x\gamma \pmod{QP}$ is brought back to $Q$ with $\mathsf{ModDown}$ \eqref{eq:approxmoddown}, dividing by $P$. The single ``digit'' $\gamma$ remains as large as $Q$, but any noise attached to the pre-scaled material is divided by $P \approx Q$ on the way down, shrinking to insignificance; the price is a small additive error $\epsilon > 0$ (the FastBConv overflow and the ModDown rounding) and auxiliary material living in the larger ring $R_{QP}$. GHS is well established for key switching; its use in the external product (\autoref{sec:tfhe}) is not, and is developed in this thesis (\autoref{chp:methodology}).
 
 \subsection{Hybrid}
-\begin{itemize}
-    \item BV and GHS represent a spectrum
-    \item Combination of the two techniques
-\end{itemize}
+BV and GHS are endpoints of a spectrum. Hybrid key switching~\cite{cryptoeprint:2021/204} groups the $k$ limbs into $\mathsf{dnum}$ digits of $\alpha = \lceil k/\mathsf{dnum}\rceil$ limbs each --- a coarser CRT gadget --- and applies the GHS modulus extension to control the remaining per-digit noise, requiring only $P \gtrsim Q^{1/\mathsf{dnum}}$. Setting $\mathsf{dnum} = k$ (no extension needed) recovers BV, while $\mathsf{dnum} = 1$ recovers GHS; the ``hybrid'' implementation of this thesis uses $\mathsf{dnum} = 1$ and is therefore effectively GHS.
