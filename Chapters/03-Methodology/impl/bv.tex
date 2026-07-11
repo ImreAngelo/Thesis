@@ -92,6 +92,21 @@ Then constructing $P_Q(a)$ is in some way equivalent to constructing $\hat{a}$, 
 %     \end{proof}
 % \end{corollary}
 
+\subsubsection{RGSW-BV Data Structure}
+Each RGSW ciphertext is stored as a vector \texttt{std::vector<DCRTPoly>} of $2\cdot k\cdot \ell$ RLWE ciphertexts (\texttt{DCRTPoly}), where $k$ is the number of moduli in the RNS basis $\mathcal{B}_Q$ and $\ell$ is the decomposition parameter. 
+Let $g_k = ()$ and $g'_\ell = (1, B, \dots, B^{\ell-1})^T$ be the gadget vector of the BV decomposition. Then an RGSW ciphertext encrypting a plaintext $\mu \in R_t$ 
+\begin{equation}
+    C = Z + \begin{pmatrix}
+        [\mu]_{q_0} \cdot g' & 0 \\
+        \vdots & \vdots \\
+        [\mu]_{q_\k} \cdot g' & 0 \\
+        0 & \mu\cdot g' \\
+        \vdots & \vdots \\
+        0 & \mu\cdot g'
+    \end{pmatrix}^{\intercal}
+\end{equation}
+
+
 \begin{definition}[RGSW-BV Data Structure]
     We define a data structure representing an RGSW ciphertext as a vector of RLWE ciphertexts. Let $G = I_2\otimes \bv{P}(1) = I_2\otimes \hps{P}(g)$ and $G^{-1}(x) = [\hps{D}(x_0)|\hps{D}(x_1)]$ using the BV gadgets... 
 
