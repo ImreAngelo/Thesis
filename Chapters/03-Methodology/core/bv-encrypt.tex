@@ -1,0 +1,57 @@
+\begin{itemize}
+    \item \texttt{ExtendedContextBV} implements the double decomposition; digit decomposing each RNS limb
+    \item Let $P_g(v) = g\otimes v$ and $P_\mathsf{BV}(v) = P_g \circ \hps{P}(v) = g\otimes (\hps{P}(v))$
+\end{itemize}
+\begin{gather*}
+    C = Z + \mu G = Z + \mu \cdot (I_2\otimes  P_g(\hps{P}(1)) = Z + (I_2\otimes  P_g(\hps{P}(\mu)) \\
+    P_g(\hps{P}(\mu)) = g\otimes ([\mu]_{q_0}, \dots, [\mu]_{q_{k-1}}) \\
+    ([\mu g]_{q_0}, \dots [\mu g]_{q_{k-1}}) \text{ where } \mu g = (\mu, \mu B, \dots, \mu B^{\ell})\\
+    ([\mu]_{q_0}, [\mu B]_{q_0}, \dots, [\mu B^\ell]_{q_{k-1}}) \in \mathbb{Z}_Q^{k\cdot \ell}
+\end{gather*}
+
+\begin{itemize}
+    \item Observe that this is the same information as $(\mu, \mu B, \dots, \mu B^{\ell})$
+    \item Because the $i$-th tower of $\mu$ is $[\mu]_{q_i}$, the HPS gadget row $j$ gives $[[\mu]_{q_i}]_{q_j} = 0 \forall i\not = j$
+\end{itemize}
+
+\begin{gather*}
+    %([\mu]_{q_0}, [\mu B]_{q_0}, \dots, [\mu B^\ell]_{q_{k-1}}) \\
+    \left[ \begin{array}{ccc|ccc|ccc}
+        [\mu]_{q_0} & \cdots & [\mu B^{\ell -1 }]_{q_0} & 0 & \dots & 0 & 0 & \dots & 0 \\
+        0 &  \dots & 0 &[\mu]_{q_1} & \cdots & [\mu B^{\ell -1 }]_{q_{1}} & 0 & \dots & 0 \\
+        \vdots & \ddots & \vdots & \vdots & \ddots & \vdots & \vdots & \ddots & \vdots \\
+        0 & \dots & 0 & 0 & \dots & 0 &[\mu]_{q_{k-1}} & \cdots & [\mu B^{\ell -1 }]_{q_{k-1}}  \\
+    \end{array} \right]
+\end{gather*}
+
+\begin{itemize}
+    \item Ignore all the 0 elements, then we get the exact definition of the RNS form of $\mu$, $\mu B$, and so on
+    \item However, each row of the RGSW must still encode only 1 tower from each of the $\ell$ polynomials
+\end{itemize}
+
+\begin{equation*}
+    {P}_{\mathsf{BV}}(\mu) \;\overset{\tiny\text{flatten}}{\longmapsto}\; 
+    \begin{bmatrix}
+        [\mu]_{q_0} & \cdots & [\mu B^{\ell - 1}]_{q_0} \\
+        [\mu]_{q_1} & \cdots & [\mu B^{\ell - 1}]_{q_1} \\
+        \vdots & \ddots & \vdots  \\
+        [\mu]_{q_{k-1}} & \cdots & [\mu B^{\ell - 1}]_{q_{k-1}}  \\
+    \end{bmatrix}
+    = ([\mu]_{\mathcal{B}_Q}, \dots, [\mu B^{\ell - 1}]_{\mathcal{B}_Q})
+\end{equation*}
+
+\begin{itemize}
+    \item Multiplying $\mu$ by a factor of $B^i$ for a single $i$ can be done in NTT
+    \item Applying this to $Z + P_\mathsf{BV}(\mu)$ allows parallelization on $k\ell$ threads
+    \item $\mathcal{B}_Q$, $\ell$ and $B$ are all known/global variables tied to the context
+\end{itemize}
+
+%%%
+%%% Encrypt RGSW-BV
+%%%
+\input{Algorithms/new/encrypt-bv}
+
+\begin{itemize}
+    \item Pre-computed value: $\Call{GetPower}{i, j} = B^i \bmod{q_j}$ where the modulo is just to keep numbers smaller in memory, negligible for performance 
+    \item Then $\Call{TowerMul}{\mu, j, B^i}$ is really just extracting the $j-th$ limb, multiplying by the pre-computed value $B^i \bmod{q_j}$ calculate the product modulo $q_j$ before the tower is inserted back into $\mu$ 
+\end{itemize}

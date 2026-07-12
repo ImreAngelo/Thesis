@@ -1,17 +1,44 @@
 \chapter{Methodology}
 \label{chp:methodology}
 
-% \section{Variables}
-% \begin{itemize}
-%     \item \textbf{Plaintext modulus} $t$ - Coefficients of plaintext polynomial are taken mod ${t}$
-%     \item \textbf{Ciphertext modulus} $Q$ - Decomposed into $Q=q_0q_1\dots q_L$
-% \end{itemize}
-
 % % \section{Notes}
 % % In Brakerski's scheme, similar to previous FHE schemes based on LWE, the ciphertext $\overset{_\rightarrow}{c}$ and secret key $\overset{_\rightarrow}{s}$ are $n$-dimensional vectors whose dot product $\langle \overset{_\rightarrow}{c}, \overset{_\rightarrow}{s}\rangle \approx \mu$ equals the message $\mu$, up to some small ``error'' that is removed by rounding.
 
 % \textcolor{red}{\textbf{Move implementation details from \autoref{sec:impl:hps} here?}}
 
-\input{Chapters/03-Methodology/lib}
-\input{Chapters/03-Methodology/implementation-details}
+\newcommand{\corelib}{\texttt{core} }
+\newcommand{\serverlib}{\texttt{server} }
+\newcommand{\clientlib}{\texttt{client} }
+
+%%
+%% Introduction
+\vfill
+A gap needed to be filled: implementing TFHE-style RGSW products (external and internal) in BGV-RNS. As a result of this thesis, a C++ library (\corelib) was developed to bring this functionality to the OpenFHE~library~\cite{cryptoeprint:2022/915}. The sPAR protocol has also been implemented in C++ using the RGSW library. I will stress the libraries are separate; the RGSW library can be used on its own as is, and the sPAR library can in theory be used without it --- provided a different library is developed to provide the same functionality and API. 
+
+\begin{itemize}
+    \item A result of this thesis: a C++ library which extends OpenFHE's BGV implementation to support RGSW operations
+    \item And sPAR which was built on top of this library
+    \item The code base is split into three sections found in the \texttt{lib} directory:
+    \begin{enumerate}
+        \item \corelib extends OpenFHE's \texttt{CryptoContext<T>} with the operations:
+        \begin{itemize}
+            \item \texttt{EncryptRGSW} outputs the RGSW encryption of the input plaintext
+            \item \texttt{EvalExternalProduct} takes an RLWE and RGSW ciphertext
+            \item \texttt{EvalInternalProduct} takes two RGSW ciphertexts
+            \item Supporting functions like AddRGSW and MultRGSWPlaintext etc.
+        \end{itemize}
+        \item \serverlib builds the sPAR server functions on top of \corelib
+        \item \clientlib builds the sPAR client functions on top of \corelib
+    \end{enumerate}
+    \item There are also two auxiliary directories \texttt{benchmarks} and \texttt{tests} that contain code to benchmark and unit test functions, respectively.
+    \item And \texttt{scripts} contain python code for running the estimator
+\end{itemize}
+
+This section also explains the set up of the various tests; the numbers from running these tests are presented in \autoref{chp:results}.
+
+\newpage
+
+\input{Chapters/03-Methodology/core/bitwise}
+\input{Chapters/03-Methodology/impl-core}
+\input{Chapters/03-Methodology/impl-spar}
 \input{Chapters/03-Methodology/experimental-setup}

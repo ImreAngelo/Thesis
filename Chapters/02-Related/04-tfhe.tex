@@ -1,0 +1,247 @@
+%%
+%% RGSW, External Product and Internal Product
+%%
+\section{TFHE Bootstrapping Primitives}
+\begin{itemize}
+    \item TFHE bootstrapping achieves fast evaluation of binary circuits. 
+    \item TFHE is optimized for computations of large multiplicative depth on small plaintexts, and is best known for its fast bootstrapping procedure.
+    \item It is based on approximating gadget decomposition. 
+    \item Asymmetry in noise scaling of GSW ciphertexts; sum of small errors is smaller than product of large errors.
+    % \item Decomposition \cite{fhetextbook}: \textit{a mathematical technique used to represent a number in a smaller base (radix) while preserving its value} $\gamma = \gamma_0\frac{q}{\beta_0} + \dots + \gamma_\ell\frac{q}{\beta_\ell}$
+    % \item Gadget \cite{fhetextbook}: \textit{generalized form of number decomposition} $\gamma = \gamma_0g_0 + \dots + \gamma_\ell g_\ell$
+\end{itemize}
+
+\begin{itemize}
+    \item (R)GSW ciphertexts \cite{cryptoeprint:2013/340, cryptoeprint:2014/816}
+    \item External product \cite{cryptoeprint:2014/816, cryptoeprint:2018/421}
+    \begin{itemize}
+        \item Though digit decomposition is often used, emphasize the external product only requires $G^{-1}(x)\cdot G \approx x\bmod{Q}$
+        \item Lemma/corollary: If two vectors satisfy the gadget property \eqref{def:gadget-property}, then $G = I_2\otimes P(1)$ and $G^{-1}(x) = [D(x_0)|D(x_1)]$ is a valid choice and \autoref{alg:external-product} returns the external product
+    \end{itemize}
+    \item Internal product \cite{cryptoeprint:2018/421}
+\end{itemize}
+
+\begin{definition}[RGSW Ciphertext]
+    \cite{cryptoeprint:2013/340, cryptoeprint:2014/816, cryptoeprint:2018/421}
+    \begin{equation}
+        \label{def:rgsw}
+        C = Z + \mu G \text{ where } G = I_2\otimes g
+    \end{equation}
+\end{definition}
+
+\begin{definition}[External Product]
+    \cite{cryptoeprint:2018/421}
+    \begin{gather}
+        G^{-1}(x)\cdot G \approx x \pmod{Q} \quad\text{ (gadget property) } \\
+        x\boxdot Y = G^{-1}(x)\cdot Y
+    \end{gather}
+\end{definition}
+
+\begin{itemize}
+    \item Gadget property vectors defines $G = I_2 \otimes P(1)$ and $G^{-1} = [D(x_0)|D(x_1)]$
+    \item Using the decomposition $D(x)$ as a subroutine makes the external product fairly straight forward
+\end{itemize}
+
+%%%
+%%% External Product
+%%%
+\begin{algorithm}
+\caption{External Product $\rlwe \boxdot \rgsw$ (RNS)}
+\label{alg:external-product}
+\begin{algorithmic}[1]
+\Require RLWE ciphertext $(c_0, c_1) \in R_Q^2$, RGSW ciphertext $C \in R_Q^{2\ell}$
+\Ensure RLWE ciphertext of product
+\State $acc \gets (0, 0)$
+\State $d_0 \gets \Call{Decompose}{c_0}$
+\State $d_1 \gets \Call{Decompose}{c_1}$
+\For{$r \gets [0, \ell)$}
+    \State $acc[0] \gets acc[0] + d_0[r] \cdot C[r][0] + d_1[r]\cdot C[r+\ell][0]$
+    \State $acc[1] \gets acc[1] + d_0[r] \cdot C[r][1] + d_1[r]\cdot C[r+\ell][1]$
+\EndFor
+\State \Return $acc$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{definition}[Internal Product]
+    \cite{cryptoeprint:2018/421}
+    \begin{equation}
+        \label{def:prod:internal}
+        X\boxtimes Y = 
+        \begin{bmatrix}
+            x_0 \boxdot Y \\
+            x_1 \boxdot Y \\
+            \vdots \\
+            x_{2\ell -1} \boxdot Y
+        \end{bmatrix}
+    \end{equation}
+\end{definition}
+
+\begin{remark}
+    Order of operations matter; decomposition determines quality, higher noise should appear on rhs of internal product and $P$ is always the vector with largest max norm.
+\end{remark}
+
+\newpage
+
+% \ifnotes{
+    % %%
+    % %% GSW
+    % \cite{}
+    
+    % The rest of the lineage, as it's conventionally attributed: the ring variant (RGSW) appears in Ducas–Micciancio's FHEW (Eurocrypt 2015), which uses ring-GSW accumulators for bootstrapping, and in Khedr–Gu–Solihin's SHIELD around the same time. The external product — the asymmetric RGSW × RLWE multiplication, as opposed to GSW's original symmetric product — is due to Chillotti–Gama–Georgieva–Izabachène (TFHE, Asiacrypt 2016; journal version 2020), with a concurrent equivalent ("hybrid product") in Brakerski–Perlman (CRYPTO 2016). TFHE formulates it over the torus, i.e. TLWE/TGSW. The internal product (RGSW × RGSW) is the ring/torus version of GSW's original multiplication.
+    
+    % \begin{definition}[RGSW Ciphertext.] 
+    %     etc. etc.
+    
+    %     \begin{equation}
+    %         \label{def:rgsw}
+    %         C = Z + \mu G
+    %     \end{equation}
+    % \end{definition}
+    
+    % \newpage
+
+    % \section{TFHE}
+    % % Scope: the RGSW machinery this thesis builds on --- RGSW ciphertexts, the
+    % % external and internal products, and the generalization to arbitrary gadgets.
+    % % Bootstrapping itself is only referenced at a high level (see FHE section).
+    
+    % \begin{itemize}
+    %     \item Attribution / lineage: GSW encryption introduced over plain LWE
+    %           \cite{GSW13}; ring variant (RGSW) used in FHEW \cite{DM15} and
+    %           SHIELD \cite{KGS16}; external product and the TFHE scheme
+    %           \cite{CGGI16} (journal version \cite{CGGI20}), concurrently
+    %           \cite{BP16} (``hybrid product'')
+    %     \item Notation remark (the torus pivot, once and for all): TFHE is natively
+    %           formulated over the (discretized) torus, with TLWE/TGSW in place of
+    %           RLWE/RGSW; the discretized torus $q^{-1}\mathbb{Z}/\mathbb{Z}$ is
+    %           isomorphic to $\mathbb{Z}_q$ via $x \mapsto qx$ \cite{Joye22}, under
+    %           which the torus gadget entries $1/B^j$ become $q/B^j$. All statements
+    %           transfer verbatim; we use ring notation over $R_Q$ throughout
+    %     \item Standing assumptions: $R_Q$ as in Sec.~\ref{sec:rns}; RLWE ciphertexts
+    %           $c = (c_0, c_1) \in R_Q^2$ with phase $c_1 - s\,c_0 = \mu + e$ as in
+    %           Sec.~\ref{sec:fhe}; gadget pairs $(D, P)$ and the (approximate) gadget
+    %           property as in Def.~\ref{def:gadget}
+    % \end{itemize}
+    
+    % \subsection{RGSW Ciphertexts}
+    % \begin{itemize}
+    %     \item Fix the radix gadget (Def.~\ref{def:gadget}, Ex.~\ref{ex:radix_gadget}):
+    %           $g = P_\omega(1) = (q/B, \dots, q/B^\ell)^T$; gadget matrix
+    %           \begin{equation}
+    %               G = I_2 \otimes g \in R_Q^{2\ell \times 2}
+    %           \end{equation}
+    %     \item RGSW encryption of $\mu \in R$:
+    %           \begin{equation}
+    %               \label{eq:rgsw}
+    %               C = Z + \mu\cdot G \in R_Q^{2\ell \times 2},
+    %               \qquad \text{each row of } Z \text{ an RLWE encryption of } 0
+    %           \end{equation}
+    %     \item Structure: the two row-blocks of $C$ are RLWE encryptions of
+    %           $\mu \cdot g_j \cdot (-s)$ and $\mu \cdot g_j$ respectively ---
+    %           i.e.\ an RGSW ciphertext is $2\ell$ RLWE ciphertexts encrypting
+    %           gadget-scaled copies of $\mu$ (and $\mu s$)
+    %     \item RGSW is additively homomorphic; decryption via any row of the
+    %           bottom block
+    % \end{itemize}
+    
+    % \subsection{External Product}
+    % \begin{itemize}
+    %     \item Gadget decomposition of an RLWE ciphertext, applied per component:
+    %           \begin{equation}
+    %               G^{-1}(c) = \big(D(c_0) \,\big|\, D(c_1)\big) \in R^{2\ell},
+    %               \qquad \text{satisfying } G^{-1}(c)\cdot G = (c_0, c_1) + (e_0, e_1),
+    %               \quad \|e_i\|_\infty \le \varepsilon
+    %           \end{equation}
+    %           % exact gadgets: ε = 0; radix gadget over torus: ε = 1/(2B^ℓ) scaled
+    %     \item External product \cite{CGGI16,BP16}:
+    %           \begin{equation}
+    %               \label{eq:ext_prod}
+    %               C \boxdot c = G^{-1}(c) \cdot C \in R_Q^2
+    %           \end{equation}
+    %     \item Correctness (one-line expansion):
+    %           \begin{equation*}
+    %               G^{-1}(c)\cdot(Z + \mu_C G)
+    %               = \underbrace{G^{-1}(c)\cdot Z}_{\text{decomposition--noise term}}
+    %               + \;\mu_C\cdot\big(c + e_{\mathrm{dec}}\big)
+    %               \;=\; \mathrm{RLWE}(\mu_C \cdot \mu_c) + \text{noise}
+    %           \end{equation*}
+    %     \item Noise (statement only, proof deferred to Thm.~\ref{thm:generalization}):
+    %           \begin{equation*}
+    %               \|v_{\boxdot}\|_\infty \;\lesssim\;
+    %               \underbrace{2\ell\, n\, \beta\, B_{Z}}_{\langle D(c_i),\, \vec{e}_Z\rangle}
+    %               \;+\;
+    %               \underbrace{\|\mu_C\|_1 \cdot \varepsilon}_{\mu_C \cdot e_{\mathrm{dec}}}
+    %               \;+\; \|\mu_C\|_1 \cdot \|v_c\|_\infty
+    %           \end{equation*}
+    %           with $\beta$ the digit bound of $D$, $B_Z$ the RGSW noise
+    %     \item Two consequences worth flagging:
+    %           (i) noise is \emph{asymmetric} --- the RLWE input's noise enters
+    %           scaled by $\mu_C$, the RGSW noise only through small digits; hence
+    %           $\mu_C$ must be small (typically $\mu_C \in \{0,1\}$ or monomials
+    %           $X^k$), while $\mu_c$ is unconstrained;
+    %           (ii) cost $= 2\ell$ ring multiplications $+$ the cost of $D$
+    %           % this asymmetry is why CMux / tree traversal chains external
+    %           % products on the RLWE side
+    % \end{itemize}
+    
+    % \subsection{Internal Product}
+    % \begin{itemize}
+    %     \item RGSW $\times$ RGSW $\to$ RGSW: apply the external product row-wise,
+    %           \begin{equation}
+    %               C_1 \boxtimes C_2 = \big(C_2 \boxdot \mathrm{row}_r(C_1)\big)_{r=1}^{2\ell}
+    %           \end{equation}
+    %           each row of $C_1$ being an RLWE ciphertext
+    %     \item Cost: $2\ell$ external products; noise as in \eqref{eq:ext_prod}
+    %           per row
+    %     \item Role: composing RGSW ciphertexts (e.g.\ products of controls);
+    %           not used on the critical path of this thesis --- included for
+    %           completeness % trim if unused downstream
+    % \end{itemize}
+    
+    % \subsection{Generalization}
+    % \begin{itemize}
+    %     \item Observation: nothing above used the radix structure of $g$ ---
+    %           only the gadget property of $(D_\omega, P_\omega)$
+    %     \item Constructive statement: any pair from the catalog of
+    %           Ch.~\ref{ch:gadgets} yields a valid RGSW ciphertext and external
+    %           product
+    % \end{itemize}
+    
+    % \begin{theorem}
+    %     \label{thm:generalization}
+    %     Let $D(a), P(b) \in R_Q^\ell$ satisfy the approximate gadget property
+    %     (Def.~\ref{def:gadget}) with digit bound $\beta$ and decomposition error
+    %     $\varepsilon$. Then
+    %     \begin{align}
+    %         G &= I_2 \otimes P(1) \label{eq:gen_G}\\
+    %         G^{-1}(x) &= \big(D(x_0) \,\big|\, D(x_1)\big) \label{eq:gen_Ginv}
+    %     \end{align}
+    %     define a valid RGSW ciphertext \eqref{eq:rgsw} and external product
+    %     \eqref{eq:ext_prod} with
+    %     $\mathrm{RLWE}(\mu_c) \boxdot \mathrm{RGSW}(\mu_C)
+    %      = \mathrm{RLWE}(\mu_c \cdot \mu_C)$,
+    %     provided the resulting noise remains below the decryption bound.
+    %     % Proof sketch: (i) the inexact gadget identity G^{-1}(x)·G = x + e holds
+    %     % componentwise from Def.~\ref{def:gadget}; (ii) rerun the external-product
+    %     % expansion; noise bound with β and ε as displayed above.
+    % \end{theorem}
+    
+    % \begin{itemize}
+    %     \item Payoff / bridge: instantiating Thm.~\ref{thm:generalization} with
+    %           the gadgets of Ch.~\ref{ch:gadgets} gives external products
+    %           computable natively in RNS --- BV-type gadgets (exact,
+    %           $\varepsilon = 0$) and extension-based gadgets (GHS/Hybrid,
+    %           $\varepsilon > 0$ from FastBConv overflow and ApproxModDown
+    %           rounding, plus the $P$-scaling adapted as in
+    %           Sec.~\ref{sec:gadgets:ghs})
+    %           % this bridge sentence is the load-bearing edge of the
+    %           % related-works graph
+    %     \item Forward remark (contribution preview, one sentence): in BGV the
+    %           key/gadget ciphertexts carry the plaintext factor $t$
+    %           ($Z$-rows of the form $(a, as + te)$), so the noise bounds above
+    %           acquire $t$ factors --- a genuine difference from the TFHE setting,
+    %           treated in Ch.~\ref{ch:contribution}, not a notational one
+    % \end{itemize}
+    
+    % \newpage
+% }\fi

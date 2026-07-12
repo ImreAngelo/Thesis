@@ -21,8 +21,85 @@
 % Diagrams
 \usepackage{tikz-cd}
 
+% Load clean numbers from JSON
+\usepackage{jsonparse}
+\usepackage{siunitx}
+\sisetup{round-mode = places, round-precision = 2}
+
+\ExplSyntaxOn
+% expands the JSON value, converts sci notation to a plain decimal, rounds to 2 places
+\NewExpandableDocumentCommand { \jsonms } { m m }
+  { \fp_eval:n { round ( \JSONParseExpandableValue {#1} {#2} , 2 ) } }
+\ExplSyntaxOff
+
+% Numbers
+\ExplSyntaxOn
+\clist_new:N \l_myn_clist
+\clist_set:Nn \l_myn_clist { 2, 32, 64, 128 }
+% \nvalue{<0-based index>} -> item from the list
+\NewExpandableDocumentCommand { \nvalue } { m }
+  { \clist_item:Nn \l_myn_clist { #1 + 1 } }  % clist is 1-based
+\ExplSyntaxOff
+
+\ExplSyntaxOn
+\NewExpandableDocumentCommand { \jsonmspern } { m m m }
+  { \fp_eval:n { round ( \JSONParseExpandableValue {#1} {#2} / (#3) , 2 ) } }
+\ExplSyntaxOff
+
 % Strike-through text
 % \usepackage[normalem]{ulem}
+
+% Tables
+\usepackage{subcaption}
+
+%%
+%% Plots
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepgfplotslibrary{groupplots}
+\usetikzlibrary{positioning}
+\pgfplotsset{compat=1.18}
+ 
+% ---- Colors matched to the original (matplotlib-like palette) ----
+\definecolor{gaussblue}{RGB}{31,119,180}
+\definecolor{hpsgreen}{RGB}{44,160,44}
+\definecolor{canonorange}{RGB}{255,165,0}
+\definecolor{maxred}{RGB}{255,36,0}
+\definecolor{hpspurple}{RGB}{148,103,189}
+ 
+% ---- Shared line styles ----
+\pgfplotsset{
+  stderr line/.style={black, dashed, thick},
+  gaussian line/.style={gaussblue, densely dotted, thick},
+  hps line/.style={hpsgreen, dash dot, thick},
+  canonical line/.style={canonorange, dash dot, thick},
+  maxnoise line/.style={maxred, solid, thick},
+  hpssqrt line/.style={hpspurple, dash dot, thick},
+  noiseaxis/.style={
+    width=6.4cm, height=4.9cm,
+    % xlabel={\#Mult},
+    % ylabel={$\log_2(v)-\log_2(\sigma)$},
+    xmin=0, xmax=33,
+    domain=1:32, samples=64, smooth, no markers,
+    legend cell align=left,
+    legend style={
+      at={(0.03,0.97)}, anchor=north west,
+      font=\scriptsize, draw=black, fill=white,
+      inner sep=2pt, row sep=-1pt,
+    },
+    every axis plot post/.append style={line width=0.9pt},
+    tick label style={font=\scriptsize},
+    label style={font=\small},
+    axis line style={line width=0.6pt},
+  },
+}
+
+% Read from CSV files
+\usepackage{csvsimple}
+ 
+% For professional looking table lines (\toprule, \midrule, \bottomrule)
+\usepackage{booktabs} 
+
 
 %%
 %% Temporary: Silence warnings outside my control

@@ -3,10 +3,17 @@
 
 \subsubsection{Conclusion}
 \begin{itemize}
-    \item Achieved better time than expected
+    \item \textcolor{red}{Achieved better time than expected with GHS}
+    \item Large noise
+    \item GHS improvement over BV even adjusted to same security parameter, but would require a solution to the internal product
+    \item TFHE could allow 
 \end{itemize}
 
 \subsubsection{Future Work}
 \begin{itemize}
-    \item BGV SIMD capabilities \cite{} not utilized
+    \item BGV SIMD capabilities \cite{} not utilized in write loop; \texttt{Server::Write} can perform $N$ rounds simultaneously, but does this translate into higher throughput?
+    \item AVX512 not tested because time + no access to a computer that supports this instruction set; this would decrease the RNS primes to 48 bits, increasing performance and security, decreasing noise headroom
+    \item RGSW/packed RLWE bandwidth optimization; originally planned, dropped due to time constraints, requires more complicated setup phase as $\rgsw{s}$ is required \cite{chillotti:onionring:2019, cryptoeprint:2025/1088}
+    \item BFV implementation should be easy as the library sits on top of OpenFHE, it should be as easy as swapping out a few lines of code. Since BFV places its messages in the most significant bits, the decomposition gadget could be made inexact as with the powers of base, the least significant digits are dropped when $\ell$ is too small for $B^\ell$ to cover $q$
+    \item The full sPAR protocols contains additional things such as equivocation protection, sorting buckets etc.
 \end{itemize}

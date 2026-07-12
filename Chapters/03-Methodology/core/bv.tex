@@ -1,0 +1,84 @@
+\subsection{Brakerski-Vaikuntanathan Implementation}
+\begin{itemize}
+    \item Digit decomposition of each residual limb
+    \item Two functions that output $P(v)$ and $D(u)$ with quality $\beta$ s.t. $\|D(u)\|_\infty \leq B/2 = \lceil \max{q_i}/(2\ell) \rceil$
+    \item The outputs has $k\times \ell$ entries, where $k$ is the number of RNS moduli (corresponding to the first decomposition) and $\ell$ is the number of base $B$ digits
+    \item Takes only $\ell$ as an input parameter and computes $\log{B} = \left\lfloor \max\{\log(q_i)\}/\ell \right\rfloor + 1$
+\end{itemize}
+
+\subsubsection{RGSW Encryption}
+\input{Chapters/03-Methodology/core/bv-encrypt}
+
+\subsubsection{External Product}
+\begin{itemize}
+    \item \textbf{IMPORTANT:} decomposition determines the quality $\beta$, so the order of operations does matter for noise growth!
+    \item Decomposition used = per limb digit extraction
+    \item Must choose to decompose into $[-B/2, B/2)$ or $[0, B)$
+    \begin{itemize}
+        \item Centered has lower noise as the quality is $\beta = B/2$ but more complicated
+        \item Unsigned is far simpler and easily parallelizable but $\beta = B$
+    \end{itemize}
+    \item Centered representation creates an order; parallelization requires \textit{pre-processing}
+\end{itemize}
+
+\begin{gather*}
+    \text{Let } offset = \frac{B}{2}\cdot \frac{B^\ell - 1}{B - 1} \text{ be a global (pre-calculated) value} \\
+    offset = \frac{2^b}{2}\cdot \frac{2^{b\ell} - 1}{2^b - 1} = 2^{b-1} \cdot \frac{2^{b\ell} - 1}{2^b - 1} = \frac{2^{b\ell(b-1)}-2^{b-1}}{2^b - 1}
+\end{gather*}
+
+%%%
+%%% Signed digit decomposition (optimized for B = 2^b)
+%%%
+\begin{algorithm}
+\caption{Decompose wrt. $B$}
+\label{alg:bv:decompose}
+\begin{algorithmic}[1]
+\Require RNS polynomial $[x]_{\mathcal{B}_Q} \in \mathbb{Z}_{q_0} \times \mathbb{Z}_{q_1} \times \dots \times  \mathbb{Z}_{q_{k-1}}$, base $B = 2^b$, and decomposition parameter $\ell$
+\Ensure $\ell$ RNS ``digit'' polynomials $\mathbf{d} = (d_0, d_1, \dots, d_{k\ell-1}) \in \mathbb{Z}_B^{k\ell}$
+\State $a' \gets a$
+\For{$j = 0$ to $\ell - 1$}
+    \State $d_j \gets a' \pmod B$ \Comment{Extract the lower bits}
+    \If{$d_j \ge B/2$}
+        \State $d_j \gets d_j - B$ \Comment{Shift to signed range}
+    \EndIf
+    \State $a' \gets \frac{a' - d_j}{B}$ \Comment{Shift down and apply the carry}
+\EndFor
+\State \Return $\mathbf{d}$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{itemize}
+    \item Uses the standard external product function \autoref{alg:external-product}
+    \item Or a slightly parallelized version
+\end{itemize}
+
+\ifnotes{
+    \begin{minted}{c++}
+    const auto& cv    = ct->GetElements();  // (c0, c1), EVALUATION format
+    const auto params = cv[0].GetParams();
+    const size_t l    = cv[0].GetNumOfElements() * m_ell;
+    
+    const auto d0 = Decompose(cv[0]);
+    const auto d1 = Decompose(cv[1]);
+    
+    DCRTPoly acc0(params, Format::EVALUATION, true);
+    DCRTPoly acc1(params, Format::EVALUATION, true);
+    
+    for (size_t r = 0; r < l; r++) {
+        const auto& row0 = C[r]->GetElements();      // (mg, 0) row
+        const auto& row1 = C[r + l]->GetElements();  // (0, mg) row
+        acc0 += d0[r] * row0[0] + d1[r] * row1[0];
+        acc1 += d0[r] * row0[1] + d1[r] * row1[1];
+    }
+    
+    auto result = ct->Clone();
+    result->SetElements({std::move(acc0), std::move(acc1)});
+    return result;
+    \end{minted}
+}\fi
+
+
+\subsubsection{Internal Product}
+\begin{itemize}
+    \item Trivially implemented as repeated external products as per the definition \autoref{def:prod:internal}
+\end{itemize}

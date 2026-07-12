@@ -1,0 +1,65 @@
+\ifnotes{
+    \begin{tikzpicture}
+    \begin{groupplot}[
+      group style={
+        group size=2 by 2,
+        horizontal sep=1.3cm,
+        vertical sep=1.9cm,
+      },
+      noiseaxis,
+    ]
+     
+    % ---------- (a) Independent Gaussian Polynomials ----------
+    \nextgroupplot[ymin=-5, ymax=120]
+    \addplot[stderr line]    {0};
+    \addplot[gaussian line]  {3};
+    \addplot[hps line]       {3.6*x};
+    \addplot[canonical line] {13 + 2.4*x};
+    \addplot[maxnoise line]  {5 + 0.13*x + 0.6*sin(deg(2.1*x))};
+    \legend{StdErr, Gaussian Bound, HPS19 Bound, Canonical Bound, Max Noise (300k Tests)}
+     
+    % ---------- (b) Same Gaussian Polynomial ----------
+    \nextgroupplot[ymin=-2, ymax=58]
+    \addplot[stderr line]    {0};
+    \addplot[gaussian line]  {3};
+    \addplot[hps line]       {1.75*x};
+    \addplot[canonical line] {9.3*ln(x+0.6)};
+    \addplot[maxnoise line]  {3 + 5*exp(-((x-22)^2)/180)};
+    \legend{StdErr, Gaussian Bound, HPS19 Bound, Canonical Bound, Max Noise (300k Tests)}
+     
+    % ---------- (c) Independent Key Polynomials ----------
+    \nextgroupplot[ymin=-5, ymax=95]
+    \addplot[stderr line]    {0};
+    \addplot[gaussian line]  {3};
+    \addplot[hps line]       {1.25*x};
+    \addplot[canonical line] {9 + 2.55*x};
+    \addplot[maxnoise line]  {4 + 0.12*x + 0.6*sin(deg(1.7*x))};
+    \legend{StdErr, Gaussian Bound, HPS19 Bound, Canonical Bound, Max Noise (300k Tests)}
+     
+    % ---------- (d) Same Key Polynomial ----------
+    \nextgroupplot[ymin=-20, ymax=40]
+    \addplot[stderr line]    {0};
+    \addplot[gaussian line]  {3};
+    \addplot[hps line]       {4 - 0.021*x^2};
+    \addplot[canonical line] {9.3*ln(x+0.6)};
+    \addplot[maxnoise line]  {2 + 5*exp(-((x-22)^2)/200)};
+    \addplot[hpssqrt line]   {3 + 10*exp(-((x-24)^2)/320)};
+    \legend{StdErr, Gaussian Bound, HPS19 Bound, Canonical Bound,
+            Max Noise (300k Tests), HPS19 Bound w/ $4\sqrt{N}$}
+     
+    \end{groupplot}
+     
+    % ---------- Subcaptions ----------
+    \node[below=0.65cm of group c1r1.south, font=\small\bfseries]
+      {(a) Independent Gaussian Polynomials.};
+    \node[below=0.65cm of group c2r1.south, font=\small\bfseries]
+      {(b) Same Gaussian Polynomial.};
+    \node[below=0.65cm of group c1r2.south, font=\small\bfseries]
+      {(c) Independent Key Polynomials.};
+    \node[below=0.65cm of group c2r2.south, font=\small\bfseries]
+      {(d) Same Key Polynomial.};
+    \end{tikzpicture}
+}\fi
+
+\input{Figures/Plots/external-product}
+\input{Figures/Plots/internal-product}

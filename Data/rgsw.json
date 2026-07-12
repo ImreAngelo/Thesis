@@ -1,0 +1,28 @@
+{
+  "benchmarks": [
+    {
+      "name": "RGSW/Encrypt/BV",
+      "cpu_time": 5.0750068294573643e+00
+    },
+    {
+      "name": "RGSW/ExternalProduct/BV",
+      "cpu_time": 1.6584896177884616e+00
+    },
+    {
+      "name": "RGSW/InternalProduct/BV",
+      "cpu_time": 2.0236042027777771e+01
+    },
+    {
+      "name": "RGSW/Encrypt/Hybrid",
+      "cpu_time": 1.0624405078369905e+00
+    },
+    {
+      "name": "RGSW/ExternalProduct/Hybrid",
+      "cpu_time": 6.9837327484786982e-01
+    },
+    {
+      "name": "RGSW/InternalProduct/Hybrid",
+      "cpu_time": 1.4209797189409354e+00
+    }
+  ]
+}

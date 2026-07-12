@@ -1,0 +1,55 @@
+%%
+%% Implementation Details (sPAR)
+%% Specifics to the library, if any?
+%%
+\subsection{Implementation Details of sPAR}
+\begin{itemize}
+    \item Uses a procedural programming paradigme, meaning the library implements the required functions but does not provide a full implementation of the server nor client. 
+    \item The benchmarks and testing framework is what actually composes the protocol, using the functions from this library
+    \item This was done so that the functionality is not tightly coupled to the benchmarking without spending time implementing actual communication which would require additional work: serializing data, error handling, and coordinating multiple machines. 
+    \item Does not implement the bucket sorting step: negligible impact
+\end{itemize}
+
+\subsection{Server Write Step}
+\begin{itemize}
+    \item Most important algorithm; does the actual homomorphic sorting
+    \item Some changes compared to \cite{cryptoeprint:2025/860}
+    \begin{itemize}
+        \item Splits the write step and pre-processing step
+        \item HasWrite is inverted i.e. ``notHasWrite''
+        \item Uses external products to handle deep circuits as \cite{cryptoeprint:2025/860} recommends.
+        \item Must use internal product
+        \item \textbf{The server does not actually encrypt }
+    \end{itemize}
+\end{itemize}
+
+%%%
+%%% Server write loop
+%%%
+\begin{algorithm}
+\caption{\texttt{Server::Write}}
+\label{alg:spar:write}
+\begin{algorithmic}[1]
+\Require Reference to state matrices $I$ and $L$
+\Require Encrypted RGSW value $V_r$
+\Require RGSW indices $A_0$, $A_1$ and $A_2$ where $A_j$ is $\log{\eta}$ encrypted bits $\{c_{j,0}, \dots, c_{j,\eta -1}\}$ for $j \in [0, 3)$
+\Ensure Updates the state matrices $I$ and $L$
+\Ensure Encrypted boolean indicating wether the operation was successful
+\State $\mathsf{hasNotWritten} \gets \Call{EncryptRGSW}{1}$
+\For{$d \gets \{0, 1, 2\}$} % [0, D) 
+    \For{$k \gets \{0, 1, 2\}$}
+        \For{$i \gets [0, \eta)$}
+            \State $h \gets z_{i,d}\boxtimes I_{i,k} \boxtimes \mathsf{hasNotWritten}$
+            \State $L_{i,k} \gets L_{i,k} + V_r \boxdot h$
+            \State $I_{i,k} \gets I_{i,k} - h$
+            \State $\mathsf{hasNotWritten} \gets \mathsf{hasNotWritten} + h$
+        \EndFor
+    \EndFor
+\EndFor
+\State \Return $\mathsf{hasNotWritten}$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{remark}
+    From a programming perspective, the choice of $K = 3$ and $D = 3$ is arbitrary. The code implements this as C++ generics also known as template specialization.  
+\end{remark}

@@ -1,7 +1,9 @@
 \chapter{Related Works} % ? The sPAR Protocol
 \label{chp:protocol}
 
+\vfill
 This section details the fundamental building blocks of the \gls{spar} protocol, and the protocol itself. To achieve a reasonable depth the protocol utilizes the \textit{external product}, a primitive from TFHE bootstrapping that allows homomorphic multiplication of binary digits with near-constant noise bounds --- enabling a large number of binary multiplication without consuming a level/bootstrapping. This primitive was ported to BGV-RNS for this thesis, which does not natively allow digit decomposition as normally used by the external product.
+\newpage
 
 % If time allows, this section also details HomExpand, which decreases the bandwidth (allowing the clients/users to send a single rlwe that is then expanded into a series of RGSW ciphertexts encrypting each bit of the index).
 
@@ -9,11 +11,12 @@ This section details the fundamental building blocks of the \gls{spar} protocol,
 \newcommand{\hps}[1]{\gadgetformat{#1}{HPS}}
 \newcommand{\bv}[1]{\gadgetformat{#1}{BV}}
 
-\input{Chapters/02-Related/00-fhe}
-\input{Chapters/02-Related/01-rns}
-\input{Chapters/02-Related/02-gadgets}
-\input{Chapters/02-Related/03-tfhe}
-\input{Chapters/02-Related/04-spar}
+% \input{Chapters/02-Related/00-notation}
+\input{Chapters/02-Related/01-fhe}
+\input{Chapters/02-Related/02-rns}
+\input{Chapters/02-Related/03-gadgets}
+\input{Chapters/02-Related/04-tfhe}
+\input{Chapters/02-Related/05-spar}
 
 % \section{Multi-Party Homomorphic Encryption}
 % TODO

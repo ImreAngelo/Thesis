@@ -1,0 +1,30 @@
+\subsection{GHS/Hybrid}
+\begin{itemize}
+    \item Reuses OpenFHE internals, including Hybrid keyswitching settings
+    \item Downsides: 
+    \begin{itemize}
+        \item Implementation-specific: parameters tied to keyswitching, can be a problem if a program uses both keyswitching and RGSW
+        \item Internal product not implemented!
+        \item Security must be evaluated at ciphertext modulus $QP$
+    \end{itemize}
+\end{itemize}
+
+\begin{algorithm}
+\caption{RGSW Encryption}
+\label{alg:bv:encrypt}
+\begin{algorithmic}[1]
+\Require Decomposition parameter $\ell$, base $B$
+\Require RNS polynomial $[\mu]^{\mathsf{NTT}}_{\mathcal{B}_Q} \in \mathbb{Z}_{q_0} \times \dots \times  \mathbb{Z}_{q_{k-1}}$
+\Ensure $\rgsw{(\mu)}$
+\State Initialize empty array $C$ with $2k\ell$ slots
+\For{$r \gets [0, k\ell)$ \textbf{in parallel}}
+    \State $z \gets \Call{HE.Encrypt}{0}_{\mathcal{B}_{QP}}$
+    \State $mG \gets P \cdot \Call{BaseExtend}{m, Q, P}$
+    
+    \State $C_r \gets \Call{HE.Enc}{0} + (mg, 0) $
+    \State $C_{r + \ell} \gets \Call{HE.Enc}{0} + (0, mg)$
+\EndFor
+\State \Return $C$
+\end{algorithmic}
+\end{algorithm}
+

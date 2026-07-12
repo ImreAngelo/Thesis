@@ -1,0 +1,16 @@
+\subsubsection{Bitwise Operations}
+The library assumes the base $B$ is a power of two, $B = 2^{b}$, and optimizes some operations by using the exponent $b = \log{B}$. This allows common arithmetic performance improvements using bitwise operators:
+
+% The modulo operation is slow because it cannot be done in parallell. If we assume $B = 2^b$ is a power of 2 --- which we can enforce by accepting $\log(B) = b$ as the input parameter instead of $B$ --- then we can use the fact that right-shift \textcolor{red}{$(a \gg b) = a \bmod{2^b}$ or something} to make the modulo operation into a bit-wise (and thus easily parallellizable) operation.
+
+% table
+\begin{align*}
+    \textbf{Operation} & \textbf{Notation} & \textbf{Value} \\
+    \textbf{\Call{LeftShift}{x, b}: } & (x \ll b)           & x\cdot 2^b \\
+    \textbf{\Call{RightShift}{x, b}:} & (x \gg b)           & x/(2^b) \\
+    \textbf{division by } \mathbf{B:} & \Call{LShift}{x, b} & x/B \\
+    \textbf{modulo: }   & x \bmod{2^b} & {x \land ((1\ll b) - 1)} \\
+    % (x \land (2^b - 1))
+    \textbf{center: }   & x \mapsto [x]_{2^b}                & ((x + (1\ll (b - 1))) & m) - (B >> 1);
+    %  = \Call{Center}{x, 2^b}
+\end{align*}

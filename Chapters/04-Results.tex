@@ -1,9 +1,176 @@
+% Load data directly from JSON
+\input{Data/read}
+
+
 \chapter{Results and Discussion}
 \label{chp:results}
+%%
+%% INTRODUCTION
+% ...
+\vfill
+I begin by examining 
+\newpage
+
+%%
+%% PARAMETERS
+\section{Parameters}
+As a baseline I target a security parameter of $\lambda \approx 128$ 
+
+\begin{table}[H]
+    \caption{Base parameters for the }
+    \label{tab:bench:params}
+    \centering
+    \begin{tabular}{lc}
+        \toprule
+        \textbf{Parameter}               & \textbf{Value}   \\
+        \midrule
+        decomposition $(\ell, B)$        & $(2, 2^{x})$ \\
+        number of RNS moduli $k$         & $2$              \\
+        standard deviation $\sigma$      & $3.19$           \\
+        ciphertext modulus order $|Q|$   & $2^{120}$        \\
+        plaintext modulus $t$            & $256$            \\
+        polynomial degree $N$            & $4096$           \\
+        security parameter $\lambda$     & $113.6$          \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% \begin{table}[!htb]
+%     \caption{Base parameters for the small and large parameter sets}
+%     \label{tab:bench:params}
+%     \centering
+%     \begin{tabular}{lcc}
+%         \toprule
+%         \textbf{Parameter} & \textbf{Small} & \textbf{Large} \\
+%         \midrule
+%         standard deviation $\sigma$      & $3.19$    & $3.19$ \\
+%         number of RNS moduli $k$         & $2$       & $2$ \\
+%         ciphertext modulus order $|Q|$   & $2^{120}$ & $2^{120}$ \\
+%         plaintext modulus $t$            & $256$     & $65537$ \\
+%         \hline % BV
+%         decomposition $(\ell, B)$        & $(2, 2^{30}?)$  & $(2, ??)$ \\
+%         polynomial degree $N$            & $4096$     & $16384$ \\
+%         security parameter $\lambda$     & $113.6$    & $\approx 400$ \\
+%         \hline % Hybrid
+%         decomposition $(d_{num}, |P|)$   & $(1,120)$  & $(1, 120)$ \\
+%         polynomial degree $N$            & $8192$     & $16384$ \\
+%         security parameter $\lambda$     & $113.1$    & $\approx 240$ \\
+%         \bottomrule
+%     \end{tabular}
+% \end{table}
 
 \begin{itemize}
-    \item Parameters used and time per user/message of each step in the protocol
-    \item Differences between BV and GHS gadgets for the external product
-    \item AVX512 improvements
+    \item For BV, the base $B = \lfloor \max q_i \rfloor$ is chosen automatically so to be the smallest $B$ that covers the largest RNS prime with $\ell$ digits when the program starts, because the $q_i$ are randomly chosen. 
+    \item The decomposition parameter is $\ell = 2$, which was the smallest $\ell$ that could handle the noise.
 \end{itemize}
 
+
+\section{Noise Analysis}
+\begin{itemize}
+    \item How many users can be supported with these parameters?
+    \item $d_{num}$ can probably be greater than 1, but this is not supported by the code yet (GHS is hard-coded at the RGSW level)
+\end{itemize}
+
+\subsubsection{External Product}
+\begin{itemize}
+    \item Take a fresh RGSW and apply it to an RLWE, save the result as the new RLWE and repeat
+    \item Key takeaway: Hybrid performs better than BV at same security settings
+    \item \textcolor{red}{Maybe a pointless section}
+    % \item Noise becomes additive; grows linearly, as expected
+    % \item At the base parameter set, unbounded but stays below 60 bits for at least 1000 iterations
+\end{itemize}
+
+\input{Figures/Plots/bv-external-product}
+
+
+\input{Figures/Plots/hybrid-external-product}
+
+\subsubsection{Internal product}
+\begin{itemize}
+    \item Hybrid supports at most 1 single internal product before the noise blows up
+\end{itemize}
+
+\input{Figures/Plots/bv-internal-product}
+
+
+\subsubsection{sPAR}
+\begin{itemize}
+    \item If the parameters support even the base case of $\eta = 2$ users, then the scheme can support a nearly arbitrary amount of users with the same parameters
+    \item Noise is a big problem due to the internal product
+    \item Getting enough noise headroom at $\lambda = 128$ requires very large parameters, making the protocol much slower than anticipated
+\end{itemize}
+
+
+%%
+%% BENCHMARKS
+\section{Benchmarks}
+\begin{itemize}
+    \item Run on AMD Ryzen 5 5600X CPU 6-core/12-thread@3.7 GHz with 32Gb RAM in WSL2 Ubuntu Linux 
+    \item Compare numbers with parity in the security parameter (according to the \href{https://github.com/malb/lattice-estimator#}{Lattice Estimator \cite{cryptoeprint:2015/046}})
+    \item Compare numbers at SIMD-capable level
+\end{itemize}
+
+%%
+%% Encrypt RGSW, external product, internal product
+\subsection{TFHE Operations}
+\begin{table}[!htb]
+    \begin{subtable}{.5\linewidth}
+        \begin{tabular}{cc}
+        \textbf{Operation} & \textbf{Time} \\
+            Encrypt RGSW        & \num{\jsonms{\rgswData}{benchmarks[0].cpu_time}}~ms \\
+            External Product    & \num{\jsonms{\rgswData}{benchmarks[1].cpu_time}}~ms \\
+            Internal Product    & \num{\jsonms{\rgswData}{benchmarks[2].cpu_time}}~ms
+        \end{tabular}
+        \caption{BV}
+        \label{tab:bench:operations:bv}
+    \end{subtable}%
+    \begin{subtable}{.5\linewidth}
+      \centering
+        \begin{tabular}{cc}
+        \textbf{Operation} & \textbf{Time} \\
+            Encrypt RGSW        & \num{\jsonms{\rgswData}{benchmarks[3].cpu_time}}~ms \\
+            External Product    & \num{\jsonms{\rgswData}{benchmarks[4].cpu_time}}~ms \\
+            Internal Product    & \num{\jsonms{\rgswData}{benchmarks[5].cpu_time}}~ms\footnote{Not really valid since the noise is too large/result is incorrect...}
+        \end{tabular}
+        \caption{GHS/Hybrid}
+        \label{tab:bench:operations:ghs}
+    \end{subtable} 
+    \caption{RGSW/TFHE Operations}
+\end{table}
+
+\subsubsection{Multi-Threaded Performance}
+\begin{itemize}
+    \item Works now, but only some functions (EncryptRGSW, BV Decompose) are optimized to take advantage of multi-threading.
+    \item $\leq k\ell$ threads saturate, so $k = 2, \ell = 3$ has optimal performance at 6 threads.
+    \item Ideally more threads would used to perform multiple coefficients simultaneously, but this is not implemented.
+\end{itemize}
+
+\textbf{Table of improvements +X\% at 1 to 6 threads}
+
+\subsubsection{sPAR}
+%%
+%% Client::Encrypt, Server::Write, Client::Decrypt, Server::Decrypt
+\begin{table}[H]
+    \caption{One round of the sPAR protocol, \textcolor{red}{using the \textbf{outdated} GHS gadget}}
+    \label{tab:bench:full}
+    \centering
+    \begin{tabular}{cccccc}
+        \toprule
+        $\mathbf{\eta}$ & \textbf{Total time} & \textbf{Encrypt} & \textbf{Write} & \textbf{Partial Dec.} & \textbf{Server Dec.} \\
+        \midrule
+        \JSONParseArrayMapInline{\fullData}{benchmarks}{
+          $\nvalue{#1}$ &
+          \num{\jsonms{\fullData}{benchmarks[#1].cpu_time}} & 
+          \num{\jsonmspern{\fullData}{benchmarks[#1].encrypt}{\nvalue{#1}}} &
+          \num{\jsonmspern{\fullData}{benchmarks[#1].write}{\nvalue{#1}}} &
+          \num{\jsonmspern{\fullData}{benchmarks[#1].partial}{\nvalue{#1}}} &
+          \num{\jsonms{\fullData}{benchmarks[#1].final}} \\
+        }
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+
+\section{Discussions}
+The results show that 

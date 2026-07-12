@@ -1,5 +1,71 @@
 %
+\newpage
 \section{Experimental Setup}
+
+\subsubsection{sPAR}
+The design 
+To simulate communication between parties, a single ``all-knowing'' orchestrator with access to the secret key. 
+
 \begin{itemize}
+    \item An ``all-knowing'' orchestrator performs the setup and 1 full round
+    \item In \texttt{benchmark} dir
+    \begin{itemize}
+        \item Takes the number of users $\eta$ as an input
+        \item Every ``user'' generates a private key share, and corresponding public key share
+        \item The public key shares are all synthesized to make one large public key
+        \item For keeping track, each user has a unique ID 
+        \item Each user encodes their ID in an RGSW using the public key, and sends that message to the server
+        \item Each user also sends 3 random indices 
+        \item After receiving all messages, the server performs the write operation on each message
+    \end{itemize}
     \item Setup phase (considered ``free'')
+    \begin{itemize}
+        \item Generate public key shares and 
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Unit Tests}
+\begin{itemize}
+    \item To empirically evaluate correctness and catch bugs early, the functionality of the program is unit tested
+    \item The RGSW encryption + TFHE operations are tested for plaintext 0 and 1, and a larger message
+\end{itemize}
+
+\subsubsection{Choice of Parameters}
+\begin{itemize}
+    \item There are two interesting choices of parameters:
+    \begin{itemize}
+        \item Small: Security parameter $\lambda \approx 128$ bits ($2^\lambda$)
+        \item \textcolor{red}{Large: Fastest parameteres that allow SIMD operations in BGV \cite{simd}}
+    \end{itemize}
+    \item To determine parameters, I used the lattice estimator \cite{cryptoeprint:2015/046} 
+    \item Try 
+\end{itemize}
+
+\subsubsection{Hybrid}
+\begin{itemize}
+    \item GHS must evaluate security under ciphertext modulus $QP$
+    \begin{itemize}
+        \item Since $|P| \approx |Q|$, security is approx. halved
+        \item Compensate by doubling the polynomial degree $N$ shows empirically (via estimator) to bring it back to approximately the same level
+    \end{itemize}
+    \item Three sets of parameters: 2 for security parity and shared for SIMD capable
+\end{itemize}
+
+\subsubsection{Noise Analysis}
+\begin{itemize}
+    \item For testing RGSW products, error is checked directly
+    \item Simulation/benchmark/testing environment always has access to the secret key
+    \begin{gather}
+        x = (c_0, c_1) = (c_1s + \Delta m + \epsilon, c_1) \\
+        \implies \epsilon = c_0 - c_1s - \Delta m, \quad m = \Call{Decrypt}{x, s}
+    \end{gather}
+    \item For sPAR protocol, the number of users is parameterized over $\eta$
+    \item \texttt{test} checks for correctness at every stage, no failures means the protocol can handle $\eta$ users
+    \item Even though $q_i$ are randomly generated each time, its empirically clear there is no difference between runs, no matter what $q_i$ are (as long as $\|Q\|$ is at the same bit size)
+    \item Difference between benchmarks and unit tests: 
+    \begin{itemize}
+        \item Benchmarks are optimized for speed, and do not perform any correctness checks (which could affect performance). Functions only need to run once and total time can be extrapolated: for the client encryption/decryption which can be run in parallel over/independently by each user, and the server/final decryption, the one-shot runtime \textit{is} the correct runtime. For the server write, we only care about the per-user runtime anyway.
+        \item Unit tests are not optimized for speed (in the compilation etc.) and does perform correctness checks multiple times, at different levels; that way, the library provides reasonable diagnostics. Not just that an operation failed, but also \textit{why}/where it failed. 
+        \item Unit tests and benchmarks match in parameter and other code, so a successful unit test empirically validates correctness while the benchmarks provides real performance numbers in a production setting.
+    \end{itemize}
 \end{itemize}

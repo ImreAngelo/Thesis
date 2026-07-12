@@ -1,0 +1,125 @@
+\section{Noise Management Techniques in BGV-RNS} % Different Variants of Key Switching
+\begin{itemize}
+    \item A problem that arises in several areas of FHE is that of multiplying a ciphertext by some large number while keeping the error low.
+    \item The techniques covered in this section typically occur in the context of keyswitching, but we remove them entirely from that context and consider only the techniques themselves.
+\end{itemize}
+
+\begin{equation}
+    (a\cdot s + \Delta m + \epsilon) \cdot X = aX\cdot s + \Delta Xm + X\epsilon
+\end{equation}
+
+% \textcolor{purple}{
+% Several core operations require computing the product of a ciphertext element with noisy auxiliary material; performed naively, this scales the noise by a factor as large as $q$. This section covers the standard techniques for controlling this growth: decomposition (BV), modulus extension (GHS), and their combination (Hybrid).
+% }
+
+\newcommand{\decomp}[2]{\mathsf{Decomp}^{#2}(#1)}
+
+\subsection{Brakerski-Vaikuntanathan}
+Brakerski and Vaikuntanathan~\cite{cryptoeprint:2011/344} first proposed decomposing ciphertext elements into small digits as a means of controlling the noise growth of this operation. The idea has since been generalized into the idea of \emph{gadget decomposition} and applied in a variety of forms, including digit and CRT (RNS) decomposition. Following the convention of~\cite{cryptoeprint:2021/204, cryptoeprint:2022/915}, we refer to this family of decomposition-based techniques collectively as \emph{BV}.
+
+\begin{definition}[Digit Decomposition]
+    Given an integer $\gamma\in\mathbb{Z}_q$ for a modulus $q\geq 2$, base $\beta$ and decomposition parameter $\ell$, the digit decomposition $\decomp{\gamma}{} = (\gamma_0, \gamma_1, \dots, \gamma_{\ell-1}) \in \mathbb{Z}_\beta^\ell$ outputs an ordered list of $\ell$ base-$\beta$ digits satisfying
+    \begin{equation*}
+        \gamma = \gamma_0\frac{q}{\beta} + \gamma_1\frac{q}{\beta^2} + ... \gamma_{\ell - 1}\frac{q}{\beta^{\ell}} = \sum_{i=0}^{\ell-1}\gamma_i\frac{q}{\beta^{i+1}}
+    \end{equation*} 
+\end{definition}
+
+%%
+%% Why its helpful
+Digit decomposition has two properties we care about. First, we can multiply two integers through the decomposition. By construction, $\langle\decomp{\gamma}{}, g\rangle = \gamma$ for the fixed vector $g = (q/\beta, \dots, q/\beta^{\ell})$, meaning $\langle\decomp{\gamma}{}, g\cdot x\rangle = \gamma\cdot x$ for an arbitrary integer $x\in \mathbb{Z}$. Second, if the digits $\gamma_i$ of $\decomp{\gamma}{}$ are small, then $\langle \decomp{\gamma}{}, \epsilon\rangle \leq \ell\cdot \max\{\gamma_i\cdot \epsilon_i\} \leq \beta \epsilon \ll \gamma \epsilon$. This is the mechanism that allows digit decomposition to decrease noise growth. For either of these properties, the particular form of $g$ is unimportant as long as the digits $\gamma_i$ remain small.  Furthermore, as we are generally working with some intrinsic error in FHE, \cite{cryptoeprint:2018/421} proposed allowing some error $\epsilon$ in the reconstruction, giving the definition from their paper verbatim \autoref{def:tfhe:gadget-decomposition}.
+
+%%
+%% Gadget Decomposition
+\begin{definition}[(Abstract) Gadget Decomposition]
+    \label{def:tfhe:gadget-decomposition}
+    An efficient algorithm $\decomp{v}{g,\beta,\epsilon}$ is a valid decomposition on the gadget $g\in \mathbb{Z}_q^\ell$ with quality $\beta \in \mathbb{Z}^{+}$ and precision $\epsilon \in \mathbb{Z}^+$ if and only if for any \gls{rlwe} sample $v\in R_Q$ it efficiently and publicly outputs a small vector $u \in \mathbb{Z}_q$ such that $\|u\|_\infty \leq \beta$ and $\langle u, g\rangle \leq v + \epsilon$.
+
+    % Furthermore, the expectation of u · H − v must to be equal to 0 when v is uniformly distributed in M .
+\end{definition}
+
+\begin{itemize}
+    \item Other (equivalent) form more convenient to work with, where the output of $\decomp{v}{g,\beta,\epsilon} \to D(v)$ and $g\cdot u \to P(u)$ are considered.
+\end{itemize}
+
+\begin{definition}[Gadget Property.]
+    Two vectors $P(x) \in \mathbb{Z}_Q^\ell$ and $D(y) \in \mathbb{Z}_\beta^\ell$ are said to have the \textit{gadget property} if and only if they satisfy \eqref{def:gadget-property} for any pair of \gls{rlwe} samples $(x,y)\in R_Q^2$ with precision $\epsilon \in \mathbb{Z}_q^+$ and quality $\beta$ where $\|D(y)\|_\infty \leq \beta$. If $\epsilon = 0$ then $P(x)$ and $D(y)$ are said to have the \textit{exact} gadget property.
+    \begin{equation}
+        \label{def:gadget-property}
+        \langle P(x), D(y)\rangle = x\cdot y + \epsilon \pmod{Q}
+    \end{equation}
+\end{definition}
+
+% \begin{itemize}
+%     \item Can be applied component-wise to polynomials $\gamma\in R_q$ instead of $\mathbb{Z}_q$
+%     \item Centered representation
+% \end{itemize}
+
+\begin{lemma}[Layered Gadget Decomposition]
+    \label{thm:gadget-layers}
+    Gadget decompositions can be layered.
+
+    \begin{gather*}
+        \langle P_1(u), D_1(v)\rangle = u\cdot v + \epsilon_1, \quad \langle P_2(u), D_2(v) \rangle = u\cdot v + \epsilon_2 \pmod{Q} \\
+        P_1\circ P_2 = P_1(P_2(u)) \implies \langle P_1\circ P_2, D_1 \circ D_2 \rangle = u\cdot v + 2\epsilon \text{ for some } D_1\circ D_2
+    \end{gather*}
+
+    \begin{proof}
+        Very simply
+        \begin{gather*}
+            \langle P_1(P_2(u)), D_1(D_2(u)) \rangle = P_2(u) \cdot D_2(u) + \epsilon_1 = u\cdot v + \epsilon_2 + \epsilon_1 \pmod{Q}
+        \end{gather*}
+    \end{proof}
+\end{lemma}
+
+\subsubsection{RNS Instantiation}
+Digit decomposition cannot be applied directly the \gls{rlwe} sample in an \gls{rns} scheme, as the system only has access to the residues. When Bajard et. al. first implemented the BV cryptosystem using RNS \cite{cryptoeprint:2016/510} they exchanged digit decomposition for CRT decomposition, using the  
+
+\begin{definition}[Chinese Remainder Theorem]
+    is clearly a gadget
+    \begin{equation}
+        CRT: \sum N
+    \end{equation}
+\end{definition}
+
+\begin{itemize}
+    \item CRT idempotent used in \cite{cryptoeprint:2016/510}
+    \item HPS optimization for specifically keyswitching \cite{cryptoeprint:2018/117}
+    \item Definition: gadget with $\beta = Q/2, \epsilon = 0$
+\end{itemize}
+
+\begin{align}
+    \hps{P}(u) = () \\
+    \hps{D}(v) = ()
+\end{align}
+
+\begin{itemize}
+    \item Note on HPS gadget = RNS limb lookup $\to$ \autoref{sec:impl:lib}
+    \item HPS is exact but noise is large ($\beta = Q/2,\; \epsilon = 0$); can apply digit decomposition to each residue polynomial as per \autoref{thm:gadget-layers}, lowering $\beta \to B/2$ where $B = \lfloor \max{q_i}/\ell \rfloor + 1 \implies \epsilon = 0$
+\end{itemize}
+
+\subsection{Gentry-Halevi-Shoup}
+\begin{itemize}
+    \item Another approach was implemented by Gentry, Halevi and Shoup in \cite{cryptoeprint:2012/099}. 
+    \item Generate the key in $QP$ as $(a\cdot s + \Delta P + \epsilon, a) \in \mathcal{B}_{QP}^2$
+    \item Base extend $u \mapsto \mathcal{B}_{QP}$ and calculate inner product $\rlwe{mP}$
+    \item Divide the ciphertext by $P$ and approx mod down to $\mathcal{B}_{Q}$
+    \item \textcolor{red}{\textbf{FastBaseExtension and Multiply by P = add empty towers!!!}}
+    \item Since key was pre-scaled, $\epsilon$ shrinks relative to the message
+    \item Cite to RNS section, base conversion
+\end{itemize}
+
+\begin{remark}[GHS Security] % In RGSW, $Z$ provides the security of the scheme by masking $m$. 
+    \label{remark:ghs-security}
+    The public key is masked by elements in $QP$, meaning the ciphertext modulus $QP \approx 2Q$ must be used when evaluating the security. A GHS scheme has the security as a BV scheme if $Q$ is halved. 
+\end{remark}
+
+
+\subsection{Hybrid}
+\begin{itemize}
+    \item BV and GHS represent a spectrum
+    \item GHS is a single-digit decomposition $(\ell = 1)$ with qualtiy $\approx Q$
+    \begin{proof}[Proof Sketch.]
+        No clue
+    \end{proof}
+    \item Combination of the two techniques
+\end{itemize}

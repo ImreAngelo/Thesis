@@ -1,0 +1,133 @@
+\renewcommand{\vec}[1]{\overrightarrow{\mathbf{#1}}}
+
+\section{Fully Homomorphic Encryption}
+\gls{he} allows computation directly on encrypted data: an untrusted party can evaluate a function over ciphertexts without learning anything about the underlying plaintexts. % Schemes are classified by the computations they support --- \gls{she} and \textit{leveled} schemes evaluate circuits of bounded (multiplicative) depth, while \gls{fhe} supports circuits of arbitrary depth, typically by resetting the accumulated noise through bootstrapping.
+
+Modern \gls{fhe} schemes operate on polynomials in the ring $\mathbb{Z}_q[X]/(\phi(m))$ where $\phi(m)$ is a cyclotomic (I denote $R_q = \mathbb{Z}_q[X]/(X^N+1)$) and base their security on the hardness of the (decision) \gls{rlwe} problem: distinguishing samples of the form $(a, a\cdot s + \epsilon)$ from uniformly random pairs in $R_q^2$. This section focuses on the BGV scheme \cite{cryptoeprint:2011/277} used by the implementation of this thesis; the required TFHE primitives are presented in a later section.
+
+\begin{definition}[Centered modulo representation]
+    Mathematically the two groups are isomorphic, we are simply renaming $0 \mapsto -q/2$, but in practice this affects noise bounds by keeping $\|\epsilon\| \leq q/2$ instead of $\|\epsilon\| \leq q$.
+    \begin{align}
+        [a]_q &= (a \bmod{q}) - q/2 \;\longmapsto\; [-q/2, q/2) \\
+        \mathbb{Z}_q &= \{-q/2, -q/2 + 1, \dots, -1, 0, 1, \dots, q/2 - 1\}
+    \end{align}
+\end{definition}
+
+%%
+%% RLWE
+\begin{definition}[RLWE ciphertext] $\vec{x} = (b,a) \in R_q^2$ containing a uniformly random \textit{public element} $a$ and the masked element $b = a\cdot s + \Delta m + \epsilon$ derived from a persistent secret key $s$ and randomly sampled noise $\epsilon$, where $\Delta$ is the message scaling factor and $m\in R_t$ is the plaintext message being encrypted.
+    \begin{gather} % \vec{x}
+        \label{def:rlwe}
+        \rlwe(m) = (b, a) = (a\cdot s + \Delta m + \epsilon, a) \\
+        s \overset{\$}{\leftarrow} \{-1,0,1\}^N,\quad \epsilon \overset{\$}{\leftarrow} \chi, \quad a \overset{\$}{\leftarrow} R_q
+    \end{gather}
+
+    An RLWE ciphertext $\vec{x}$ encrypting a message $m$ under the secret key $s$ is denoted $\rlwe_s(m)$, but if the secret key is understood from context then $\rlwe(m)$ is typically used.
+\end{definition}
+
+\begin{itemize}
+    \item A public key is an encryption of 0 $p = (a\cdot s + \epsilon, a)$ so that encryption using the public key is as simple as adding the encoded message into 
+\end{itemize}
+
+\begin{definition}[Encryption]
+    \begin{align}
+        \Call{Encrypt}{m} &\mapsto (a\cdot s + \Call{Encode}{m} + \epsilon, a) \\
+        \Call{Encrypt}{m, pk} &= pk + (\Call{Encode}{m}, 0)
+    \end{align}
+\end{definition}
+
+\begin{definition}[Decryption]
+    \Call{Decrypt}{x, s} = 
+\end{definition}
+
+\gls{fhe} schemes support homomorphic addition and multiplication, and typically admits one of the two for \textit{free} in the sense that applying the operation directly to the ciphertexts applies it to the underlying plaintexts, without any additional machinery. 
+% For example, RSA has free multiplication, while 
+Schemes based on \gls{rlwe} have free addition, as seen below:
+\begin{gather*}
+    \vec{x} + \vec{y} = (b_x, a_x) + (b_y, a_y) \\
+    (a_x s + \Delta m_x + \epsilon_x, a_x) + (a_y s + \Delta m_y + \epsilon_y, a_y) \\
+    ((a_x +a_y )s + \Delta (m_x+m_y) + (\epsilon_x + \epsilon_y), a_x + a_y) \\
+    \text{Let } a = (a_x + a_y) \text{ and } \epsilon = (\epsilon_x + \epsilon_y)\\
+    \therefore \vec{x} + \vec{y} = (as + \Delta(m_x + m_y) + \epsilon, a) = \rlwe_s(m_x + m_y)
+\end{gather*}
+
+%%
+%% BGV ADDITION
+\begin{definition}[RLWE addition]
+    \begin{equation}
+        + \;:=\; \rlwe_s(m_x) + \rlwe_s(m_y) = \rlwe_s(m_x + m_y)
+    \end{equation}
+\end{definition}
+
+\begin{itemize}
+    \item The resulting \gls{rlwe} ciphertext encodes the sum of the original messages, but also has higher noise. 
+    \item Managing noise is a central issue in FHE, especially when it comes to multiplication in \gls{lwe}-based schemes 
+    \item Homomorphic multiplication is considerably more complicated and expensive
+    \item We mix BGV with TFHE-style external products to achieve multiplication (of binary digits)
+\end{itemize}
+
+% : the product of two ciphertexts has three elements and multiplied noise terms, and requires \textit{relinearization} --- a form of key switching --- to return to two elements and manage the noise growth without bootstrapping. As \gls{spar} performs no such multiplications, the procedure is not detailed further.
+
+%%
+%% MODULUS SWITCHING
+\begin{definition}[Modulus Switching]
+    The process of converting a ciphertext $\vec{x}\in R_Q^2$ encrypted under a ciphertext modulus $Q$ into a ciphertext $\vec{x}'\in R_{Q'}^2$ encrypted under a different modulus $Q'$, while ensuring that both ciphertexts still decrypt to the same message. 
+    
+    Scaling the message by a factor of $Q'/Q$ and rounding to the nearest integer achieves this, 
+    
+    This process is typically the primary tool for noise management in leveled schemes, as scaling down the modulus also scales down the noise, allowing further computation without bootstrapping.
+\end{definition}
+
+    % The process of converting a ciphertext $\vec{x}\in R_q^2$ into a ciphertext $\vec{x}'\in R_{q'}^2$ encrypting the same message under a smaller modulus $q' < q$, by rescaling and rounding
+%     \begin{equation}
+%         \vec{x}' = \left\lceil \frac{q'}{q}\, \vec{x} \right\rfloor,
+%     \end{equation}
+%     where the rounding is chosen such that $\vec{x}' \equiv \vec{x} \pmod{t}$ to preserve correct decryption. The noise is scaled by the same factor $q'/q$ (plus a small rounding term), so modulus switching is the primary tool for noise management in leveled schemes. Its realization in RNS is different and will be revisited in \autoref{sec:rns-base-conversion}.
+% \end{definition}
+
+%%
+%% OTHER
+\begin{definition}[Bootstrapping]
+    The process of homomorphically evaluating the decryption circuit to reset the noise of a ciphertext, allowing further computation \cite{gentry:2009}. Generally slow.
+\end{definition}
+
+\begin{definition}[Keyswitching]
+    The process of converting a message to being encrypted under a different secret key.
+\end{definition}
+
+\begin{definition}[Multi-Party FHE]
+    Different methods exist and are being researched. Method used in this thesis:
+    Each party has a secret key and public key. The full public key is each of the public key shares appended together.
+    Noise is flooded to maintain security.
+    Partial decryption = each client decrypts the ciphertext using their own secret key
+    Final decryption = the server takes each partial decryption and since the decryption is linear can combine them to decrypt the message without any party knowing the (full) secret key.
+\end{definition}
+
+\subsection{The BGV scheme}
+\begin{itemize}
+    \item Introduce scheme \cite{cryptoeprint:2011/277}
+    \item Justify choice implicitly; strengths
+    \begin{itemize}
+        \item SIMD
+    \end{itemize}
+\end{itemize}
+The implementation of this thesis is in the BGV cryptosystem \cite{cryptoeprint:2011/277}, \textcolor{red}{because} ... which places the message in the \textit{least} significant bits of the ciphertext by encoding the message $v$ as a plaintext $m$ via
+
+\begin{equation}
+    m = \frac{\tilde{W}\cdot I_n^R \cdot v}{n}
+\end{equation}
+
+Notably, $v = 0 \implies m  = 0$ and $v = 1 \implies m = 1$, which is important for later.
+
+The message scale is fixed to $\Delta = 1$ \textcolor{red}{\textbf{(But some noise techniques i.e. AUTO can change $\Delta$ in practice)}} and the noise is scaled by the plaintext modulus, $\epsilon = t\cdot \epsilon_{\mathsf{rlwe}}$, giving $b = a\cdot s + m + t\epsilon_{\mathsf{rlwe}}$ in \eqref{def:rlwe}. In this thesis, each \gls{rlwe} ciphertext will be expressed as \eqref{def:rlwe} to be as general as possible, even though the BGV stuff is implied.
+
+\begin{definition}[Decryption]
+    Assuming $\epsilon < Q$, then decryption is correct.
+    \begin{equation}
+        \Call{Decrypt}{x, s} = \left[[b - a\cdot s]_q\right]_t
+    \end{equation}
+\end{definition}
+
+\begin{definition}[SIMD Capabilities] 
+    If the chosen plaintext modulus $t$ is a prime satisfying the algebraic condition $t \equiv 1 \pmod{2N}$, then BGV supports per-slot SIMD packing \cite{simd}. This mode converts a plaintext from a polynomial of order $N - 1$ into $N$ independent constants $[c_i]_t$. Homomorphic operations are applied to each slot individually, for example $(1, 2) \cdot (2, 3) = (1, 6)$ instead of $(1, 2) \cdot (2, 3) = (1 + 2x)(2 + 3x) = (2, 7, 6)$.
+\end{definition}
