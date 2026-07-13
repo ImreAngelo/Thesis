@@ -1,40 +1,40 @@
 {
+  "context": {
+    "date": "2026-07-11T20:29:15+02:00",
+    "host_name": "DESKTOP",
+    "executable": "/home/angelo/thesis/fhe-master-thesis/build/benchmark/bench-full",
+    "num_cpus": 12,
+    "mhz_per_cpu": 3700,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 32768,
+        "num_sharing": 2
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 32768,
+        "num_sharing": 2
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 2
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 33554432,
+        "num_sharing": 12
+      }
+    ],
+    "load_avg": [1.41748,1.20117,3.58496],
+    "library_version": "v1.9.1",
+    "library_build_type": "release",
+    "json_schema_version": 1
+  },
   "benchmarks": [
-    {
-      "real_time": 1.4718178539997098e+02,
-      "cpu_time": 1.4704501919999998e+02,
-      "time_unit": "ms",
-      "encrypt": 1.4726282800000002e+01,
-      "write": 1.1884822319999998e+02,
-      "partial": 1.2713448199999998e+01,
-      "final": 7.7642559999999994e-01
-    },
-    {
-      "real_time": 3.7346147147000011e+04,
-      "cpu_time": 3.7431265039999998e+04,
-      "time_unit": "ms",
-      "encrypt": 3.8914218980000001e+03,
-      "write": 3.0922536768000002e+04,
-      "partial": 2.4840341030000000e+03,
-      "final": 3.8247478000000001e+01
-    },
-    {
-      "real_time": 1.4423795189700014e+05,
-      "cpu_time": 1.4416093651599999e+05,
-      "time_unit": "ms",
-      "encrypt": 1.4816611174000000e+04,
-      "write": 1.2005366718900000e+05,
-      "partial": 9.2050830420000002e+03,
-      "final": 1.2214678900000000e+02
-    },
-    {
-      "real_time": 5.8262659634800046e+05,
-      "cpu_time": 5.8253149057200004e+05,
-      "time_unit": "ms",
-      "encrypt": 6.0347296905000003e+04,
-      "write": 4.8343944120599999e+05,
-      "partial": 3.8000202334000001e+04,
-      "final": 4.8642594200000002e+02
-    }
-  ]
-}
