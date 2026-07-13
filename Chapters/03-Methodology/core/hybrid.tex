@@ -4,7 +4,7 @@
     \item Downsides: 
     \begin{itemize}
         \item Implementation-specific: parameters tied to keyswitching, can be a problem if a program uses both keyswitching and RGSW
-        \item Internal product not implemented!
+        \item Internal product not really valid
         \item Security must be evaluated at ciphertext modulus $QP$
     \end{itemize}
 \end{itemize}
@@ -18,7 +18,7 @@
 \Ensure $\rgsw{(\mu)}$
 \State Initialize empty array $C$ with $2k\ell$ slots
 \For{$r \gets [0, k\ell)$ \textbf{in parallel}}
-    \State $z \gets \Call{HE.Encrypt}{0}_{\mathcal{B}_{QP}}$
+    \State $z \gets \Call{HE.Encrypt}{0, pk_{\mathcal{B}_{QP}}}$
     \State $mG \gets P \cdot \Call{BaseExtend}{m, Q, P}$
     
     \State $C_r \gets \Call{HE.Enc}{0} + (mg, 0) $

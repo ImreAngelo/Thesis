@@ -5,10 +5,10 @@
 
 Modern \gls{fhe} schemes operate on polynomials in the ring $\mathbb{Z}_q[X]/(\phi(m))$ where $\phi(m)$ is a cyclotomic (I denote $R_q = \mathbb{Z}_q[X]/(X^N+1)$) and base their security on the hardness of the (decision) \gls{rlwe} problem: distinguishing samples of the form $(a, a\cdot s + \epsilon)$ from uniformly random pairs in $R_q^2$. This section focuses on the BGV scheme \cite{cryptoeprint:2011/277} used by the implementation of this thesis; the required TFHE primitives are presented in a later section.
 
-\begin{definition}[Centered modulo representation]
-    Mathematically the two groups are isomorphic, we are simply renaming $0 \mapsto -q/2$, but in practice this affects noise bounds by keeping $\|\epsilon\| \leq q/2$ instead of $\|\epsilon\| \leq q$.
+\begin{definition}[Centered Residue Representation]
+    Mathematically the two groups are isomorphic, we are simply renaming $q/2 +1 \mapsto -q/2$ etc., but in practice this affects noise bounds by keeping $\|\epsilon\| \leq q/2$ instead of $\|\epsilon\| \leq q$.
     \begin{align}
-        [a]_q &= (a \bmod{q}) - q/2 \;\longmapsto\; [-q/2, q/2) \\
+        [a]_q &= (a + q/2 \bmod{q}) - q/2 \;\longmapsto\; [-q/2, q/2) \\
         \mathbb{Z}_q &= \{-q/2, -q/2 + 1, \dots, -1, 0, 1, \dots, q/2 - 1\}
     \end{align}
 \end{definition}
@@ -25,9 +25,9 @@ Modern \gls{fhe} schemes operate on polynomials in the ring $\mathbb{Z}_q[X]/(\p
     An RLWE ciphertext $\vec{x}$ encrypting a message $m$ under the secret key $s$ is denoted $\rlwe_s(m)$, but if the secret key is understood from context then $\rlwe(m)$ is typically used.
 \end{definition}
 
-\begin{itemize}
-    \item A public key is an encryption of 0 $p = (a\cdot s + \epsilon, a)$ so that encryption using the public key is as simple as adding the encoded message into 
-\end{itemize}
+\begin{definition}[RLWE Public Key]
+    A public key is an encryption of 0 $p = (a\cdot s + \epsilon, a)$ so that encryption using the public key is as simple as adding the encoded message into 
+\end{definition}
 
 \begin{definition}[Encryption]
     \begin{align}
@@ -37,7 +37,9 @@ Modern \gls{fhe} schemes operate on polynomials in the ring $\mathbb{Z}_q[X]/(\p
 \end{definition}
 
 \begin{definition}[Decryption]
-    \Call{Decrypt}{x, s} = 
+    \begin{equation}
+        \Call{Decrypt}{x, s} = m
+    \end{equation}
 \end{definition}
 
 \gls{fhe} schemes support homomorphic addition and multiplication, and typically admits one of the two for \textit{free} in the sense that applying the operation directly to the ciphertexts applies it to the underlying plaintexts, without any additional machinery. 
@@ -63,7 +65,7 @@ Schemes based on \gls{rlwe} have free addition, as seen below:
     \item The resulting \gls{rlwe} ciphertext encodes the sum of the original messages, but also has higher noise. 
     \item Managing noise is a central issue in FHE, especially when it comes to multiplication in \gls{lwe}-based schemes 
     \item Homomorphic multiplication is considerably more complicated and expensive
-    \item We mix BGV with TFHE-style external products to achieve multiplication (of binary digits)
+    \item We mix BGV with TFHE-style external products to achieve multiplication (of binary digits), and avoid any HE multiplication.
 \end{itemize}
 
 % : the product of two ciphertexts has three elements and multiplied noise terms, and requires \textit{relinearization} --- a form of key switching --- to return to two elements and manage the noise growth without bootstrapping. As \gls{spar} performs no such multiplications, the procedure is not detailed further.
@@ -111,7 +113,7 @@ Schemes based on \gls{rlwe} have free addition, as seen below:
         \item SIMD
     \end{itemize}
 \end{itemize}
-The implementation of this thesis is in the BGV cryptosystem \cite{cryptoeprint:2011/277}, \textcolor{red}{because} ... which places the message in the \textit{least} significant bits of the ciphertext by encoding the message $v$ as a plaintext $m$ via
+While most of the theory covered throughout this thesis is scheme-agnostic, the implementation is built on top of the BGV scheme \cite{cryptoeprint:2011/277}, \textcolor{red}{chosen because} ... which places the message in the \textit{least} significant bits of the ciphertext by encoding the message $v$ as a plaintext $m$ via
 
 \begin{equation}
     m = \frac{\tilde{W}\cdot I_n^R \cdot v}{n}
@@ -119,7 +121,7 @@ The implementation of this thesis is in the BGV cryptosystem \cite{cryptoeprint:
 
 Notably, $v = 0 \implies m  = 0$ and $v = 1 \implies m = 1$, which is important for later.
 
-The message scale is fixed to $\Delta = 1$ \textcolor{red}{\textbf{(But some noise techniques i.e. AUTO can change $\Delta$ in practice)}} and the noise is scaled by the plaintext modulus, $\epsilon = t\cdot \epsilon_{\mathsf{rlwe}}$, giving $b = a\cdot s + m + t\epsilon_{\mathsf{rlwe}}$ in \eqref{def:rlwe}. In this thesis, each \gls{rlwe} ciphertext will be expressed as \eqref{def:rlwe} to be as general as possible, even though the BGV stuff is implied.
+The message scale is fixed to $\Delta = 1$ \textcolor{red}{\textbf{(But some noise/scaling techniques i.e. FLEXIBLEAUTO can change $\Delta$ in practice)}} and the noise is scaled by the plaintext modulus, $\epsilon = t\cdot \epsilon_{\mathsf{rlwe}}$, giving $b = a\cdot s + m + t\epsilon_{\mathsf{rlwe}}$ in \eqref{def:rlwe}. In this thesis, each \gls{rlwe} ciphertext will be expressed as \eqref{def:rlwe} to be as general as possible, even though the BGV stuff is implied.
 
 \begin{definition}[Decryption]
     Assuming $\epsilon < Q$, then decryption is correct.
@@ -128,6 +130,6 @@ The message scale is fixed to $\Delta = 1$ \textcolor{red}{\textbf{(But some noi
     \end{equation}
 \end{definition}
 
-\begin{definition}[SIMD Capabilities] 
-    If the chosen plaintext modulus $t$ is a prime satisfying the algebraic condition $t \equiv 1 \pmod{2N}$, then BGV supports per-slot SIMD packing \cite{simd}. This mode converts a plaintext from a polynomial of order $N - 1$ into $N$ independent constants $[c_i]_t$. Homomorphic operations are applied to each slot individually, for example $(1, 2) \cdot (2, 3) = (1, 6)$ instead of $(1, 2) \cdot (2, 3) = (1 + 2x)(2 + 3x) = (2, 7, 6)$.
+\begin{definition}[SIMD Batching] 
+    If the chosen plaintext modulus $t$ is a prime satisfying the algebraic condition $t \equiv 1 \pmod{2N}$, then BGV supports per-slot SIMD packing \cite{cryptoeprint:2011/133}. This mode converts a plaintext from a polynomial of order $N - 1$ into $N$ independent constants $[c_i]_t$. Homomorphic operations are applied to each slot individually, for example $(1, 2) \cdot (2, 3) = (2, 6)$ instead of $(1, 2) \cdot (2, 3) = (1 + 2x)(2 + 3x) = (2, 7, 6)$.
 \end{definition}

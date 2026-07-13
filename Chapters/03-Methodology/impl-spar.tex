@@ -4,10 +4,10 @@
 %%
 \subsection{Implementation Details of sPAR}
 \begin{itemize}
-    \item Uses a procedural programming paradigme, meaning the library implements the required functions but does not provide a full implementation of the server nor client. 
-    \item The benchmarks and testing framework is what actually composes the protocol, using the functions from this library
+    \item Uses a procedural programming paradigm, meaning the library implements the required functions but does not provide a full state-maintaining implementation of the server nor client. 
+    \item The benchmarks and testing framework is what actually composes the protocol, using the functions from this library.
     \item This was done so that the functionality is not tightly coupled to the benchmarking without spending time implementing actual communication which would require additional work: serializing data, error handling, and coordinating multiple machines. 
-    \item Does not implement the bucket sorting step: negligible impact
+    \item Does not implement the bucket sorting step: negligible impact (estimated $< 100$ ms per client)
 \end{itemize}
 
 \subsection{Server Write Step}
@@ -18,8 +18,8 @@
         \item Splits the write step and pre-processing step
         \item HasWrite is inverted i.e. ``notHasWrite''
         \item Uses external products to handle deep circuits as \cite{cryptoeprint:2025/860} recommends.
-        \item Must use internal product
-        \item \textbf{The server does not actually encrypt }
+        \item Not implementable using only external products: must use internal products
+        \item As the sever does not care about the privacy of its users, and we can assume it is actively attempting to break privacy, to manage noise \textbf{the server does not actually encrypt the initial entries of $L$, $I$ and $hasNotWritten$}. They are in the correct form but generated using $\epsilon = 0, a = 0$. This has a very minor impact on noise but worth noting, major impact on setup phase as it does not spend any time on encrypting or generating random values.
     \end{itemize}
 \end{itemize}
 
@@ -51,5 +51,5 @@
 \end{algorithm}
 
 \begin{remark}
-    From a programming perspective, the choice of $K = 3$ and $D = 3$ is arbitrary. The code implements this as C++ generics also known as template specialization.  
+    From a programming perspective, the choice of $K = 3$ and $D = 3$ is arbitrary. The library allows a developer to configure different values for $K$ and $D$ as compile-time constants, with no impact on the size of the compiled binary/program. They are implemented as C++ generics, also known as template specialization.
 \end{remark}

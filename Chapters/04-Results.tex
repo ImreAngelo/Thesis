@@ -14,7 +14,7 @@ I begin by examining
 %%
 %% PARAMETERS
 \section{Parameters}
-As a baseline I target a security parameter of $\lambda \approx 128$ 
+As a baseline I target a security parameter of $\lambda \approx 128$ according to \cite{cryptoeprint:2015/046}. The benchmarks are using the parameters from \autoref{tab:bench:params}.
 
 \begin{table}[H]
     \caption{Base parameters for the }
@@ -24,8 +24,8 @@ As a baseline I target a security parameter of $\lambda \approx 128$
         \toprule
         \textbf{Parameter}               & \textbf{Value}   \\
         \midrule
-        decomposition $(\ell, B)$        & $(2, 2^{x})$ \\
-        number of RNS moduli $k$         & $2$              \\
+        decomposition $(\ell, B)$        & $(7, 2^{x})$     \\
+        number of RNS moduli $k$         & $3$              \\
         standard deviation $\sigma$      & $3.19$           \\
         ciphertext modulus order $|Q|$   & $2^{120}$        \\
         plaintext modulus $t$            & $256$            \\
@@ -61,7 +61,8 @@ As a baseline I target a security parameter of $\lambda \approx 128$
 
 \begin{itemize}
     \item For BV, the base $B = \lfloor \max q_i \rfloor$ is chosen automatically so to be the smallest $B$ that covers the largest RNS prime with $\ell$ digits when the program starts, because the $q_i$ are randomly chosen. 
-    \item The decomposition parameter is $\ell = 2$, which was the smallest $\ell$ that could handle the noise.
+    \item I found the best results was setting the first RNS prime $q_0$ to a larger value on the order of $2^{60}$. The remaining primes are on the order of $2^{30}$.
+    \item The decomposition parameter is $\ell = 7$, which was the smallest $\ell$ that could handle the noise with these parameters.
 \end{itemize}
 
 
@@ -112,8 +113,8 @@ As a baseline I target a security parameter of $\lambda \approx 128$
 
 %%
 %% Encrypt RGSW, external product, internal product
-\subsection{TFHE Operations}
-\begin{table}[!htb]
+\subsection{RGSW Operations}
+\begin{table}[H]
     \begin{subtable}{.5\linewidth}
         \begin{tabular}{cc}
         \textbf{Operation} & \textbf{Time} \\
@@ -138,6 +139,11 @@ As a baseline I target a security parameter of $\lambda \approx 128$
     \caption{RGSW/TFHE Operations}
 \end{table}
 
+\begin{itemize}
+    \item The internal product is $2k\ell$ external products, which performs $2k\ell$ multiplications = $\mathcal{O}(4k^2\ell^2)$ runtime 
+    \item Since GHS specifically has only $2$ rows, the internal product $\mathcal{O}(2^2) = \mathcal{O}(1)$ has much better scaling --- which would be impressive if it worked.
+\end{itemize}
+
 \subsubsection{Multi-Threaded Performance}
 \begin{itemize}
     \item Works now, but only some functions (EncryptRGSW, BV Decompose) are optimized to take advantage of multi-threading.
@@ -148,10 +154,26 @@ As a baseline I target a security parameter of $\lambda \approx 128$
 \textbf{Table of improvements +X\% at 1 to 6 threads}
 
 \subsubsection{sPAR}
+% Numbers here
+
+\section{Discussions}
+The results show that 
+
+\begin{itemize}
+    \item Once noise is controlled, many users can be handled due to the additive scaling of the RGSW products
+    \item GHS improvement over BV even adjusted to same security parameter, but would require a solution to the internal product
+\end{itemize}
+
+\subsection{Theoretical Hybrid Improvement}
+\begin{itemize}
+    \item Assuming \autoref{alg:spar:write} is implemented using only external products, or the internal product can be implemented in the hybrid scheme, we see that the hybrid approach is generally faster and has better noise properties
+    \item These results are not technically valid as the noise overflows immediately after 1 or 2 internal products, but it gives an idea of what the system \textit{could} do with more work
+\end{itemize}
+
 %%
 %% Client::Encrypt, Server::Write, Client::Decrypt, Server::Decrypt
 \begin{table}[H]
-    \caption{One round of the sPAR protocol, \textcolor{red}{using the \textbf{outdated} GHS gadget}}
+    \caption{One round of the sPAR protocol, \textcolor{red}{using the \textbf{outdated} GHS gadget}, single-threaded}
     \label{tab:bench:full}
     \centering
     \begin{tabular}{cccccc}
@@ -169,8 +191,3 @@ As a baseline I target a security parameter of $\lambda \approx 128$
         \bottomrule
     \end{tabular}
 \end{table}
-
-
-
-\section{Discussions}
-The results show that 

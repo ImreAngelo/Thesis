@@ -1,5 +1,5 @@
 \subsubsection{Bitwise Operations}
-The library assumes the base $B$ is a power of two, $B = 2^{b}$, and optimizes some operations by using the exponent $b = \log{B}$. This allows common arithmetic performance improvements using bitwise operators:
+The library assumes the base $B$ is a power of two, $B = 2^{b}$, and optimizes some operations by using the exponent $b = \log{B}$. This allows common arithmetic performance improvements $\mathcal{O}(1)$ using bitwise operators:
 
 % The modulo operation is slow because it cannot be done in parallell. If we assume $B = 2^b$ is a power of 2 --- which we can enforce by accepting $\log(B) = b$ as the input parameter instead of $B$ --- then we can use the fact that right-shift \textcolor{red}{$(a \gg b) = a \bmod{2^b}$ or something} to make the modulo operation into a bit-wise (and thus easily parallellizable) operation.
 

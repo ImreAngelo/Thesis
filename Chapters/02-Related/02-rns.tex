@@ -3,10 +3,10 @@
 
 
 \section{Residue Number Systems}
-In BGV, BFV and CKKS the ciphertext modulus $Q$ is large, much larger than a computer word/register (typically 64 bits on modern computers). Numbers that do not fit inside a register must be handled with multi-precision arithmetic, which is known to be slow due to its serial nature that does not allow parallelization. Implementations avoid this problem by using a \gls{rns} where large numbers are represented as a set of smaller, independent residues via the \gls{crt}. RNS variants of BGV, BFV and CKKS are the standard in practice; OpenFHE, for example, only supports the RNS versions of these schemes \cite{cryptoeprint:2022/915}.
+In BGV, BFV and CKKS the ciphertext modulus $Q$ is large, much larger than a computer word/register (typically 64 bits on modern computers). Numbers that do not fit inside a register must be handled with multi-precision arithmetic, which is known to be slow due to its serial nature that does not allow parallelization. High-performance implementations avoid this problem by using a \gls{rns} where large numbers are represented as a set of smaller, independent residues via the \gls{crt}. RNS variants of BGV, BFV and CKKS are the standard in practice; OpenFHE, for example, only supports the RNS versions of these schemes~\cite{cryptoeprint:2022/915}.
 
 \begin{definition}[Canonical Form]
-    We are interested in polynomials in the ring $R_Q = \mathbb{Z}_Q[X]/(X^N+1)$ with degree (up to) $N - 1$ and coefficients in $[-Q/2, Q/2)$. (centered modulo representation), and different ways to represent this polynomial. The canonical form \eqref{form:canonical} of such a polynomial $a$ is the form everyone is familiar with.
+    We are interested in polynomials in the ring $R_Q = \mathbb{Z}_Q[X]/(X^N+1)$ with degree (up to) $N - 1$ and coefficients in $[-Q/2, Q/2)$, and different representations of this polynomial. The canonical form \eqref{form:canonical} of such a polynomial $a$ is the form most is familiar with.
     \begin{equation}
         \label{form:canonical}
         a = c_0 + c_1X + \cdots + c_{N-1}X^{N-1} = \sum_{i=0}^{N-1} c_iX^i
@@ -57,7 +57,7 @@ Let $Q = q_0\dots q_{k-1}$ with $\gcd(q_i, q_j) = 1 \;\forall\; i\not= j$, so th
 \subsection{Number Theoretic Transform} % Maybe more details in appendix?
 The \gls{ntt} converts a negacyclic convolution in the coefficient domain into point-wise multiplication in the NTT domain, and multiplication in $R_{q_i}$ is exactly such a convolution of the coefficient vectors. Applying the \gls{ntt} to each residue of the CRT form \eqref{form:crt} therefore makes polynomial multiplication element-wise as well. The negacyclic \gls{ntt} of size $N$ requires each modulus to satisfy $q_i \equiv 1 \pmod{2N}$, which constrains the choice of RNS primes.
 
-\begin{definition}[Second RNS form (Double CRT/NTT/Evaluation Form)]
+\begin{definition}[Second RNS form (Double CRT/NTT/Evaluation)]
     By applying the \gls{ntt} to the CRT form \eqref{form:crt} we gain the ability to perform polynomial multiplication in parallel, without losing the ability to perform addition/subtraction in parallel.
     
     \begin{equation}
@@ -89,19 +89,22 @@ The \gls{ntt} converts a negacyclic convolution in the coefficient domain into p
 
 %%
 %% CLOSING REMARKS
-The evaluation form \eqref{form:eval} is the preferred form, as it supports parallel addition, subtraction and multiplication, but it still does not natively support \textit{all} necessary operations. Because switching between canonical/vector, CRT and NTT mode is relatively expensive --- requiring (inverse) CRTs and NTTs --- much of the relevant literature \cite{cryptoeprint:2012/099, cryptoeprint:2016/510, cryptoeprint:2018/117, cryptoeprint:2021/204} improves upon existing functions by finding new approaches and approximations that limit the number of format-switches required. 
-\begin{equation*}
-    \raisebox{0.3ex}{\text{ Coefficient }}
-    \overset{\text{\tiny CRT}}{\underset{\text{\tiny iCRT}}{\overset{\longrightarrow}{\longleftarrow}}}
-    \raisebox{0.3ex}{\text{ CRT }}
-    \overset{\text{\tiny NTT}}{\underset{\text{\tiny iNTT}}{\overset{\longrightarrow}{\longleftarrow}}}
-    \raisebox{0.3ex}{\text{ Evaluation (DCRT) }}
-\end{equation*}
+{
+\color{red}
+The evaluation form \eqref{form:eval} is the preferred form, as it supports parallel addition, subtraction and multiplication, but it still does not natively support \textit{all} necessary operations. Because switching between canonical/vector, CRT and NTT mode is relatively expensive --- requiring (inverse) CRTs and NTTs --- much of the relevant literature \cite{cryptoeprint:2012/099, cryptoeprint:2016/510, cryptoeprint:2018/117, cryptoeprint:2021/204} improves upon existing functions by finding new approaches and approximations that limit the number of conversions required. 
+}
+% \begin{equation*}
+%     \raisebox{0.3ex}{\text{ Coefficient }}
+%     \overset{\text{\tiny CRT}}{\underset{\text{\tiny iCRT}}{\overset{\longrightarrow}{\longleftarrow}}}
+%     \raisebox{0.3ex}{\text{ CRT }}
+%     \overset{\text{\tiny NTT}}{\underset{\text{\tiny iNTT}}{\overset{\longrightarrow}{\longleftarrow}}}
+%     \raisebox{0.3ex}{\text{ Evaluation (DCRT) }}
+% \end{equation*}
 
 % Switching between formats is expensive so we try to stay in evaluation mode for as long as possible, only switching to coefficient/CRT form when absolutely required.
 
 
-\subsection{RNS Base Conversion}
+\subsection{Base Conversion}
 \label{sec:rns-base-conversion}
 % In some cases it becomes useful to change the modulus of the RNS representation without changing the underlying integer. Note this is different to modulus switching because... ???? 
 
@@ -136,38 +139,11 @@ The evaluation form \eqref{form:eval} is the preferred form, as it supports para
     % (\textcolor{red}{TODO: distinguish CRT vs NTT mode... maybe $[a]^\mathsf{NTT}_{\mathcal{B}_Q}$?})
 \end{remark}
 
-The naive approach to base conversion reconstructs $a$ from its residues through inverse \gls{crt}, and then reduces the result modulo each modulus of the new basis. This reintroduces the multi-precision arithmetic that RNS was meant to avoid. A cheap but approximate alternative exists, described next.
+The naive approach to base conversion reconstructs $a$ from its residues through inverse \gls{crt}, and then reduces the result modulo each modulus of the new basis. This reintroduces the multi-precision arithmetic that RNS was meant to avoid. Cheaper but approximate alternatives exists, described next.
 
-%%%
-%%% Base Extension
-%%%
-% \begin{algorithm}[ht!]
-% \caption{Base Extension}
-% \label{alg:base_extension}
-% \begin{algorithmic}[1]
-%     \Require $[a]_{\mathcal{B}_Q}^\mathsf{NTT}$ and a basis $\mathcal{B}_P$
-%     \Ensure $[a]_{\mathcal{B}_{QP}}^\mathsf{NTT}$
-%     \State Initialize an empty array $a_{P}$ of size $|\mathcal{B}_P|$
-%     \Comment{Holds the $P$-towers}
-%     \State $a_{\mathsf{coeffs}} := \mathsf{Inverse CRT}(\mathsf{Inverse NTT}(a))$
-%     \Comment{Convert to coefficient form}
-%     \For{$p_i \in \mathcal{B}_P$}
-%         \State $a_{p_i} := a_{\mathsf{coeffs}} \pmod{p_i}$ \Comment{Find $p_i$-tower}
-%         \State Append $\mathsf{NTT}(a_{p_i})$ to $a_{P}$
-%     \EndFor
-%     \State\Return $a \cup a_{P}$
-% \end{algorithmic}
-% \end{algorithm}
-
-% \begin{enumerate}
-%     \item Convert to RNS-coefficient mode, then convert to canonical/coefficient form
-%     \item Find the residues/towers $\bmod{p_i}$ for $\mathcal{B}_P$
-%     \item Apply NTT to each residue ($\bmod{p_i}$)
-%     \item Append the NTT'd $P$-towers to the original $Q$-towers
-% \end{enumerate}
 
 \subsubsection{Fast Base Conversion}
-Fast base conversion, introduced by \cite{cryptoeprint:2016/510}, performs the conversion directly on the residues (in CRT mode), avoiding the CRT reconstruction and multi-precision integers entirely. The price is approximation: \eqref{eq:fastbconv} produces not $x$ but $x + \alpha_x Q$ for some integer $\alpha_x \in [0, k)$, as computing the exact overflow $\alpha_x$ would require costly operations in RNS.
+Introduced by \cite{cryptoeprint:2016/510}, fast base conversion performs operates directly on the residues (in CRT mode), avoiding the CRT reconstruction and multi-precision integers entirely. \textcolor{red}{(Does not work in evaluation mode).} The price is approximation, since \eqref{eq:fastbconv} produces not $x$ but $x + \alpha_x Q$ for some integer $\alpha_x \in [0, k)$. \textcolor{purple}{Computing the exact overflow $\alpha_x$ is possible but would require costly operations in RNS, and is unnecessary in \textit{extension} by $P$.} \textcolor{red}{Introduce the notation $\hat{q}_i = Q/q_i$ here?}
 
 \begin{equation}
     \label{eq:fastbconv}
@@ -176,7 +152,7 @@ Fast base conversion, introduced by \cite{cryptoeprint:2016/510}, performs the c
 
 
 \subsubsection{Fast Base Extension}
-We can use \eqref{eq:fastbconv} as a subroutine in base extension: only the new residues $\mathcal{B}_Q \longmapsto \mathcal{B}_P$ need to be calculated, and since $\mathcal{B}_{QP} = \mathcal{B}_Q\cup \mathcal{B}_P$ the original residues are simply kept.
+We can use \eqref{eq:fastbconv} as a subroutine in base extension. Only the new residues $\mathcal{B}_Q \longmapsto \mathcal{B}_P$ need to be calculated, and since $\mathcal{B}_{QP} = \mathcal{B}_Q\cup \mathcal{B}_P$ the original residues are simply kept.
 
 %%%
 %%% Fast Base Extension
@@ -194,30 +170,22 @@ We can use \eqref{eq:fastbconv} as a subroutine in base extension: only the new 
 \end{algorithmic}
 \end{algorithm}
 
-Notably, \eqref{eq:fastbconv} is approximate as a \textit{conversion} but exact as an \textit{extension}: the extended residue vector over $\mathcal{B}_Q\cup\mathcal{B}_P$ is an exact RNS representation of the lifted integer $x' = [x]_Q + \alpha_x Q \in \mathbb{Z}_{QP}$, since $\alpha_x Q \equiv 0 \pmod{q_i}$ keeps the original (reused) $Q$-residues consistent with $x'$. The RNS schemes are designed to tolerate this overflow, which is removed --- or shrunk to the small $\alpha_x$ --- by a subsequent division during mod down.
-
-% \iftrue{
-%     \color{red}
-%     3. The fast variant is approximate as a conversion but exact as an extension. This is the deepest justification, and it's worth a remark in your text. FastBConv doesn't compute [x]Q mod bj[x]_Q \bmod b_j
-%     [x]Q​modbj​; it computes (x+uQ) mod bj(x + uQ) \bmod b_j
-%     (x+uQ)modbj​ for some small overflow uu
-%     u. Viewed as a conversion, that's an error. But viewed as an extension, the combined residue vector over BQ∪B\mathcal{B}_Q \cup \mathcal{B}
-%     BQ​∪B is a perfectly consistent, exact RNS representation of the single lifted integer x′=[x]Q+uQ∈ZQBx' = [x]_Q + uQ \in \mathbb{Z}_{QB}
-%     x′=[x]Q​+uQ∈ZQB​ — the original residues still agree with x′x'
-%     x′ modulo each qiq_i
-%     qi​, since uQuQ
-%     uQ vanishes there. The RNS-variant schemes are designed around exactly this: they tolerate carrying x′x'
-%     x′ instead of xx
-%     x because a subsequent division by QQ
-%     Q shrinks uQuQ
-%     uQ to the small quantity uu
-%     u, or because a Shenoy–Kumaresan-style correction (your FastBConvEx) removes it using one extra modulus. So "extension" isn't just the more common use case — it's the semantics under which the fast algorithm is actually correct.
-% }\fi
+% Notably, \eqref{eq:fastbconv} is approximate as a \textit{conversion} but exact as an \textit{extension}: the extended residue vector over $\mathcal{B}_Q\cup\mathcal{B}_P$ is an exact RNS representation of the lifted integer $x' = [x]_Q + \alpha_x Q \in \mathbb{Z}_{QP}$, since $\alpha_x Q \equiv 0 \pmod{q_i}$ keeps the original (reused) $Q$-residues consistent with $x'$. The RNS schemes are designed to tolerate this overflow, which is removed --- or shrunk to the small $\alpha_x$ --- by a subsequent division during mod down.
 
 \begin{remark}
-    The factors $[(\frac{Q}{q_i})^{-1}]_{q_i}$ and $\frac{Q}{q_i}$ can be pre-calculated and stored in memory (will be discussed in \autoref{sec:impl:hps}).
+    The factors $[(\frac{Q}{q_i})^{-1}]_{q_i}$ and $\hat{q}_i =\frac{Q}{q_i}$ can be pre-calculated and stored in memory (discussed in \autoref{sec:impl:core}).
 \end{remark}
 
+\subsubsection{Scale}
+Note that the error $\alpha_xQ \pmod{QP}$ produced by \autoref{alg:fast_base_extension} would be completely removed if we multiplied by $P$. This observation leads to the specialized operation of ``extend and scale by $P$''. I refer to this operation as $\Call{Scale}{x, P} \mapsto [xP]_{\mathcal{B}_{QP}}$.
+\begin{gather*}
+    x' = x + \alpha_xQ \pmod{QP} \\
+    x'P = xP + \alpha_x QP = xP \pmod{QP}
+\end{gather*}
+\begin{equation}
+    \label{def:scale}
+    \Call{Scale}{x, P} = \Call{FastBaseExtend}{x, \mathcal{B}_Q, \mathcal{B}_P} \cdot P
+\end{equation}
 
 % This conversion is relatively fast. This is because the sum should ideally be
 % reduced modulo q in order to provide the exact value x; instead, (2) provides
@@ -228,7 +196,7 @@ Notably, \eqref{eq:fastbconv} is approximate as a \textit{conversion} but exact 
 
 % , which requires no such conversion but does result in some noise. \eqref{eq:fastbconv} converts $x$ from base $Q$ to base $B$. Using this we can convert the residues of $a \in R_Q$ to residues in $R_P$ and simply add the towers to \eqref{form:eval}.
 
-\subsubsection{Modulus Switching}
+\subsubsection{\color{red} Modulus Switching}
 In RNS, modulus switching --- also referred to as \textit{mod down} --- from $Q$ to $Q' = Q/q_{k-1}$ amounts to \textit{dropping the last limb} with a small correction, computed limb-wise without CRT reconstruction:
 \begin{equation}
     \label{eq:rns-modswitch}
@@ -236,10 +204,14 @@ In RNS, modulus switching --- also referred to as \textit{mod down} --- from $Q$
 \end{equation}
 where $\delta \equiv c \pmod{q_{k-1}}$ and, for BGV, $\delta \equiv 0 \pmod{t}$ so that decryption correctness is maintained. The noise shrinks by a factor $q_{k-1}$, matching the classical modulus switch.
 
-\subsubsection{Approximate Mod Down}
+\subsubsection{\color{red} Approximate Mod Down}
+Modulus switching exactly requires multiprecision integers.. can use FBE again... exploits the fact that the polynomial is pre-multiplied by $P$...
+
+Uses $\delta = \Call{FastBConv}{[x]_{\mathcal{B}_P}, \mathcal{B}_P, \mathcal{B}_Q}$
+
 The reverse operation, switching from the extended modulus $QP$ back down to $Q$, uses \eqref{eq:fastbconv} to convert the $P$-part back to $\mathcal{B}_Q$ before dividing by $P$ \autocite{cryptoeprint:2012/099, cryptoeprint:2018/117}:
 \begin{equation}
     \label{eq:approxmoddown}
-    \mathsf{ApproxModDown}(x) = \left[P^{-1}\left(x - \mathsf{FastBConv}([x]_{\mathcal{B}_P}, \mathcal{B}_P, \mathcal{B}_Q)\right)\right]_{\mathcal{B}_Q}
+    \Call{ApproxModDown}{x} = \left[P^{-1}\left(x - \Call{FastBConv}{[x]_{\mathcal{B}_P}, \mathcal{B}_P, \mathcal{B}_Q}\right)\right]_{\mathcal{B}_Q}
 \end{equation}
-For BGV the converted term must additionally be corrected modulo $t$ to preserve the plaintext \cite{cryptoeprint:2021/204}. This operation also corrects the fast base conversion error: the conversion overflow $\alpha P$ is divided by $P$, shrinking it to the small additive term $\alpha$ --- which is why the approximation in \eqref{eq:fastbconv} is tolerable.
+For BGV the converted term must additionally be corrected modulo $t$ to preserve the plaintext \cite{cryptoeprint:2021/204}. % This operation also corrects the fast base conversion error: the conversion overflow $\alpha P$ is divided by $P$, shrinking it to the small additive term $\alpha$ --- which is why the approximation in \eqref{eq:fastbconv} is tolerable.

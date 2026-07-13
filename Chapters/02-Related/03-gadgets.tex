@@ -1,4 +1,6 @@
-\section{Noise Management Techniques in BGV-RNS} % Different Variants of Key Switching
+% Noise Management Techniques in BGV-RNS?
+% Different Variants of Key Switching?
+\section{Gadget Decomposition in BGV-RNS} 
 \begin{itemize}
     \item A problem that arises in several areas of FHE is that of multiplying a ciphertext by some large number while keeping the error low.
     \item The techniques covered in this section typically occur in the context of keyswitching, but we remove them entirely from that context and consider only the techniques themselves.
@@ -56,8 +58,7 @@ Digit decomposition has two properties we care about. First, we can multiply two
 
 \begin{lemma}[Layered Gadget Decomposition]
     \label{thm:gadget-layers}
-    Gadget decompositions can be layered.
-
+    The composition of two gadget decompositions is itself a gadget decomposition.
     \begin{gather*}
         \langle P_1(u), D_1(v)\rangle = u\cdot v + \epsilon_1, \quad \langle P_2(u), D_2(v) \rangle = u\cdot v + \epsilon_2 \pmod{Q} \\
         P_1\circ P_2 = P_1(P_2(u)) \implies \langle P_1\circ P_2, D_1 \circ D_2 \rangle = u\cdot v + 2\epsilon \text{ for some } D_1\circ D_2
@@ -72,7 +73,7 @@ Digit decomposition has two properties we care about. First, we can multiply two
 \end{lemma}
 
 \subsubsection{RNS Instantiation}
-Digit decomposition cannot be applied directly the \gls{rlwe} sample in an \gls{rns} scheme, as the system only has access to the residues. When Bajard et. al. first implemented the BV cryptosystem using RNS \cite{cryptoeprint:2016/510} they exchanged digit decomposition for CRT decomposition, using the  
+Digit decomposition cannot be applied directly the \gls{rlwe} sample in an \gls{rns} scheme, as the system only has access to the residues. When Bajard et. al. first implemented the BV cryptosystem using \gls{rns} \cite{cryptoeprint:2016/510} they exchanged digit decomposition for CRT decomposition, exploiting the fact that this decomposition is already required by the \gls{rns}.
 
 \begin{definition}[Chinese Remainder Theorem]
     is clearly a gadget
@@ -93,19 +94,19 @@ Digit decomposition cannot be applied directly the \gls{rlwe} sample in an \gls{
 \end{align}
 
 \begin{itemize}
-    \item Note on HPS gadget = RNS limb lookup $\to$ \autoref{sec:impl:lib}
-    \item HPS is exact but noise is large ($\beta = Q/2,\; \epsilon = 0$); can apply digit decomposition to each residue polynomial as per \autoref{thm:gadget-layers}, lowering $\beta \to B/2$ where $B = \lfloor \max{q_i}/\ell \rfloor + 1 \implies \epsilon = 0$
+    \item Note on HPS gadget = RNS limb lookup $\to$ \autoref{sec:impl:core}
+    \item HPS is exact but noise is large ($\beta = Q/2,\; \epsilon = 0$); can apply digit decomposition to each residue polynomial as per \autoref{thm:gadget-layers}, lowering $\beta \to B/2$ and still exact ($\epsilon = 0$) if $B = \lfloor \max{q_i}/\ell \rfloor + 1$
 \end{itemize}
 
 \subsection{Gentry-Halevi-Shoup}
 \begin{itemize}
     \item Another approach was implemented by Gentry, Halevi and Shoup in \cite{cryptoeprint:2012/099}. 
-    \item Generate the key in $QP$ as $(a\cdot s + \Delta P + \epsilon, a) \in \mathcal{B}_{QP}^2$
-    \item Base extend $u \mapsto \mathcal{B}_{QP}$ and calculate inner product $\rlwe{mP}$
+    \item Generate the key in $QP$ as $(a\cdot s + \Delta + \epsilon, a) \in \mathcal{B}_{QP}^2$
+    \item Base extend $u \mapsto \mathcal{B}_{QP}$ and calculate inner product $\rlwe{(mP)}$
     \item Divide the ciphertext by $P$ and approx mod down to $\mathcal{B}_{Q}$
     \item \textcolor{red}{\textbf{FastBaseExtension and Multiply by P = add empty towers!!!}}
     \item Since key was pre-scaled, $\epsilon$ shrinks relative to the message
-    \item Cite to RNS section, base conversion
+    \item Reference RNS section, base conversion
 \end{itemize}
 
 \begin{remark}[GHS Security] % In RGSW, $Z$ provides the security of the scheme by masking $m$. 
@@ -113,13 +114,25 @@ Digit decomposition cannot be applied directly the \gls{rlwe} sample in an \gls{
     The public key is masked by elements in $QP$, meaning the ciphertext modulus $QP \approx 2Q$ must be used when evaluating the security. A GHS scheme has the security as a BV scheme if $Q$ is halved. 
 \end{remark}
 
+\begin{lemma}
+    GHS is a single-digit decomposition $(\ell = 1)$ with quality $\beta = Q/P$ and precision $\epsilon = 0$. 
+    \begin{gather} %%%% Exact gadget
+        \langle [x]_{\mathcal{B}_{QP}}, P\cdot [y]_{\mathcal{B}_{QP}}\rangle = x\cdot y \cdot P \pmod{QP} \\
+        \langle P^{-1}\cdot [x]_{\mathcal{B}_{QP}}, P\cdot [y]_{\mathcal{B}_{QP}}\rangle = x\cdot y \cdot P \cdot P^{-1} = x\cdot y \pmod{QP} \\
+        \overset{\tiny\text{ModDown}}{\longmapsto} \;\; x\cdot y \pmod{Q}
+    \end{gather}
+
+    %%%% Inexact gadget
+    % \begin{gather}
+    %     \langle [x]_{\mathcal{B}_{QP}}, P\cdot [y]_{\mathcal{B}_{QP}}\rangle = x\cdot y \cdot P + \epsilon \pmod{QP} \\
+    %     \implies \langle P^{-1}\cdot [x]_{\mathcal{B}_{QP}}, P\cdot [y]_{\mathcal{B}_{QP}}\rangle = x\cdot y \cdot P \cdot P^{-1} + \epsilon = x\cdot y + \epsilon \pmod{QP} \\
+    %     \overset{\tiny\text{ModDown}}{\longmapsto} x\cdot y + \epsilon/P \pmod{Q}
+    % \end{gather}
+\end{lemma}
 
 \subsection{Hybrid}
 \begin{itemize}
     \item BV and GHS represent a spectrum
-    \item GHS is a single-digit decomposition $(\ell = 1)$ with qualtiy $\approx Q$
-    \begin{proof}[Proof Sketch.]
-        No clue
-    \end{proof}
-    \item Combination of the two techniques
+    \item Hybrid = combination of the two techniques
+    \item Group digits by $d_{num}$
 \end{itemize}
