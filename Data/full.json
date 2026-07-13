@@ -1,0 +1,126 @@
+{
+  "context": {
+    "date": "2026-07-10T10:32:51+02:00",
+    "host_name": "DESKTOP",
+    "executable": "/home/angelo/thesis/fhe-master-thesis/build/benchmark/bench-rgsw",
+    "num_cpus": 12,
+    "mhz_per_cpu": 3700,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 32768,
+        "num_sharing": 2
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 32768,
+        "num_sharing": 2
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 2
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 33554432,
+        "num_sharing": 12
+      }
+    ],
+    "load_avg": [0.62207,0.519531,0.345215],
+    "library_version": "v1.9.1",
+    "library_build_type": "release",
+    "json_schema_version": 1
+  },
+  "benchmarks": [
+    {
+      "name": "RGSW/Encrypt/BV_Small",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "RGSW/Encrypt/BV_Small",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 271,
+      "real_time": 2.5235865129152311e+00,
+      "cpu_time": 2.5501960959409598e+00,
+      "time_unit": "ms"
+    },
+    {
+      "name": "RGSW/ExternalProduct/BV_Small",
+      "family_index": 1,
+      "per_family_instance_index": 0,
+      "run_name": "RGSW/ExternalProduct/BV_Small",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 1101,
+      "real_time": 6.1274968755675563e-01,
+      "cpu_time": 6.1808764032697561e-01,
+      "time_unit": "ms"
+    },
+    {
+      "name": "RGSW/InternalProduct/BV_Small",
+      "family_index": 2,
+      "per_family_instance_index": 0,
+      "run_name": "RGSW/InternalProduct/BV_Small",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 143,
+      "real_time": 5.2552820839153966e+00,
+      "cpu_time": 5.2899988671328675e+00,
+      "time_unit": "ms"
+    },
+    {
+      "name": "RGSW/Encrypt/BV_Large",
+      "family_index": 3,
+      "per_family_instance_index": 0,
+      "run_name": "RGSW/Encrypt/BV_Large",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 63,
+      "real_time": 1.1141407904762081e+01,
+      "cpu_time": 1.1199401301587304e+01,
+      "time_unit": "ms"
+    },
+    {
+      "name": "RGSW/ExternalProduct/BV_Large",
+      "family_index": 4,
+      "per_family_instance_index": 0,
+      "run_name": "RGSW/ExternalProduct/BV_Large",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 219,
+      "real_time": 3.1947063744290429e+00,
+      "cpu_time": 3.2069326803652962e+00,
+      "time_unit": "ms"
+    },
+    {
+      "name": "RGSW/InternalProduct/BV_Large",
+      "family_index": 5,
+      "per_family_instance_index": 0,
+      "run_name": "RGSW/InternalProduct/BV_Large",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 18,
+      "real_time": 3.7987912666665125e+01,
+      "cpu_time": 3.8080670666666691e+01,
+      "time_unit": "ms"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 \section{Parameters}
-Parameters were selected to provide $\lambda >= 128$ bits of security at the largest possible $Q$ while supporting SIMD batching ($t \geq 65537, N \geq 16385$), then $\ell$ was tweaked until the sPAR protocol runs without decryption failure. The RNS primes are set slightly below $64$ bits to minimize $k$. The resulting parameters, listed in~\autoref{tab:bench:params}, yield a security parameter of $339.6$ bits~\cite{cryptoeprint:2015/046} for the underlying \gls{rlwe} scheme.
+Parameters were selected to provide $\lambda >= 128$ bits of security at the largest possible $Q$ while supporting SIMD batching ($t$ prime s.t. $t\equiv 1 \bmod{N}$), then $\ell$ was tweaked until the sPAR protocol runs without decryption failure. The RNS primes are set slightly below $64$ bits to minimize $k$. The resulting parameters, listed in~\autoref{tab:bench:params}, yield a security parameter of $339.6$ bits~\cite{cryptoeprint:2015/046} for the underlying \gls{rlwe} scheme.
 
 \begin{table}[H]
     \caption{Base parameters for BV-RNS}
@@ -22,7 +22,7 @@ Parameters were selected to provide $\lambda >= 128$ bits of security at the lar
 \end{table}
 
 \begin{itemize}
-    \item 
+    \item I was not able to run the protocol using the exact parameters from~\cite{cryptoeprint:2025/860} due to noise (even for $\eta=2$)
 \end{itemize}
 
 % \begin{table}[!htb]

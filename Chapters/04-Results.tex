@@ -56,9 +56,8 @@ I begin by examining the BV implementation on its own, then analyze the sPAR pro
 %% BENCHMARKS
 \section{Benchmarks}
 \begin{itemize}
-    \item Run on AMD Ryzen 5 5600X CPU 6-core {@} 3.7 GHz with 32Gb RAM in WSL2 Ubuntu Linux 
-    \item Compare numbers with parity in the security parameter (according to the \href{https://github.com/malb/lattice-estimator#}{Lattice Estimator \cite{cryptoeprint:2015/046}})
-    \item Compare numbers at SIMD-capable level
+    \item Run on AMD Ryzen 5 5600X CPU 6-core {@} 3.7 GHz with 32Gb RAM in WSL2 Ubuntu 24.04 LTS Linux
+    % \item Compare numbers with parity in the security parameter (according to the \href{https://github.com/malb/lattice-estimator#}{Lattice Estimator \cite{cryptoeprint:2015/046}})
 \end{itemize}
 
 %%
@@ -81,17 +80,18 @@ I begin by examining the BV implementation on its own, then analyze the sPAR pro
         \textbf{Operation} & \textbf{Time} \\
             Encrypt RGSW        & \num{\jsonms{\rgswData}{benchmarks[3].cpu_time}}~ms \\
             External Product    & \num{\jsonms{\rgswData}{benchmarks[4].cpu_time}}~ms \\
-            Internal Product    & \num{\jsonms{\rgswData}{benchmarks[5].cpu_time}}~ms\footnote{Not really valid since the noise is too large/result is incorrect...}
+            Internal Product    & \num{\jsonms{\rgswData}{benchmarks[5].cpu_time}}~ms\footnotemark
         \end{tabular}
         \caption{GHS/Hybrid}
         \label{tab:bench:operations:ghs}
-    \end{subtable} 
-    \caption{RGSW/TFHE Operations}
+    \end{subtable}
+    \caption{RGSW/TFHE Operations with the old (small) parameters}
 \end{table}
+\footnotetext{Not really valid since the noise is too large/result is incorrect...}
 
 \begin{itemize}
-    \item The internal product is $2k\ell$ external products, which performs $2k\ell$ multiplications = $\mathcal{O}(4k^2\ell^2)$ runtime 
-    \item Since GHS specifically has only $2$ rows, the internal product $\mathcal{O}(2^2) = \mathcal{O}(1)$ has much better scaling --- which would be impressive if it worked.
+    \item The internal product scales exponentially as it performs $2k\ell$ external products, which in turn performs $2k\ell$ multiplications = $\mathcal{O}(4k^2\ell^2)$
+    \item Since GHS specifically only has only $2$ rows, the scaling is a set factor of approx. 2 instead of $2k\ell$
 \end{itemize}
 
 \subsubsection{Multi-Threaded Performance}
