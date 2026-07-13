@@ -19,6 +19,10 @@ mk:
 	latexmk -pdf -shell-escape -interaction=nonstopmode \
 		-e '$$makeindex = q/makeglossaries %B/' $(TEXFILE)
 
+force:
+	latexmk -f -pdf -shell-escape -interaction=nonstopmode \
+		-e '$$makeindex = q/makeglossaries %B/' $(TEXFILE)
+
 # Removes TeX-output files
 clean:
 	rm -f *.aux $(TEXFILE).bbl $(TEXFILE).blg *.log *.out $(TEXFILE).toc $(TEXFILE).lot $(TEXFILE).lof $(TEXFILE).glg $(TEXFILE).glo $(TEXFILE).gls $(TEXFILE).acn $(TEXFILE).acr $(TEXFILE).alg $(TEXFILE).xdy $(TEXFILE).loa $(TEXFILE).bcf $(TEXFILE).run.xml $(TEXFILE).fls $(TEXFILE).fdb_latexmk
