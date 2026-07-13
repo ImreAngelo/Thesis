@@ -18,7 +18,7 @@
 \begin{figure}[H]
     \centering
     \caption{RNS-BV noise growth in chained internal products}
-    \label{fig:bv:plot-1}
+    \label{fig:bv:plot-2}
     \begin{tikzpicture}
     \begin{semilogyaxis}[
         noiseaxis,
@@ -33,10 +33,10 @@
     ]
         
         % ---------- Scatter plots ----------
-        \addplot[only marks, mark=*, mark size=1pt, color=gaussblue]
-            table[col sep=comma, x=n, y=noise] {Data/InternalProduct/bv-small.csv};
+        % \addplot[only marks, mark=*, mark size=1pt, color=gaussblue]
+        %     table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv-small.csv};
         \addplot[only marks, mark=*, mark size=1pt, color=hpsgreen]
-            table[col sep=comma, x=n, y=noise] {Data/InternalProduct/bv-large.csv};
+            table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv.csv};
             
         % ---------- Regression lines ----------
         % \addplot[thick, solid, dotted, on layer=axis foreground, color=canonorange, domain=1:1000, samples=300, forget plot]
