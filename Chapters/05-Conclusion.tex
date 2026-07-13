@@ -11,7 +11,15 @@
 
 \subsubsection{Future Work}
 \begin{itemize}
-    \item BGV SIMD capabilities \cite{} not utilized in write loop; \texttt{Server::Write} can perform $N$ rounds simultaneously, but does this translate into higher throughput?
+%% Not pushed to git ------------------
+    \item BGV SIMD capabilities \cite{cryptoeprint:2011/133} not utilized in write loop; \texttt{Server::Write} can perform $N$ rounds simultaneously, but does this translate into higher throughput? A constant polynomial is the same object in SIMD batching and as a regular polynomial, so if write is changed to output binary $\{0,1\}$ it should be possible with:
+    \begin{itemize}
+        \item For each $i \in [0, N)$
+        \item mask $\gets e_i = (0,0,\dots, 1, \dots, 0)$ where only the $i$-th element is 1
+        \item isolated $\gets h \cdot \text{mask}$
+        \item msg
+    \end{itemize}
+%%% -----------------------------------
     \item AVX512 not tested because time + no access to a computer that supports this instruction set; this would decrease the RNS primes to 48 bits, increasing performance and security, decreasing noise headroom
     \item RGSW/packed RLWE bandwidth optimization; originally planned, dropped due to time constraints, requires more complicated setup phase as $\rgsw{s}$ is required \cite{chillotti:onionring:2019, cryptoeprint:2025/1088}
     \item BFV implementation should be easy as the library sits on top of OpenFHE, it should be as easy as swapping out a few lines of code. Since BFV places its messages in the most significant bits, the decomposition gadget could be made inexact as with the powers of base, the least significant digits are dropped when $\ell$ is too small for $B^\ell$ to cover $q$
