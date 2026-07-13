@@ -5,12 +5,12 @@
 % \definecolor{hpspurple}{RGB}{148,103,189}
 
 % ---------- Compute fits in linear space ----------
-\pgfplotstableread[col sep=comma]{Data/ExternalProduct/ghs-small.csv}\bvsmall
+\pgfplotstableread[col sep=comma]{Data/Noise/ExternalProd/hybrid-small.csv}\bvsmall
 \pgfplotstablecreatecol[linear regression={x=n, y=noise}]{reg}{\bvsmall}
 \edef\smallSlope{\pgfplotstableregressiona}
 \edef\smallIntercept{\pgfplotstableregressionb}
 
-\pgfplotstableread[col sep=comma]{Data/ExternalProduct/ghs-large.csv}\bvlarge
+\pgfplotstableread[col sep=comma]{Data/Noise/ExternalProduct/hybrid.csv}\bvlarge
 \pgfplotstablecreatecol[linear regression={x=n, y=noise}]{reg}{\bvlarge}
 \edef\largeSlope{\pgfplotstableregressiona}
 \edef\largeIntercept{\pgfplotstableregressionb}
@@ -33,9 +33,9 @@
     ]
         % ---------- Scatter plots ----------
         \addplot[only marks, mark=*, mark size=1pt, color=gaussblue]
-            table[col sep=comma, x=n, y=noise] {Data/ExternalProduct/ghs-small.csv};
+            table[col sep=comma, x=n, y=noise] {Data/Noise/ExternalProduct/hybrid-small.csv};
         \addplot[only marks, mark=*, mark size=1pt, color=hpsgreen]
-            table[col sep=comma, x=n, y=noise] {Data/ExternalProduct/ghs-large.csv};
+            table[col sep=comma, x=n, y=noise] {Data/Noise/ExternalProduct/hybrid.csv};
             
         % ---------- Regression lines ----------
         \addplot[thick, solid, dotted, on layer=axis foreground, color=canonorange, domain=1:1000, samples=300, forget plot]

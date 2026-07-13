@@ -4,6 +4,7 @@
     \item Two functions that output $P(v)$ and $D(u)$ with quality $\beta$ s.t. $\|D(u)\|_\infty \leq B/2 = \lceil \max{q_i}/(2\ell) \rceil$
     \item The outputs has $k\times \ell$ entries, where $k$ is the number of RNS moduli (corresponding to the first decomposition) and $\ell$ is the number of base $B$ digits
     \item Takes only $\ell$ as an input parameter and computes $\log{B} = \left\lfloor \max\{\log(q_i)\}/\ell \right\rfloor + 1$
+    \item The base $B = \lfloor \max q_i \rfloor$ is chosen automatically so to be the smallest $B$ that covers the largest RNS prime with $\ell$ digits when the program starts. This makes the gadget exact, even if the $q_i$ are generated at different orders (in OpenFHE the first prime is typically larger than the other primes for some reason).
 \end{itemize}
 
 \subsubsection{RGSW Encryption}

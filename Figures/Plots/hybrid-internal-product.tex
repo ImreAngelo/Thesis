@@ -1,52 +1,52 @@
-% \definecolor{gaussblue}{RGB}{31,119,180}
-% \definecolor{hpsgreen}{RGB}{44,160,44}
-% \definecolor{canonorange}{RGB}{255,165,0}
-% \definecolor{maxred}{RGB}{255,36,0}
-% \definecolor{hpspurple}{RGB}{148,103,189}
+% % \definecolor{gaussblue}{RGB}{31,119,180}
+% % \definecolor{hpsgreen}{RGB}{44,160,44}
+% % \definecolor{canonorange}{RGB}{255,165,0}
+% % \definecolor{maxred}{RGB}{255,36,0}
+% % \definecolor{hpspurple}{RGB}{148,103,189}
 
-% ---------- Compute fits in linear space ----------
-% \pgfplotstableread[col sep=comma]{Data/InternalProduct/bv-small.csv}\bvsmall
-% \pgfplotstablecreatecol[linear regression={x=n, y=noise}]{reg}{\bvsmall}
-% \edef\smallSlope{\pgfplotstableregressiona}
-% \edef\smallIntercept{\pgfplotstableregressionb}
+% % ---------- Compute fits in linear space ----------
+% % \pgfplotstableread[col sep=comma]{Data/InternalProduct/bv-small.csv}\bvsmall
+% % \pgfplotstablecreatecol[linear regression={x=n, y=noise}]{reg}{\bvsmall}
+% % \edef\smallSlope{\pgfplotstableregressiona}
+% % \edef\smallIntercept{\pgfplotstableregressionb}
 
-% \pgfplotstableread[col sep=comma]{Data/InternalProduct/bv-large.csv}\bvlarge
-% \pgfplotstablecreatecol[linear regression={x=n, y=noise}]{reg}{\bvlarge}
-% \edef\largeSlope{\pgfplotstableregressiona}
-% \edef\largeIntercept{\pgfplotstableregressionb}
+% % \pgfplotstableread[col sep=comma]{Data/InternalProduct/bv-large.csv}\bvlarge
+% % \pgfplotstablecreatecol[linear regression={x=n, y=noise}]{reg}{\bvlarge}
+% % \edef\largeSlope{\pgfplotstableregressiona}
+% % \edef\largeIntercept{\pgfplotstableregressionb}
 
-\begin{figure}[H]
-    \centering
-    \caption{RNS-BV noise growth in chained internal products}
-    \label{fig:bv:plot-1}
-    \begin{tikzpicture}
-    \begin{semilogyaxis}[
-        noiseaxis,
-        log basis y=2,
-        xmin=0, xmax=50,
-        xlabel={Chain length},
-        ylabel={Largest error $\|\epsilon\|_\infty$},
-        legend pos=south east,
-        set layers,
-        width=\textwidth,
-        height=0.6\textwidth,
-    ]
-        % ---------- Decryption failure ---------
-        \addplot[color=maxred, domain=1:50]{2^71};
+% \begin{figure}[H]
+%     \centering
+%     \caption{RNS-BV noise growth in chained internal products}
+%     \label{fig:hybrid:plot-2}
+%     \begin{tikzpicture}
+%     \begin{semilogyaxis}[
+%         noiseaxis,
+%         log basis y=2,
+%         xmin=0, xmax=50,
+%         xlabel={Chain length},
+%         ylabel={Largest error $\|\epsilon\|_\infty$},
+%         legend pos=south east,
+%         set layers,
+%         width=\textwidth,
+%         height=0.6\textwidth,
+%     ]
+%         % ---------- Decryption failure ---------
+%         \addplot[color=maxred, domain=1:50]{2^71};
         
-        % ---------- Scatter plots ----------
-        \addplot[only marks, mark=*, mark size=1pt, color=gaussblue]
-            table[col sep=comma, x=n, y=noise] {Data/InternalProduct/bv-small.csv};
-        \addplot[only marks, mark=*, mark size=1pt, color=hpsgreen]
-            table[col sep=comma, x=n, y=noise] {Data/InternalProduct/bv-large.csv};
+%         % ---------- Scatter plots ----------
+%         \addplot[only marks, mark=*, mark size=1pt, color=gaussblue]
+%             table[col sep=comma, x=n, y=noise] {Data/InternalProduct/bv-small.csv};
+%         \addplot[only marks, mark=*, mark size=1pt, color=hpsgreen]
+%             table[col sep=comma, x=n, y=noise] {Data/InternalProduct/bv-large.csv};
             
-        % ---------- Regression lines ----------
-        % \addplot[thick, solid, dotted, on layer=axis foreground, color=canonorange, domain=1:1000, samples=300, forget plot]
-        %     {\smallSlope*x + \smallIntercept};
-        % \addplot[thick, solid, dotted, on layer=axis foreground, color=hpspurple, domain=1:1000, samples=300, forget plot]
-        %     {\largeSlope*x + \largeIntercept};
+%         % ---------- Regression lines ----------
+%         % \addplot[thick, solid, dotted, on layer=axis foreground, color=canonorange, domain=1:1000, samples=300, forget plot]
+%         %     {\smallSlope*x + \smallIntercept};
+%         % \addplot[thick, solid, dotted, on layer=axis foreground, color=hpspurple, domain=1:1000, samples=300, forget plot]
+%         %     {\largeSlope*x + \largeIntercept};
             
-        \legend{Noise ceiling, Small Parameters, Large Parameters}
-    \end{semilogyaxis}
-    \end{tikzpicture}
-\end{figure}
+%         \legend{Noise ceiling, Small Parameters, Large Parameters}
+%     \end{semilogyaxis}
+%     \end{tikzpicture}
+% \end{figure}
