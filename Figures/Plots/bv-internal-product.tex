@@ -5,15 +5,15 @@
 % \definecolor{hpspurple}{RGB}{148,103,189}
 
 % ---------- Compute fits in linear space ----------
-% \pgfplotstableread[col sep=comma]{Data/InternalProduct/bv-small.csv}\bvsmall
+% \pgfplotstableread[col sep=comma]{Data/Noise/InternalProd/bv_small.csv}\bvsmall
 % \pgfplotstablecreatecol[linear regression={x=n, y=noise}]{reg}{\bvsmall}
 % \edef\smallSlope{\pgfplotstableregressiona}
 % \edef\smallIntercept{\pgfplotstableregressionb}
 
-% \pgfplotstableread[col sep=comma]{Data/InternalProduct/bv-large.csv}\bvlarge
-% \pgfplotstablecreatecol[linear regression={x=n, y=noise}]{reg}{\bvlarge}
-% \edef\largeSlope{\pgfplotstableregressiona}
-% \edef\largeIntercept{\pgfplotstableregressionb}
+\pgfplotstableread[col sep=comma]{Data/Noise/InternalProd/bv.csv}\bvlarge
+\pgfplotstablecreatecol[linear regression={x=n, y=noise}]{reg}{\bvlarge}
+\edef\largeSlope{\pgfplotstableregressiona}
+\edef\largeIntercept{\pgfplotstableregressionb}
 
 \begin{figure}[H]
     \centering
@@ -31,10 +31,9 @@
         width=\textwidth,
         height=0.6\textwidth,
     ]
-        
         % ---------- Scatter plots ----------
         % \addplot[only marks, mark=*, mark size=1pt, color=gaussblue]
-        %     table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv-small.csv};
+        %     table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv_small.csv};
         \addplot[only marks, mark=*, mark size=1pt, color=hpsgreen]
             table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv.csv};
             

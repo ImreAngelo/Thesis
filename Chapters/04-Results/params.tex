@@ -1,5 +1,5 @@
 \section{Parameters}
-Parameters were selected to provide $\lambda >= 128$ bits of security at the largest possible $Q$ while supporting SIMD batching ($t$ prime s.t. $t\equiv 1 \bmod{N}$), then $\ell$ was tweaked until the sPAR protocol runs without decryption failure. The RNS primes are set slightly below $64$ bits to minimize $k$. The resulting parameters, listed in~\autoref{tab:bench:params}, yield a security parameter of $339.6$ bits~\cite{cryptoeprint:2015/046} for the underlying \gls{rlwe} scheme.
+Parameters were selected to provide $\lambda \geq 128$ bits of security at the largest possible $Q$ while supporting SIMD batching ($t$ prime s.t. $t\equiv 1 \bmod{N}$), then $\ell$ was tweaked until the sPAR protocol runs without decryption failure. The RNS primes are set slightly below $64$ bits to minimize $k$. The resulting parameters, listed in~\autoref{tab:bench:params}, yield a security parameter of $339.6$ bits~\cite{cryptoeprint:2015/046} for the underlying \gls{rlwe} scheme.
 
 \begin{table}[H]
     \caption{Base parameters for BV-RNS}
@@ -9,12 +9,12 @@ Parameters were selected to provide $\lambda >= 128$ bits of security at the lar
         \toprule
         \textbf{Parameter}                  & \textbf{Value}   \\
         \midrule
-        decomposition $(\ell, B)$           & $(7, 2^{9})$     \\ % (6, 2^{11})
+        decomposition $(\ell, B)$           & $(6, 2^{11})$    \\ % $(7, 2^{9})$
         number of RNS moduli $k$            & $3$              \\
         first mod size $\log{q_0}$          & $60$             \\
         ciphertext modulus order $\log{Q}$  & $2^{180}$        \\
         standard deviation $\sigma$         & $3.19$           \\
-        plaintext modulus $t$               & $65537$          \\
+        plaintext modulus $t$               & $65537 = 2^{16}+1$          \\
         polynomial degree $N$               & $16385$          \\
         security parameter $\lambda$        & $339.6$          \\
         \bottomrule
@@ -22,7 +22,10 @@ Parameters were selected to provide $\lambda >= 128$ bits of security at the lar
 \end{table}
 
 \begin{itemize}
-    \item I was not able to run the protocol using the exact parameters from~\cite{cryptoeprint:2025/860} due to noise (even for $\eta=2$)
+    \item Tried to replicate the original parameters exactly, I was not able to run the protocol using the exact parameters from~\cite{cryptoeprint:2025/860} due to noise (even for $\eta=2$). These parameters would be too small to take advantage of RNS anyways, as they all fit inside a computer register $\leq 2^{64}$
+    \item Data per message = $N\log(t)/8 \approx 16385 \cdot (16)/8 = 32770$ bytes $\approx 32$ Kb
+    \item sPAR data per msg = $2048 * 8/8 = 2048 = 2$ Kb
+    \item If larger params is 16 times slower than expected, throughput is the same
 \end{itemize}
 
 % \begin{table}[!htb]

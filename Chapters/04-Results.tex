@@ -16,13 +16,13 @@ I begin by examining the BV implementation on its own, then analyze the sPAR pro
 \input{Chapters/04-Results/params.tex}
 \input{Chapters/04-Results/bv.tex}
 
-\section{Noise Analysis}
+\section{Noise Analysis (old)}
 \begin{itemize}
     \item How many users can be supported with these parameters?
     \item $d_{num}$ can probably be greater than 1, but this is not supported by the code yet (GHS is hard-coded at the RGSW level)
 \end{itemize}
 
-\subsubsection{External Product}
+% \subsubsection{External Product}
 \begin{itemize}
     \item Take a fresh RGSW and apply it to an RLWE, save the result as the new RLWE and repeat
     \item Key takeaway: Hybrid performs better than BV at same security settings
@@ -31,25 +31,19 @@ I begin by examining the BV implementation on its own, then analyze the sPAR pro
     % \item At the base parameter set, unbounded but stays below 60 bits for at least 1000 iterations
 \end{itemize}
 
-\input{Figures/Plots/bv-external-product}
+% \input{Figures/Plots/bv-external-product}
+
+% \input{Figures/Plots/hybrid-external-product}
+
+% \subsubsection{Internal product}
+% \begin{itemize}
+%     \item Hybrid supports at most 1 single internal product before the noise blows up
+% \end{itemize}
+
+% \input{Figures/Plots/bv-internal-product}
 
 
-\input{Figures/Plots/hybrid-external-product}
-
-\subsubsection{Internal product}
-\begin{itemize}
-    \item Hybrid supports at most 1 single internal product before the noise blows up
-\end{itemize}
-
-\input{Figures/Plots/bv-internal-product}
-
-
-\subsubsection{sPAR}
-\begin{itemize}
-    \item If the parameters support even the base case of $\eta = 2$ users, then the scheme can support a nearly arbitrary amount of users with the same parameters
-    \item Noise is a big problem due to the internal product
-    \item Getting enough noise headroom at $\lambda = 128$ requires very large parameters, making the protocol much slower than anticipated
-\end{itemize}
+\input{Chapters/04-Results/spar}
 
 
 %%
@@ -60,39 +54,6 @@ I begin by examining the BV implementation on its own, then analyze the sPAR pro
     % \item Compare numbers with parity in the security parameter (according to the \href{https://github.com/malb/lattice-estimator#}{Lattice Estimator \cite{cryptoeprint:2015/046}})
 \end{itemize}
 
-%%
-%% Encrypt RGSW, external product, internal product
-\subsection{RGSW Operations}
-\begin{table}[H]
-    \begin{subtable}{.5\linewidth}
-        \begin{tabular}{cc}
-        \textbf{Operation} & \textbf{Time} \\
-            Encrypt RGSW        & \num{\jsonms{\rgswData}{benchmarks[0].cpu_time}}~ms \\
-            External Product    & \num{\jsonms{\rgswData}{benchmarks[1].cpu_time}}~ms \\
-            Internal Product    & \num{\jsonms{\rgswData}{benchmarks[2].cpu_time}}~ms
-        \end{tabular}
-        \caption{BV}
-        \label{tab:bench:operations:bv}
-    \end{subtable}%
-    \begin{subtable}{.5\linewidth}
-      \centering
-        \begin{tabular}{cc}
-        \textbf{Operation} & \textbf{Time} \\
-            Encrypt RGSW        & \num{\jsonms{\rgswData}{benchmarks[3].cpu_time}}~ms \\
-            External Product    & \num{\jsonms{\rgswData}{benchmarks[4].cpu_time}}~ms \\
-            Internal Product    & \num{\jsonms{\rgswData}{benchmarks[5].cpu_time}}~ms\footnotemark
-        \end{tabular}
-        \caption{GHS/Hybrid}
-        \label{tab:bench:operations:ghs}
-    \end{subtable}
-    \caption{RGSW/TFHE Operations with the old (small) parameters}
-\end{table}
-\footnotetext{Not really valid since the noise is too large/result is incorrect...}
-
-\begin{itemize}
-    \item The internal product scales exponentially as it performs $2k\ell$ external products, which in turn performs $2k\ell$ multiplications = $\mathcal{O}(4k^2\ell^2)$
-    \item Since GHS specifically only has only $2$ rows, the scaling is a set factor of approx. 2 instead of $2k\ell$
-\end{itemize}
 
 \subsubsection{Multi-Threaded Performance}
 \begin{itemize}
@@ -103,30 +64,10 @@ I begin by examining the BV implementation on its own, then analyze the sPAR pro
 
 \textbf{Table of improvements +X\% at 1 to 6 threads}
 
-\subsubsection{sPAR}
-% Numbers here
-
-\begin{table}[H]
-    \caption{Runtime per user (6 threads) for \texttt{Server::Write}}
-    \label{tab:bench:write}
-    \centering
-    \begin{tabular}{cccc}
-        \toprule
-        $\mathbf{\eta}$ & \textbf{Real time} & \textbf{CPU time} & \textbf{Iterations} \\
-        \midrule
-        2  &       35693 ms &       35644 ms &            1 \\
-        4  &       75926 ms &       75921 ms &            1 \\
-        8  &      150865 ms &      151096 ms &            1 \\
-        16 &      299432 ms &      299156 ms &            1 \\
-        32 &      592589 ms &      591729 ms &            1 \\
-        \bottomrule
-    \end{tabular}
-\end{table}
 
 \section{Discussions}
-The results show that 
-
 \begin{itemize}
+    \item The results show that number of users is not a problem; noise is
     \item Once noise is controlled, many users can be handled due to the additive scaling of the RGSW products
     \item GHS improvement over BV even adjusted to same security parameter, but would require a solution to the internal product
 \end{itemize}
@@ -135,26 +76,5 @@ The results show that
 \begin{itemize}
     \item Assuming \autoref{alg:spar:write} is implemented using only external products, or the internal product can be implemented in the hybrid scheme, we see that the hybrid approach is generally faster and has better noise properties
     \item These results are not technically valid as the noise overflows immediately after 1 or 2 internal products, but it gives an idea of what the system \textit{could} do with more work
+    \item Explain problem
 \end{itemize}
-
-%%
-%% Client::Encrypt, Server::Write, Client::Decrypt, Server::Decrypt
-\begin{table}[H]
-    \caption{One round of the sPAR protocol, \textcolor{red}{using the \textbf{outdated} GHS gadget}, single-threaded}
-    \label{tab:bench:full}
-    \centering
-    \begin{tabular}{cccccc}
-        \toprule
-        $\mathbf{\eta}$ & \textbf{Total time} & \textbf{Encrypt} & \textbf{Write} & \textbf{Partial Dec.} & \textbf{Server Dec.} \\
-        \midrule
-        \JSONParseArrayMapInline{\fullData}{benchmarks}{
-          $\nvalue{#1}$ &
-          \num{\jsonms{\fullData}{benchmarks[#1].cpu_time}} & 
-          \num{\jsonmspern{\fullData}{benchmarks[#1].encrypt}{\nvalue{#1}}} &
-          \num{\jsonmspern{\fullData}{benchmarks[#1].write}{\nvalue{#1}}} &
-          \num{\jsonmspern{\fullData}{benchmarks[#1].partial}{\nvalue{#1}}} &
-          \num{\jsonms{\fullData}{benchmarks[#1].final}} \\
-        }
-        \bottomrule
-    \end{tabular}
-\end{table}

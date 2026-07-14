@@ -1,0 +1,38 @@
+\begin{tikzpicture}[
+    % Define the style for the boxes
+    box/.style={
+        draw=black,
+        rectangle,
+        minimum width=3.5cm,
+        minimum height=1.5cm,
+        align=center,
+        font=\sffamily
+    },
+    % Define the style for the arrows
+    arrow/.style={
+        ->,
+        >=Stealth,
+        thick,
+        draw=black
+    },
+    % Define the style for the edge text labels
+    label/.style={
+        fill=white, % Clears the line behind the text
+        font=\sffamily\small,
+        inner sep=3pt
+    }
+]
+
+% 1. Define Nodes
+\node[box] (ecc) {ExtendedCryptoContext};
+\node[box, above left=1.5cm and -1.2cm of ecc] (bv) {BV};
+\node[box, above right=1.5cm and -1.2cm of ecc] (hybrid) {Hybrid};
+\node[box, below=1.5cm of ecc] (cc) {CryptoContext\textless T\textgreater};
+\node[box, right=3cm of ecc] (spar) {sPAR};
+
+% 2. Draw Edges and Labels
+\draw[arrow] (bv) -- node[label] {Implements} (ecc);
+\draw[arrow] (hybrid) -- node[label] {Implements} (ecc);
+\draw[arrow] (ecc) -- node[label] {depends on} (cc);
+\draw[arrow] (spar) -- node[label] {depends on} (ecc);
+\end{tikzpicture}

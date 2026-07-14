@@ -1,0 +1,39 @@
+\subsection{Gentry-Halevi-Shoup}
+\begin{itemize}
+    \item Another approach was implemented by Gentry, Halevi and Shoup in \cite{cryptoeprint:2012/099}. 
+    \item Generate the key in $QP$ as $(a\cdot s + \Delta + \epsilon, a) \in \mathcal{B}_{QP}^2$
+    \item Base extend $u \mapsto \mathcal{B}_{QP}$ and calculate inner product $\rlwe{(mP)}$
+    \item Divide the ciphertext by $P$ and approx mod down to $\mathcal{B}_{Q}$
+    \item \textcolor{red}{\textbf{FastBaseExtension and Multiply by P = add empty towers!!!}}
+    \item Since key was pre-scaled, $\epsilon$ shrinks relative to the message
+    \item Reference RNS section, base conversion
+\end{itemize}
+
+\begin{remark}[GHS Security] % In RGSW, $Z$ provides the security of the scheme by masking $m$. 
+    \label{remark:ghs-security}
+    The public key is masked by elements in $QP$, meaning the ciphertext modulus $QP \approx 2Q$ must be used when evaluating the security. A GHS scheme has the security as a BV scheme if $Q$ is halved. 
+\end{remark}
+
+\begin{lemma}
+    GHS is a single-digit decomposition $(\ell = 1)$ with quality $\beta = Q/P$ and precision $\epsilon = 0$. 
+    \begin{gather} %%%% Exact gadget
+        \langle [x]_{\mathcal{B}_{QP}}, P\cdot [y]_{\mathcal{B}_{QP}}\rangle = x\cdot y \cdot P \pmod{QP} \\
+        \langle P^{-1}\cdot [x]_{\mathcal{B}_{QP}}, P\cdot [y]_{\mathcal{B}_{QP}}\rangle = x\cdot y \cdot P \cdot P^{-1} = x\cdot y \pmod{QP} \\
+        \overset{\tiny\text{ModDown}}{\longmapsto} \;\; x\cdot y \pmod{Q}
+    \end{gather}
+
+    %%%% Inexact gadget
+    % \begin{gather}
+    %     \langle [x]_{\mathcal{B}_{QP}}, P\cdot [y]_{\mathcal{B}_{QP}}\rangle = x\cdot y \cdot P + \epsilon \pmod{QP} \\
+    %     \implies \langle P^{-1}\cdot [x]_{\mathcal{B}_{QP}}, P\cdot [y]_{\mathcal{B}_{QP}}\rangle = x\cdot y \cdot P \cdot P^{-1} + \epsilon = x\cdot y + \epsilon \pmod{QP} \\
+    %     \overset{\tiny\text{ModDown}}{\longmapsto} x\cdot y + \epsilon/P \pmod{Q}
+    % \end{gather}
+\end{lemma}
+
+\subsection{Hybrid}
+\label{sec:hybrid}
+\begin{itemize}
+    \item BV and GHS represent a spectrum
+    \item Hybrid = combination of the two techniques
+    \item Group digits by $d_{num}$
+\end{itemize}

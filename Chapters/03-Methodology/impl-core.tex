@@ -5,15 +5,18 @@
 \section{Implementation Details of the Core Library}
 \label{sec:impl:core}
 The core library, located in the \texttt{lib/core} directory of \cite{gitrepo} provides an abstract interface named \texttt{ExtendendedCryptoContext} which provides a number of RGSW functions, including RGSW encryption, external product and internal product. % The most important of which are \texttt{EncryptRGSW}, \texttt{EvalExternalProduct} and \texttt{EvalInternalProduct}
-Any project that requires this functionality can import the library and consume this interface without worrying about the implementation of the interface. The library is built on top of OpenFHE~\cite{cryptoeprint:2022/915} and the interface reflects that, mirroring the API of OpenFHE. A user who is familiar with OpenFHE should as a result have no problem using this library in their own projects.
+The advantage of this design is that any number of concrete implementations can be developed for the interface, while any project that requires the provided functionality can import the library and consume the interface without worrying about the implementation of the interface. 
+
+The library is built on top of OpenFHE~\cite{cryptoeprint:2022/915} and the interface reflects that, mirroring the API of OpenFHE. A user who is familiar with OpenFHE should as a result have no problem using this library in their own projects.
 
 % TODO: Keep 1
 \begin{figure}[!htb]
     \centering
     \begin{subfigure}[b]{0.54\linewidth}
         \centering
-        \includegraphics[width=\linewidth]{Figures/dependency-graph-preview.png}
-        \caption{Dependency graph (preview; recreate in tikz)}
+        \input{Figures/dependency-graph}
+        % \includegraphics[width=\linewidth]{Figures/dependency-graph-preview.png}
+        \caption{Dependency graph}
         \label{fig:depgraph}
     \end{subfigure}
     \hfill

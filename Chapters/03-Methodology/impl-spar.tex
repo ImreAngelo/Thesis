@@ -40,7 +40,7 @@
     \For{$k \gets \{0, 1, 2\}$}
         \For{$i \gets [0, \eta)$}
             \State $h \gets z_{i,d}\boxtimes I_{i,k} \boxtimes \mathsf{hasNotWritten}$
-            \State $L_{i,k} \gets L_{i,k} + V_r \boxdot h$
+            \State $L_{i,k} \gets L_{i,k} + V_r \cdot h$ % use different symbol for pt * ct
             \State $I_{i,k} \gets I_{i,k} - h$
             \State $\mathsf{hasNotWritten} \gets \mathsf{hasNotWritten} + h$
         \EndFor

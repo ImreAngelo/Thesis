@@ -110,6 +110,10 @@ The evaluation form \eqref{form:eval} is the preferred form, as it supports para
 
 \begin{definition}[RNS Basis.] 
     Given a large modulus $Q = \prod_{i=0}^{k-1} q_i$ composed of pairwise coprime factors, we define the \textit{RNS basis} $\mathcal{B}_Q = \{q_0, q_1, \dots, q_{k-1}\}$ as the set of RNS moduli used in the RNS/CRT representation \eqref{form:crt}.
+    
+    \begin{equation}
+        \mathbb{Z}_Q \cong \mathbb{Z}_{q_0} \times \mathbb{Z}_{q_1} \times \cdots \times \mathbb{Z}_{q_{k-1}}
+    \end{equation}
 \end{definition}
 
 %%
@@ -177,7 +181,7 @@ We can use \eqref{eq:fastbconv} as a subroutine in base extension. Only the new 
 \end{remark}
 
 \subsubsection{Scale}
-Note that the error $\alpha_xQ \pmod{QP}$ produced by \autoref{alg:fast_base_extension} would be completely removed if we multiplied by $P$. This observation leads to the specialized operation of ``extend and scale by $P$''. I refer to this operation as $\Call{Scale}{x, P} \mapsto [xP]_{\mathcal{B}_{QP}}$.
+Note that the error $\alpha_xQ \pmod{QP}$ produced by \autoref{alg:fast_base_extension} would be completely removed if we multiplied by $P$. This observation leads to the specialized operation of ``\textit{extend and scale by} $P$''. I refer to this operation as $\Call{Scale}{x, P} \mapsto [xP]_{\mathcal{B}_{QP}}$.
 \begin{gather*}
     x' = x + \alpha_xQ \pmod{QP} \\
     x'P = xP + \alpha_x QP = xP \pmod{QP}
@@ -208,8 +212,7 @@ where $\delta \equiv c \pmod{q_{k-1}}$ and, for BGV, $\delta \equiv 0 \pmod{t}$ 
 Modulus switching exactly requires multiprecision integers.. can use FBE again... exploits the fact that the polynomial is pre-multiplied by $P$...
 
 Uses $\delta = \Call{FastBConv}{[x]_{\mathcal{B}_P}, \mathcal{B}_P, \mathcal{B}_Q}$
-
-The reverse operation, switching from the extended modulus $QP$ back down to $Q$, uses \eqref{eq:fastbconv} to convert the $P$-part back to $\mathcal{B}_Q$ before dividing by $P$ \autocite{cryptoeprint:2012/099, cryptoeprint:2018/117}:
+% The reverse operation, switching from the extended modulus $QP$ back down to $Q$, uses \eqref{eq:fastbconv} to convert the $P$-part back to $\mathcal{B}_Q$ before dividing by $P$ \autocite{cryptoeprint:2012/099, cryptoeprint:2018/117}:
 \begin{equation}
     \label{eq:approxmoddown}
     \Call{ApproxModDown}{x} = \left[P^{-1}\left(x - \Call{FastBConv}{[x]_{\mathcal{B}_P}, \mathcal{B}_P, \mathcal{B}_Q}\right)\right]_{\mathcal{B}_Q}

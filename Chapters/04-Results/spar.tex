@@ -1,0 +1,50 @@
+\section{sPAR}
+\begin{itemize}
+    \item If the parameters support even the base case of $\eta = 2$ users, then the scheme can support a nearly arbitrary amount of users with the same parameters
+    \item Noise is a big problem due to the internal product
+    \item Getting enough noise headroom at $\lambda = 128$ requires very large parameters, making the protocol much slower than anticipated
+\end{itemize}
+
+\subsubsection{Noise}
+\input{Figures/Plots/spar-write}
+\begin{itemize}
+    \item Linear regression: $\largeSlope x + \largeIntercept$
+    \item Noise ceiling: $180$ bits
+    \item Assuming same growth: $\largeSlope \eta + \largeIntercept \leq 2^{180} \implies \eta \leq 1.03875\cdot10^{12}$ 
+    \item Noise growth is probably larger as $\eta$ increases; have to verify
+\end{itemize}
+
+
+%%
+%% Client::Encrypt, Server::Write, Client::Decrypt, Server::Decrypt
+\subsection{Performance}
+% TODO: Load from JSON again
+\begin{table}[H]
+    \caption{One round of the full sPAR protocol, not adjusted to per user, 6 threads}
+    \label{tab:bench:full}
+    \centering
+    \begin{tabular}{cccccc}
+        \toprule
+        $\mathbf{\eta}$ & \textbf{Total time} & \textbf{Encrypt} & \textbf{Write} & \textbf{Partial Dec.} & \textbf{Server Dec.} \\
+        \midrule
+        2 & $78.586$ s  & $826.96$ ms   & $76.61$ s   & $201.83$ ms  & $5.12$ ms \\
+        4 & $315.636$ s & $3049.33$ ms  & $308.01$ s  & $546.20$ ms  & $10.55$ ms \\
+        8 & $1258.86$ s & $13562.60$ ms & $1223.85$ s & $1631.47$ ms & $26.61$ ms \\
+        % \JSONParseArrayMapInline{\fullData}{benchmarks}{
+        %   $\nvalue{#1}$ &
+        %   \num{\jsonms{\fullData}{benchmarks[#1].cpu_time}} & 
+        %   \num{\jsonmspern{\fullData}{benchmarks[#1].encrypt}{\nvalue{#1}}} &
+        %   \num{\jsonmspern{\fullData}{benchmarks[#1].write}{\nvalue{#1}}} &
+        %   \num{\jsonmspern{\fullData}{benchmarks[#1].partial}{\nvalue{#1}}} &
+        %   \num{\jsonms{\fullData}{benchmarks[#1].final}} \\
+        % }
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item If write can use SIMD batching the write loop can be divided by up to $N \implies 4.675$ ms, $18.798$ ms, $74.69$ ms per round, respectively, but the other functions must also be scaled up.. % works in some scenarios
+    \item \textcolor{red}{TODO: run single-threaded, adjust to $\eta$ i.e. divide by $\eta$ for encrypt, write, partial decrypt}
+\end{itemize}
+
+% Check gain vs DC-net -> throughput
