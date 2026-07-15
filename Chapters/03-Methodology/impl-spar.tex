@@ -3,14 +3,20 @@
 %% Specifics to the library, if any?
 %%
 \section{Implementation Details of sPAR}
+My instantiation of \gls{spar} contains some differences from the specification in \cite{cryptoeprint:2025/860}:
+\begin{itemize}
+    \item Some functions are missing: bucket sorting, all extras such as equivocation protection etc.
+    \item Sorting is negligible, estimated $< 100$ ms according to \cite{} and highly parallelizable.
+    \item Write step has been separated into two steps
+\end{itemize}
+
 \begin{itemize}
     \item Uses a procedural programming paradigm, meaning the library implements the required functions but does not provide a full state-maintaining implementation of the server nor client. 
     \item The benchmarks and testing framework is what actually composes the protocol, using the functions from this library.
-    \item This was done so that the functionality is not tightly coupled to the benchmarking without spending time implementing actual communication which would require additional work: serializing data, error handling, and coordinating multiple machines. 
-    \item Does not implement the bucket sorting step: negligible impact (estimated $< 100$ ms per client)
+    \item This was done so that the functionality is not tightly coupled to the benchmarking without spending time implementing actual communication which would require additional work: serializing data, error handling, and coordinating multiple machines.
 \end{itemize}
 
-\subsection{Server Write Step}
+\subsection{Server Write Step}  
 \begin{itemize}
     \item Most important algorithm; does the actual homomorphic sorting
     \item Some changes compared to \cite{cryptoeprint:2025/860}
@@ -22,10 +28,11 @@
         \item As the sever does not care about the privacy of its users, and we can assume it is actively attempting to break privacy, to manage noise \textbf{the server does not actually encrypt the initial entries of $L$, $I$ and $hasNotWritten$}. They are in the correct form but generated using $\epsilon = 0, a = 0$. This has a very minor impact on noise but worth noting, major impact on setup phase as it does not spend any time on encrypting or generating random values.
         \item Variables:
         \begin{itemize}
-            \item $z_{i,d},\; I_{i,k},\;\mathsf{hasNotWritten}$ are $ \Call{RGSW}{m}, m \in \{0, 1\}$
-            \item $L_{i,k} = \Call{RLWE}{m}, m \in [-t/2, t/2)$
+            \item $z_{i,d},\; I_{i,k},\;\mathsf{hasNotWritten}$ are $ \Call{RGSW}{m}, m \in \{0, 1\}^{N}$
+            \item $L_{i,k} = \Call{RLWE}{m}, m \in R_t$
         \end{itemize}
     \end{itemize}
+    \item Swapping order so $h = (\mathsf{hasNotWritten} \boxtimes I_{i,k}) \boxtimes z_{i,d})$ saw a 30 to 40 bit improvement in the noise of \Call{Server::Write}{}
 \end{itemize}
 
 
@@ -45,7 +52,7 @@
 \For{$d \gets \{0, 1, 2\}$} % [0, D) 
     \For{$k \gets \{0, 1, 2\}$}
         \For{$i \gets [0, \eta)$}
-            \State $h \gets z_{i,d}\boxtimes I_{i,k} \boxtimes \mathsf{hasNotWritten}$
+            \State $h \gets (\mathsf{hasNotWritten} \boxtimes I_{i,k}) \boxtimes z_{i,d})$
             \State $L_{i,k} \gets L_{i,k} + V_r \cdot h$ % use different symbol for pt * ct
             \State $I_{i,k} \gets I_{i,k} - h$
             \State $\mathsf{hasNotWritten} \gets \mathsf{hasNotWritten} + h$
