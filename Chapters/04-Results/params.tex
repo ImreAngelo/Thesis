@@ -11,8 +11,8 @@ Parameters were thus selected to provide $\lambda \geq 128$ bits of security at 
         \toprule
         \textbf{Parameter}                  & \textbf{Value}   \\
         \midrule
-        decomposition $(\ell, B)$               & $(2, 2^{31})$    \\
-        number of RNS moduli $k$                & $5$              \\
+        decomposition $(\ell, B)$               & $(3, 2^{21})$    \\
+        number of RNS moduli $k$                & $4$              \\
         first mod size $\log{q_0}$              & $60$             \\
         scaling mod size $\log{q_i},\; i > 0$   & $59$             \\
         ciphertext modulus order $\log{Q}$      & $2^{296}$        \\
@@ -30,7 +30,7 @@ Parameters were thus selected to provide $\lambda \geq 128$ bits of security at 
     \item Explain $q_i$ are random $59$-bit primes so only their order is listed 
     \item Data per message = $N\log(t)/8 \approx 16385 \cdot (16)/8 = 32770$ bytes $\approx 32$ Kb
     \item sPAR data per msg = $2048 * 8/8 = 2048 = 2$ Kb
-    \item For performance, the key is generally to minimize $k\ell$
+    \item For performance, the key is generally to minimize $k\ell$, in this case $2k\ell = 2\cdot  4\cdot 3 = 2\cdot 12 = 24$ rows per RGSW! 
     \item Note for self: if larger params is 16 times slower than expected, throughput is the same
 %     \item MOVE TO IMPLEMENTATION DETAILS: For BV, the base $B = \lfloor \max q_i \rfloor$ is chosen automatically so to be the smallest $B$ that covers the largest RNS prime with $\ell$ digits when the program starts, because the $q_i$ are randomly chosen. 
 \end{itemize}
