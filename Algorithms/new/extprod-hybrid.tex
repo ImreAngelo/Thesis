@@ -1,0 +1,14 @@
+\begin{algorithm}
+\caption{RLWE $\boxdot$ Hybrid-RGSW}
+\label{alg:hybrid:extprod}
+\begin{algorithmic}[1]
+\Require Extended basis $\mathcal{B}_{P}$
+\Require RNS polynomial $[\mu]^{\mathsf{NTT}}_{\mathcal{B}_Q} \in \mathbb{Z}_{q_0} \times \dots \times  \mathbb{Z}_{q_{k-1}}$
+\Ensure $\Call{RGSW}{\mu\cdot P}$
+\State Initialize empty array $C$ with $2k\ell$ slots
+\For{$r \gets [0, k\ell)$ \textbf{in parallel}}
+    \State hm
+\EndFor
+\State \Return $C$
+\end{algorithmic}
+\end{algorithm}

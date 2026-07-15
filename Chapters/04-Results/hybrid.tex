@@ -1,0 +1,76 @@
+\subsection{Theoretical Hybrid Improvement}
+An alternative to gadget decomposition used in \gls{rns} key-switching is \textit{hybrid} keyswitching \cite{cryptoeprint:2012/099, cryptoeprint:2021/204}.
+
+\begin{itemize}
+    \item This approach nearly fits inside the gadget decomposition framework established in \autoref{sec:gadget-decomposition}, as $\langle u \cdot  P^{-1}, v\cdot P\rangle = u\cdot v \cdot P^{-1}\cdot P = u\cdot v \bmod{QP}$
+    \item This actually defines a valid external product, the problem is that the $P$-scaling is consumed after this operation
+\end{itemize}
+
+\begin{definition}[Hybrid-RGSW Ciphertext]
+    An \gls{rgsw} ciphertext that encodes $\mu P$ in the extended  
+    \begin{equation}
+        C_{QP} = Z_{QP} + \mu \begin{pmatrix}
+            P & 0 \\
+            0 & P
+        \end{pmatrix} \pmod{QP}
+    \end{equation}
+    \begin{equation}
+        \Call{HybridRGSW}{b} = \Call{RGSW}{b\cdot P}
+    \end{equation}
+\end{definition}
+
+\input{Algorithms/new/encrypt-hybrid}
+
+\begin{definition}[Hybrid External Product]
+    Is valid...
+\end{definition}
+
+\begin{lemma}
+    The external product $\Call{RGSW}{} \boxdot \Call{HybridRGSW}{}$ is a valid product...
+    \begin{proof}
+        \begin{gather}
+            x_{Q} \boxdot C_{QP} = P^{-1}(x_q \cdot 
+            Z_{QP} + \mu \begin{pmatrix}
+            P & 0 \\
+            0 & P
+        \end{pmatrix}
+            ) \pmod{QP}
+        \end{gather}
+    \end{proof}
+\end{lemma}
+
+\input{Algorithms/new/extprod-hybrid}
+
+\begin{itemize}
+    \item This method shows far better noise handling and 
+    \item Show graphs for same parameters but $|P| \approx |Q|$ i.e. $d_{num} = 1$ and security parameter smaller but still $\geq 128$ bits
+    \item Problem: internal product does not work with both sides as Hybrid-RGSW and one $P$ is consumed each external product!
+\end{itemize}
+
+\begin{definition}[Hybrid Internal Product]
+    I define the \textit{hybrid internal product} as 
+    \begin{gather}
+        \boxtimes_H \;:=\; \Call{RGSW}{a} \boxtimes_H \Call{RGSW}{b\cdot P} = \Call{RGSW}{a\cdot b}
+    \end{gather}
+\end{definition}
+
+\begin{algorithm}
+\caption{Modified}
+\label{alg:hybrid:spar}
+\begin{algorithmic}[1]
+\Require Extended basis $\mathcal{B}_{P}$
+\Require RNS polynomial $[\mu]^{\mathsf{NTT}}_{\mathcal{B}_Q} \in \mathbb{Z}_{q_0} \times \dots \times  \mathbb{Z}_{q_{k-1}}$
+\Ensure $\Call{RGSW}{\mu\cdot P}$
+\State Initialize empty array $C$ with $2k\ell$ slots
+\For{$r \gets [0, k\ell)$ \textbf{in parallel}}
+    \State $h\gets (I_{i,k}\boxtimes \mathsf{nhw}) \boxed{\Tilde{}} \boxtimes_H z_{i,d}$
+\EndFor
+\State \Return $C$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{itemize}
+    \item Assuming \autoref{alg:spar:write} is implemented using only external products, or the internal product can be implemented in the hybrid scheme, we see that the hybrid approach is generally faster and has better noise properties
+    %\item These results are not technically valid as the noise overflows immediately after 1 or 2 internal products, but it gives an idea of what the system \textit{could} do with more work
+    %\item Explain problem
+\end{itemize}

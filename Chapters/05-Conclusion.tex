@@ -1,7 +1,11 @@
 \chapter{Conclusion and Future Work}
 \label{chp:conclusion}
 
-\subsubsection{Conclusion}
+\vfill
+Introduction...
+\newpage
+
+\section{Conclusion}
 \begin{itemize}
     \item \textcolor{red}{Achieved better time than expected with GHS}
     \item Large noise
@@ -9,7 +13,7 @@
     % \item TFHE could allow 
 \end{itemize}
 
-\subsubsection{Future Work}
+\section{Future Work}
 \begin{itemize}
     \item BGV SIMD capabilities \cite{cryptoeprint:2011/133} not utilized in write loop; \texttt{Server::Write} can perform $N$ rounds simultaneously, but does this translate into higher throughput? A constant polynomial is the same object in SIMD batching and as a regular polynomial, so if write is changed to output binary $\{0,1\}$ it should be possible with:
     \begin{itemize}

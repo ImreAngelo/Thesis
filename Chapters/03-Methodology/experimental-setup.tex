@@ -41,26 +41,26 @@ To simulate communication between parties, a single ``all-knowing'' orchestrator
     \end{itemize}
 \end{itemize}
 
-\subsubsection{Choice of Parameters}
-\begin{itemize}
-    \item There are two interesting choices of parameters:
-    \begin{itemize}
-        \item Small: Security parameter $\lambda \approx 128$ bits ($2^\lambda$)
-        \item \textcolor{red}{Large: Fastest parameteres that allow SIMD operations in BGV \cite{cryptoeprint:2011/133}}
-    \end{itemize}
-    \item To determine parameters, I used the lattice estimator \cite{cryptoeprint:2015/046} 
-    \item Try 
-\end{itemize}
+% \subsubsection{Choice of Parameters}
+% \begin{itemize}
+%     \item There are two interesting choices of parameters:
+%     \begin{itemize}
+%         \item Small: Security parameter $\lambda \approx 128$ bits ($2^\lambda$)
+%         \item \textcolor{red}{Large: Fastest parameteres that allow SIMD operations in BGV \cite{cryptoeprint:2011/133}}
+%     \end{itemize}
+%     \item To determine parameters, I used the lattice estimator \cite{cryptoeprint:2015/046} 
+%     \item Try 
+% \end{itemize}
 
-\subsubsection{Hybrid}
-\begin{itemize}
-    \item GHS must evaluate security under ciphertext modulus $QP$
-    \begin{itemize}
-        \item Since $|P| \approx |Q|$, security is approx. halved
-        \item Compensate by doubling the polynomial degree $N$ shows empirically (via estimator) to bring it back to approximately the same level
-    \end{itemize}
-    \item \textcolor{red}{Three sets of parameters: 2 for security parity and shared for SIMD capable}
-\end{itemize}
+% \subsubsection{Hybrid}
+% \begin{itemize}
+%     \item GHS must evaluate security under ciphertext modulus $QP$
+%     \begin{itemize}
+%         \item Since $|P| \approx |Q|$, security is approx. halved
+%         \item Compensate by doubling the polynomial degree $N$ shows empirically (via estimator) to bring it back to approximately the same level
+%     \end{itemize}
+%     \item \textcolor{red}{Three sets of parameters: 2 for security parity and shared for SIMD capable}
+% \end{itemize}
 
 \subsubsection{Noise Analysis}
 \begin{itemize}
@@ -70,4 +70,10 @@ To simulate communication between parties, a single ``all-knowing'' orchestrator
         x = (c_0, c_1) = (c_1s + \Delta m + \epsilon, c_1) \\
         \implies \epsilon = c_0 - c_1s - \Delta m, \quad m = \Call{Decrypt}{x, s}
     \end{gather}
+    \item RGSW is an 'intermediate' object used in calculations, in some cases (when the result is an RGSW e.g., the internal product, notHasWritten in the server) two methods exist to evaluate noise:
+    \begin{enumerate}
+        \item The first (or $\ell$-th) row encodes $\mu \cdot 1$, so we can extract only this row and check it's error
+        \item We calculate the external product with $\Call{RLWE}{1}$, and this ciphertext can be noiseless as to not add any noise.
+    \end{enumerate}
+    \item I use the latter method because the first method relies on the fact that a gadget $g = (1, \dots)$ containing $1$ is used, which is not necessarily always the case, even though this is traditionally the case.
 \end{itemize}

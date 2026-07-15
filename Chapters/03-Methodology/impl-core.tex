@@ -2,52 +2,10 @@
 %% Implementation Details (RGSW)
 %% The specifics of the program that are not necessarily important for the math, and other (novel) optimizations
 %%
-\section{Implementation Details of the Core Library}
-\label{sec:impl:core}
-The core library, located in the \texttt{lib/core} directory of \cite{gitrepo} provides an abstract interface named \texttt{ExtendendedCryptoContext} which provides a number of RGSW functions, including RGSW encryption, external product and internal product. % The most important of which are \texttt{EncryptRGSW}, \texttt{EvalExternalProduct} and \texttt{EvalInternalProduct}
-The advantage of this design is that any number of concrete implementations can be developed for the interface, while any project that requires the provided functionality can import the library and consume the interface without worrying about the implementation of the interface. 
 
-The library is built on top of OpenFHE~\cite{cryptoeprint:2022/915} and the interface reflects that, mirroring the API of OpenFHE. A user who is familiar with OpenFHE should as a result have no problem using this library in their own projects.
-
-% TODO: Keep 1
-\begin{figure}[!htb]
-    \centering
-    \begin{subfigure}[b]{0.54\linewidth}
-        \centering
-        \input{Figures/dependency-graph}
-        % \includegraphics[width=\linewidth]{Figures/dependency-graph-preview.png}
-        \caption{Dependency graph}
-        \label{fig:depgraph}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.45\linewidth}
-        \centering
-        \includegraphics[width=\linewidth, trim=0 16px 0 0, clip]{Figures/lib-structure.pdf}
-        \caption{Structure (preview)}
-        \label{fig:lib-structure}
-    \end{subfigure}
-\end{figure}
-
-\begin{table}[H]
-    \centering
-    \label{tab:main-functions}
-    \caption{Primary functionality provided by \texttt{ExtendedCryptoContext}}
-    \begin{tabular}{r|l}
-        \Call{EncryptRGSW}{pk, pt}              & Outputs an RGSW ciphertext \\
-        \Call{EvalExternalProduct}{rlwe, rgsw}  & Outputs the external product \\
-        \Call{EvalInternalProduct}{lhs, rhs}    & Outputs the internal product
-    \end{tabular}
-\end{table}
-
-The \texttt{ExtendedCryptoContext} interface comes bundled with two concrete implementations. One is designed around gadget decomposition of the RNS primes as described in \autoref{sec:gadget-decomposition}, and will be referred to as the BV implementation. The other implementation is designed around the hybrid keyswitching mechanism from \autoref{sec:hybrid}. Of these, the former should be considered the ``canonical'' implementation because (1) this design is the most closely related to the external product as discussed in the literature, where this product is traditionally defined using digit decomposition \cite{examples-of-this, cryptoeprint:2025/860}, and (2) the other implementation does not use true \gls{rgsw} ciphertexts.
-
-\begin{remark}
-    \color{red}
-    The implementations are hard coupled to the BGV-RNS (\texttt{CryptoContextBGVRNS}) scheme. As OpenFHE provides a unified interface for both BGV and BFV --- and the TFHE products are defined independent of scheme --- it would not require much work to add support for BFV to the core library.
-\end{remark}
-
+\input{Chapters/03-Methodology/core/api}
 \input{Chapters/03-Methodology/core/bv}
-\input{Chapters/03-Methodology/core/hybrid}
+% \input{Chapters/03-Methodology/core/hybrid}
 
 % \textcolor{red}{\textbf{TODO:} Organize pre-computed Values}
 % \begin{itemize}
@@ -62,8 +20,9 @@ The \texttt{ExtendedCryptoContext} interface comes bundled with two concrete imp
 %     \end{itemize}
 % \end{itemize}
 
-\subsection{SIMD}
+\subsubsection{SIMD Batching}
 \begin{itemize}
     \item Assuming parameters that support SIMD batching are set
     \item Requires using \texttt{MakePackedPlaintext} instead of \texttt{MakeCoefPackedPlaintext} in OpenFHE
+    \item This allows up to $N$ RGSW/External/Internal prodcuts simultaneously at no additional cost compared to the same parameters with \Call{MakeCoefPackedPlaintext}.
 \end{itemize}

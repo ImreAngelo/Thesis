@@ -1,0 +1,93 @@
+\section{Performance Benchmarks}
+\begin{itemize}
+    \item Run on AMD Ryzen 5 5600X CPU 6-core {@} 3.7 GHz with 32Gb RAM in WSL2 Ubuntu 24.04 LTS Linux
+    % \item Compare numbers with parity in the security parameter (according to the \href{https://github.com/malb/lattice-estimator#}{Lattice Estimator \cite{cryptoeprint:2015/046}})
+\end{itemize}
+
+\subsection{Core Library}
+%% TODO: Include Hybrid results in same table!
+%% Encrypt RGSW, external product, internal product
+\begin{table}[H]
+    \caption{RGSW Operations \textcolor{red}{(todo: update numbers)}}
+    \label{tab:bench:bv}
+    \centering
+    \begin{tabular}{lc}
+        \toprule
+        \textbf{Operation}  & \textbf{Time} \\
+        \midrule
+        Encrypt RGSW        & \num{\jsonms{\rgswData}{benchmarks[0].cpu_time}}~ms \\
+        External Product    & \num{\jsonms{\rgswData}{benchmarks[1].cpu_time}}~ms \\
+        Internal Product    & \num{\jsonms{\rgswData}{benchmarks[2].cpu_time}}~ms \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+
+\begin{itemize}
+    \item The internal product scales exponentially as it performs $2k\ell$ external products, which in turn performs $2k\ell$ multiplications = $\mathcal{O}(4k^2\ell^2)$
+    \item Since GHS specifically only has only $2$ rows, the scaling is a set factor of approx. 2 instead of $2k\ell$
+\end{itemize}
+
+
+\subsection{sPAR}
+%%
+%% Client::Encrypt, Server::Write, Client::Decrypt, Server::Decrypt
+% TODO: Load from JSON again
+\begin{table}[H]
+    \caption{One round of the full sPAR protocol, not adjusted to per user except Write, 6 threads}
+    \label{tab:bench:full}
+    \centering
+    \begin{tabular}{cccccc}
+        \toprule
+        $\mathbf{\eta}$ & \textbf{Total} & \textbf{Encrypt} & \textbf{Write} & \textbf{Partial Dec.} & \textbf{Server Dec.} \\
+        \midrule
+        $2$  &   $8620$ ms &    $402.53$ ms &   $8.06798$ s &   $140.60$ ms &  $5.02677$ ms \\
+        $4$  &  $17984$ ms &   $1652.05$ ms &   $15.9965$ s &   $425.13$ ms &   $10.783$ ms \\
+        $8$  &  $41232$ ms &   $6745.00$ ms &   $33.0402$ s &  $1472.59$ ms &  $28.1619$ ms \\
+        $16$ &  $98332$ ms &  $26382.50$ ms &    $67.368$ s &  $5005.41$ ms &  $60.5488$ ms \\
+        % \JSONParseArrayMapInline{\fullData}{benchmarks}{
+        %   $\nvalue{#1}$ &
+        %   \num{\jsonms{\fullData}{benchmarks[#1].cpu_time}} & 
+        %   \num{\jsonmspern{\fullData}{benchmarks[#1].encrypt}{\nvalue{#1}}} &
+        %   \num{\jsonms{\fullData}{benchmarks[#1].write}} &
+        %   \num{\jsonmspern{\fullData}{benchmarks[#1].partial}{\nvalue{#1}}} &
+        %   \num{\jsonms{\fullData}{benchmarks[#1].final}} \\
+        % }
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% TODO: Load from JSON
+% \begin{table}[H]
+%     \caption{One round of the full sPAR protocol, not adjusted to per user except Write, 6 threads (slower params)}
+%     \label{tab:bench:full}
+%     \centering
+%     \begin{tabular}{cc}
+%         \toprule
+%         $\mathbf{\eta}$ & \Call{Server::Write}{} \textbf{per $\eta$} \\
+%         \midrule
+%             2  &     $8.262$ s \\
+%             4  &    $16.794$ s \\
+%             8  &    $33.856$ s \\
+%             16 &    $65.956$ s \\
+%             32 &   $131.481$ s \\
+%             64 &   $281.886$ s \\
+%         \bottomrule
+%     \end{tabular}
+% \end{table}
+\begin{itemize}
+    \item \textbf{Discussions:} If write can use SIMD batching the write loop can be divided by up to $N \implies 4.675$ ms, $18.798$ ms, $74.69$ ms per round, respectively, but the other functions must also be scaled up.. % works in some scenarios
+    \item \textcolor{red}{TODO: run single-threaded, adjust to $\eta$ i.e. divide by $\eta$ for encrypt, write, partial decrypt}
+\end{itemize}
+
+% Check gain vs DC-net -> throughput
+
+\subsection{Multi-Threaded Performance}
+\begin{itemize}
+    \item Works now, but only some functions (EncryptRGSW, BV Decompose) are optimized to take advantage of multi-threading.
+    \item $\leq k\ell$ threads saturate, so $k = 2, \ell = 3$ has optimal performance at 6 threads.
+    \item Ideally more threads would used to perform multiple coefficients simultaneously, but this is not implemented.
+\end{itemize}
+
+\textbf{Table of improvements +X\% at 1 to 6 threads}

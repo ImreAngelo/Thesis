@@ -1,5 +1,5 @@
 \subsection{Brakerski-Vaikuntanathan}
-Brakerski and Vaikuntanathan~\cite{cryptoeprint:2011/344} first proposed decomposing ciphertext elements into small digits as a means of controlling the noise growth of this operation. The idea has since been generalized into the idea of \emph{gadget decomposition} and applied in a variety of forms, including digit and CRT (RNS) decomposition. Following the convention of~\cite{cryptoeprint:2021/204, cryptoeprint:2022/915}, we refer to this family of decomposition-based techniques collectively as \emph{BV}.
+Brakerski and Vaikuntanathan~\cite{cryptoeprint:2011/344} first proposed decomposing ciphertext elements into small digits as a means of controlling the noise growth \textcolor{red}{of this operation}. The idea has since been generalized into the idea of \emph{gadget decomposition} and applied in a variety of forms, including digit and CRT (RNS) decomposition. Following the convention of~\cite{cryptoeprint:2021/204, cryptoeprint:2022/915}, we refer to this family of decomposition-based techniques collectively as \emph{BV}.
 
 \begin{definition}[Digit Decomposition]
     Given an integer $\gamma\in\mathbb{Z}_q$ for a modulus $q\geq 2$, base $\beta$ and decomposition parameter $\ell$, the digit decomposition $\decomp{\gamma}{} = (\gamma_0, \gamma_1, \dots, \gamma_{\ell-1}) \in \mathbb{Z}_\beta^\ell$ outputs an ordered list of $\ell$ base-$\beta$ digits satisfying
@@ -25,7 +25,7 @@ Digit decomposition has two important properties. First, if the digits $\gamma_i
     \item Other (equivalent) form more convenient to work with, where the output of $\decomp{v}{g,\beta,\epsilon} \to D(v)$ and $g\cdot u \to P(u)$ are considered.
 \end{itemize}
 
-\begin{definition}[Gadget Property.]
+\begin{definition}[Gadget Property]
     Two vectors $P(x) \in \mathbb{Z}_Q^\ell$ and $D(y) \in \mathbb{Z}_\beta^\ell$ are said to have the \textit{gadget property} if and only if they satisfy \eqref{def:gadget-property} for any pair of \gls{rlwe} samples $(x,y)\in R_Q^2$ with precision $\epsilon \in \mathbb{Z}_q^+$ and quality $\beta$ where $\|D(y)\|_\infty \leq \beta$. If $\epsilon = 0$ then $P(x)$ and $D(y)$ are said to have the \textit{exact} gadget property.
     \begin{equation}
         \label{def:gadget-property}
@@ -43,11 +43,11 @@ Digit decomposition has two important properties. First, if the digits $\gamma_i
     The composition of two gadget decompositions is itself a valid gadget decomposition.
     \begin{gather*}
         \langle P_1(u), D_1(v)\rangle = u\cdot v + \epsilon_1, \quad \langle P_2(u), D_2(v) \rangle = u\cdot v + \epsilon_2 \pmod{Q} \\
-        P_1\circ P_2 = P_1(P_2(u)) \implies \langle P_1\circ P_2, D_1 \circ D_2 \rangle = u\cdot v + 2\epsilon \text{ for some } D_1\circ D_2
+        P_1\circ P_2 = P_1(P_2(u)) \implies \langle P_1\circ P_2, D_1 \circ D_2 \rangle = u\cdot v + 2\epsilon \pmod{Q} 
     \end{gather*}
 
     \begin{proof}
-        Very simply: apply the gadget property twice.
+        This is clear from applying the gadget property twice.
         \begin{gather*}
             \langle P_1(P_2(u)), D_1(D_2(u)) \rangle = P_2(u) \cdot D_2(u) + \epsilon_1 = u\cdot v + \epsilon_2 + \epsilon_1 \pmod{Q}
         \end{gather*}

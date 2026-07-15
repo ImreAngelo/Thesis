@@ -1,10 +1,85 @@
 \subsection{RGSW}
 \begin{itemize}
-    \item (R)GSW ciphertexts \cite{cryptoeprint:2013/340, cryptoeprint:2014/816}
-    \item External product \cite{cryptoeprint:2014/816, cryptoeprint:2018/421}
-    \begin{itemize}
-        \item \textcolor{red}{Future work/results:} Though digit decomposition is often used, emphasize the external product only requires $G^{-1}(x)\cdot G \approx x\bmod{Q}$
-        \item Lemma/corollary: If two vectors satisfy the gadget property \eqref{def:gadget-property}, then $G = I_2\otimes P(1)$ and $G^{-1}(x) = [D(x_0)|D(x_1)]$ is a valid choice and \autoref{alg:external-product} returns the external product
-    \end{itemize}
-    \item Internal product \cite{cryptoeprint:2018/421}
+    \item GSW introduced in \cite{cryptoeprint:2013/340}
+    \item and its ring variant \cite{cryptoeprint:2014/816}
+    \item two-dimensional gadget property
+\end{itemize}
+
+\begin{definition}[RGSW Ciphertext]
+    Given a gadget vector $g$ 
+
+    \begin{equation}
+        \label{def:rgsw}
+        C = Z + \mu\cdot G
+    \end{equation}
+\end{definition}
+
+\begin{itemize}
+    \item We want a product between RLWE and RGSW ciphertexts
+    \item The RLWE-RGSW relationship is similar to vector vs matrix
+\end{itemize}
+
+\begin{definition}[External Product]
+    \begin{align}
+        \boxdot: \Call{RLWE}{\mu} &\boxdot \Call{RGSW}{\gamma} = \Call{RLWE}{\mu} \\
+        x &\boxdot C = G^{-1}(x) \cdot C
+    \end{align}
+\end{definition}
+
+\begin{lemma}[Gadget Matrix Construction]
+    Two vectors $P(u), D(v)$ that satisfy the gadget property \eqref{def:gadget-property} define a valid pair of gadget matrices
+    \begin{gather}
+        \label{def:Gmat}
+        G = I_2 \otimes P(1) \\
+        \label{def:Ginvmat}
+        G^{-1}(x) = [D(x_0)|D(x_1)] \\
+        \text{s.t. } G^{-1}(x)\cdot G = x + \epsilon \pmod{Q}
+    \end{gather}
+
+    \begin{proof}
+        \begin{gather*}
+            G^{-1}(x)\cdot G = [D(x_0)|D(x_1)] 
+            \begin{pmatrix}
+                P(1) & 0 \\
+                0 & P(1)
+            \end{pmatrix} \\
+            \left(
+                D(x_0) \cdot P(1), D(x_1)\cdot P(1)
+            \right)
+            = (x_0 + \epsilon_0, x_1 + \epsilon_1) = x + \epsilon \pmod{Q}
+        \end{gather*}
+    \end{proof}
+\end{lemma}
+
+\begin{itemize}
+    \item We also need a product definition between two \gls{rgsw} ciphertexts
+    \item Using the fact that an RGSW ciphertext is a matrix of RLWE ciphertexts we can repeate the external product on each row
+\end{itemize}
+
+\begin{definition}[Internal Product]
+    \begin{gather}
+        \boxtimes: \Call{RGSW}{a}\boxtimes\Call{RGSW}{b} = \Call{RGSW}{a\cdot b} \\
+        A \boxtimes C = \begin{bmatrix}
+            A_0 \boxdot C \\
+            A_1 \boxdot C \\
+            \vdots \\
+            A_{2\ell - 1} \boxdot C
+        \end{bmatrix}
+    \end{gather}
+\end{definition}
+
+\begin{remark}
+    \label{remark:noise-asymmetry-products}
+    Since the quality $\beta$ of gadget decomposition is determined only by the
+\end{remark}
+
+
+\begin{itemize}
+    \item \textcolor{red}{Future work/results:} Though digit decomposition is often used, emphasize the external product only requires $G^{-1}(x)\cdot G \approx x\bmod{Q}$
+    % \item (R)GSW ciphertexts \cite{cryptoeprint:2013/340, cryptoeprint:2014/816}
+    % \item External product \cite{cryptoeprint:2014/816, cryptoeprint:2018/421}
+    % \begin{itemize}
+    %     \item Lemma/corollary: If two vectors satisfy the gadget property \eqref{def:gadget-property}, then $G = I_2\otimes P(1)$ and $G^{-1}(x) = [D(x_0)|D(x_1)]$ is a valid choice and \autoref{alg:external-product} returns the external product
+    % \end{itemize}
+    % \item Internal product \cite{cryptoeprint:2018/421}
 \end{itemize}

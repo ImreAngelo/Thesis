@@ -20,8 +20,14 @@
         \item Uses external products to handle deep circuits as \cite{cryptoeprint:2025/860} recommends.
         \item Not implementable using only external products: must use internal products
         \item As the sever does not care about the privacy of its users, and we can assume it is actively attempting to break privacy, to manage noise \textbf{the server does not actually encrypt the initial entries of $L$, $I$ and $hasNotWritten$}. They are in the correct form but generated using $\epsilon = 0, a = 0$. This has a very minor impact on noise but worth noting, major impact on setup phase as it does not spend any time on encrypting or generating random values.
+        \item Variables:
+        \begin{itemize}
+            \item $z_{i,d},\; I_{i,k},\;\mathsf{hasNotWritten}$ are $ \Call{RGSW}{m}, m \in \{0, 1\}$
+            \item $L_{i,k} = \Call{RLWE}{m}, m \in [-t/2, t/2)$
+        \end{itemize}
     \end{itemize}
 \end{itemize}
+
 
 %%%
 %%% Server write loop

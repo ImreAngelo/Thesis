@@ -110,35 +110,35 @@ The evaluation form \eqref{form:eval} is the preferred form, as it supports para
 
 \begin{definition}[RNS Basis.] 
     Given a large modulus $Q = \prod_{i=0}^{k-1} q_i$ composed of pairwise coprime factors, we define the \textit{RNS basis} $\mathcal{B}_Q = \{q_0, q_1, \dots, q_{k-1}\}$ as the set of RNS moduli used in the RNS/CRT representation \eqref{form:crt}.
-    
     \begin{equation}
         \mathbb{Z}_Q \cong \mathbb{Z}_{q_0} \times \mathbb{Z}_{q_1} \times \cdots \times \mathbb{Z}_{q_{k-1}}
     \end{equation}
 \end{definition}
 
+% A subset $\mathcal{B}_{Q} \subseteq \mathcal{B}$ forms the basis for the $Q$-towers of...
+
 %%
 %% BASE EXTENSION (NAIVE)
-\iftrue{ % AI Written: Claude Fable
-    \begin{definition}[Base conversion]
-        Let $\mathcal{B}_Q = \{q_0,\dots,q_{k-1}\}$ and
-        $\mathcal{B} = \{b_0,\dots,b_{\ell-1}\}$ be RNS bases with
-        $\gcd(Q, B) = 1$, where $B = \prod_{j} b_j$. Base conversion is
-        the map that takes the representation of $x$ in $\mathcal{B}_Q$
-        to the representation of $[x]_Q$ in $\mathcal{B}$, i.e.
-        \begin{equation*}
-            \left([x]_{q_0}, \dots, [x]_{q_{k-1}}\right)
-            \;\longmapsto\;
-            \left([x]_{b_0}, \dots, [x]_{b_{\ell-1}}\right)
-        \end{equation*}
-        When the residues in $\mathcal{B}$ are appended to those in $\mathcal{B}_Q$, so that $x$ becomes represented in the \textit{extended} basis $\mathcal{B}_Q \cup \mathcal{B}$ for the modulus $QB$, the operation is also referred to as \emph{base extension}.
-    \end{definition}
-}\fi
+\begin{definition}[Base conversion]
+    Let $\mathcal{B}_Q = \{q_0,\dots,q_{k-1}\}$ and
+    $\mathcal{B} = \{b_0,\dots,b_{\ell-1}\}$ be RNS bases with
+    $\gcd(Q, B) = 1$, where $B = \prod_{j} b_j$. Base conversion is
+    the map that takes the representation of $x$ in $\mathcal{B}_Q$
+    to the representation of $[x]_Q$ in $\mathcal{B}$, i.e.
+    \begin{equation*}
+        \left([x]_{q_0}, \dots, [x]_{q_{k-1}}\right)
+        \;\longmapsto\;
+        \left([x]_{b_0}, \dots, [x]_{b_{\ell-1}}\right)
+    \end{equation*}
+    When the residues in $\mathcal{B}$ are appended to those in $\mathcal{B}_Q$, so that $x$ becomes represented in the \textit{extended} basis $\mathcal{B}_Q \cup \mathcal{B}$ for the modulus $QB$, the operation is also referred to as \emph{base extension}.
+\end{definition}
 
 % \begin{definition}[Base Extension.]
 %     Special case of base conversion where we convert from $\mathcal{B}_Q \longmapsto \mathcal{B}_{QP}$. Note $\mathcal{B}_{QP} = \mathcal{B}_{Q} \cup \mathcal{B}_{P}$ and $P = \prod_i p_i$ etc. 
 % \end{definition}
 
 \begin{remark}
+    \color{purple}
     Extend mod notation for RNS polynomials: $[a]_{\mathcal{B}_Q} = ([a]_{q_0}, \dots, [a]_{q_{k-1}})$ for the basis $\mathcal{B}_Q = \{q_i\}_{i=0}^{k-1}$ means $a$ must be in RNS form 
     % (\textcolor{red}{TODO: distinguish CRT vs NTT mode... maybe $[a]^\mathsf{NTT}_{\mathcal{B}_Q}$?})
 \end{remark}
@@ -156,7 +156,7 @@ Introduced by \cite{cryptoeprint:2016/510}, fast base conversion performs operat
 
 
 \subsubsection{Fast Base Extension}
-We can use \eqref{eq:fastbconv} as a subroutine in base extension. Only the new residues $\mathcal{B}_Q \longmapsto \mathcal{B}_P$ need to be calculated, and since $\mathcal{B}_{QP} = \mathcal{B}_Q\cup \mathcal{B}_P$ the original residues are simply kept.
+We can use \eqref{eq:fastbconv} as a subroutine in base extension. Only the new residues $\mathcal{B}_Q \longmapsto \mathcal{B}_P$ need to be calculated, and since $\mathcal{B}_{QP} = \mathcal{B}_Q\cup \mathcal{B}_P$ the original residues are kept unchanged.
 
 %%%
 %%% Fast Base Extension
@@ -177,11 +177,11 @@ We can use \eqref{eq:fastbconv} as a subroutine in base extension. Only the new 
 % Notably, \eqref{eq:fastbconv} is approximate as a \textit{conversion} but exact as an \textit{extension}: the extended residue vector over $\mathcal{B}_Q\cup\mathcal{B}_P$ is an exact RNS representation of the lifted integer $x' = [x]_Q + \alpha_x Q \in \mathbb{Z}_{QP}$, since $\alpha_x Q \equiv 0 \pmod{q_i}$ keeps the original (reused) $Q$-residues consistent with $x'$. The RNS schemes are designed to tolerate this overflow, which is removed --- or shrunk to the small $\alpha_x$ --- by a subsequent division during mod down.
 
 \begin{remark}
-    The factors $[(\frac{Q}{q_i})^{-1}]_{q_i}$ and $\hat{q}_i =\frac{Q}{q_i}$ can be pre-calculated and stored in memory (discussed in \autoref{sec:impl:core}).
+    The factors $\hat{q}^{-1}_i =[(\frac{Q}{q_i})^{-1}]_{q_i}$ and $\hat{q}_i =\frac{Q}{q_i}$ can be pre-calculated and stored in memory (discussed in \autoref{sec:impl:core}).
 \end{remark}
 
 \subsubsection{Scale}
-Note that the error $\alpha_xQ \pmod{QP}$ produced by \autoref{alg:fast_base_extension} would be completely removed if we multiplied by $P$. This observation leads to the specialized operation of ``\textit{extend and scale by} $P$''. I refer to this operation as $\Call{Scale}{x, P} \mapsto [xP]_{\mathcal{B}_{QP}}$.
+Note that the error $\alpha_xQ \pmod{QP}$ produced by \autoref{alg:fast_base_extension} would be completely removed if we multiplied by $P$. This observation leads to the specialized operation ``\textit{extend and scale by} $P$''. I refer to this operation as $\Call{Scale}{x, P} \mapsto [xP]_{\mathcal{B}_{QP}}$. 
 \begin{gather*}
     x' = x + \alpha_xQ \pmod{QP} \\
     x'P = xP + \alpha_x QP = xP \pmod{QP}
@@ -191,14 +191,7 @@ Note that the error $\alpha_xQ \pmod{QP}$ produced by \autoref{alg:fast_base_ext
     \Call{Scale}{x, P} = \Call{FastBaseExtend}{x, \mathcal{B}_Q, \mathcal{B}_P} \cdot P
 \end{equation}
 
-% This conversion is relatively fast. This is because the sum should ideally be
-% reduced modulo q in order to provide the exact value x; instead, (2) provides
-% x + αxq for some integer αx ∈ [0, k − 1]. Computing αx requires costly operations
-% in RNS. So this step is by-passed, at the cost of an approximate result.
-% FastBconv naturally extends to polynomials of R by applying it coefficient-
-% wise.
-
-% , which requires no such conversion but does result in some noise. \eqref{eq:fastbconv} converts $x$ from base $Q$ to base $B$. Using this we can convert the residues of $a \in R_Q$ to residues in $R_P$ and simply add the towers to \eqref{form:eval}.
+Furthermore, in \gls{rns}, the $P$-towers
 
 \subsubsection{\color{red} Modulus Switching}
 In RNS, modulus switching --- also referred to as \textit{mod down} --- from $Q$ to $Q' = Q/q_{k-1}$ amounts to \textit{dropping the last limb} with a small correction, computed limb-wise without CRT reconstruction:

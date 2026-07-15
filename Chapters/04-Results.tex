@@ -4,77 +4,24 @@
 
 \chapter{Results and Discussion}
 \label{chp:results}
+\vfill
+
 %%
 %% INTRODUCTION
-% ...
-\vfill
-I begin by examining the BV implementation on its own, then analyze the sPAR protocol. Then I will present the hybrid implementation, even though it does not support the noise growth in.
+This section begins by presenting the parameters used in benchmarking, then ...
+
+I will close the section by discussing the results and % generic
+suggest a new approach... % hybrid
+
 \newpage
 
 %%
-%% PARAMETERS
-\input{Chapters/04-Results/params.tex}
-\input{Chapters/04-Results/bv.tex}
-
-\section{Noise Analysis (old)}
-\begin{itemize}
-    \item How many users can be supported with these parameters?
-    \item $d_{num}$ can probably be greater than 1, but this is not supported by the code yet (GHS is hard-coded at the RGSW level)
-\end{itemize}
-
-% \subsubsection{External Product}
-\begin{itemize}
-    \item Take a fresh RGSW and apply it to an RLWE, save the result as the new RLWE and repeat
-    \item Key takeaway: Hybrid performs better than BV at same security settings
-    \item \textcolor{red}{Maybe a pointless section}
-    % \item Noise becomes additive; grows linearly, as expected
-    % \item At the base parameter set, unbounded but stays below 60 bits for at least 1000 iterations
-\end{itemize}
-
-% \input{Figures/Plots/bv-external-product}
-
-% \input{Figures/Plots/hybrid-external-product}
-
-% \subsubsection{Internal product}
-% \begin{itemize}
-%     \item Hybrid supports at most 1 single internal product before the noise blows up
-% \end{itemize}
-
-% \input{Figures/Plots/bv-internal-product}
-
-
-\input{Chapters/04-Results/spar}
-
+%% RESULTS
+\input{Chapters/04-Results/params}
+\input{Chapters/04-Results/noise}
+\input{Chapters/04-Results/benchmarks}
 
 %%
-%% BENCHMARKS
-\section{Benchmarks}
-\begin{itemize}
-    \item Run on AMD Ryzen 5 5600X CPU 6-core {@} 3.7 GHz with 32Gb RAM in WSL2 Ubuntu 24.04 LTS Linux
-    % \item Compare numbers with parity in the security parameter (according to the \href{https://github.com/malb/lattice-estimator#}{Lattice Estimator \cite{cryptoeprint:2015/046}})
-\end{itemize}
-
-
-\subsubsection{Multi-Threaded Performance}
-\begin{itemize}
-    \item Works now, but only some functions (EncryptRGSW, BV Decompose) are optimized to take advantage of multi-threading.
-    \item $\leq k\ell$ threads saturate, so $k = 2, \ell = 3$ has optimal performance at 6 threads.
-    \item Ideally more threads would used to perform multiple coefficients simultaneously, but this is not implemented.
-\end{itemize}
-
-\textbf{Table of improvements +X\% at 1 to 6 threads}
-
-
-\section{Discussions}
-\begin{itemize}
-    \item The results show that number of users is not a problem; noise is
-    \item Once noise is controlled, many users can be handled due to the additive scaling of the RGSW products
-    \item GHS improvement over BV even adjusted to same security parameter, but would require a solution to the internal product
-\end{itemize}
-
-\subsection{Theoretical Hybrid Improvement}
-\begin{itemize}
-    \item Assuming \autoref{alg:spar:write} is implemented using only external products, or the internal product can be implemented in the hybrid scheme, we see that the hybrid approach is generally faster and has better noise properties
-    \item These results are not technically valid as the noise overflows immediately after 1 or 2 internal products, but it gives an idea of what the system \textit{could} do with more work
-    \item Explain problem
-\end{itemize}
+%% DISCUSSIONS
+\input{Chapters/04-Results/discussions}
+\input{Chapters/04-Results/hybrid}
