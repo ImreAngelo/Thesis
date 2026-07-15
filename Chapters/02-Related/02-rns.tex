@@ -3,7 +3,7 @@
 
 
 \section{Residue Number Systems}
-In BGV, BFV and CKKS the ciphertext modulus $Q$ is large, much larger than a computer word/register (typically 64 bits on modern computers). Numbers that do not fit inside a register must be handled with multi-precision arithmetic, which is known to be slow due to its serial nature that does not allow parallelization. High-performance implementations avoid this problem by using a \gls{rns} where large numbers are represented as a set of smaller, independent residues via the \gls{crt}. RNS variants of BGV, BFV and CKKS are the standard in practice; OpenFHE, for example, only supports the RNS versions of these schemes~\cite{cryptoeprint:2022/915}.
+In BGV, BFV and CKKS the ciphertext modulus $Q$ is large, much larger than a computer word/register (typically 64 bits on modern computers). Numbers that do not fit inside a register must be handled with multi-precision arithmetic, which is known to be slow due to its serial nature that does not allow parallelization. High-performance instantiations avoid this problem by using a \gls{rns} where large numbers are represented as a set of smaller, independent residues via the \gls{crt}. RNS variants of BGV, BFV and CKKS are the standard in practice; OpenFHE, for example, only supports the RNS versions of these schemes~\cite{cryptoeprint:2022/915}.
 
 \begin{definition}[Canonical Form]
     We are interested in polynomials in the ring $R_Q = \mathbb{Z}_Q[X]/(X^N+1)$ with degree (up to) $N - 1$ and coefficients in $[-Q/2, Q/2)$, and different representations of this polynomial. The canonical form \eqref{form:canonical} of such a polynomial $a$ is the form most is familiar with.
@@ -191,7 +191,24 @@ Note that the error $\alpha_xQ \pmod{QP}$ produced by \autoref{alg:fast_base_ext
     \Call{Scale}{x, P} = \Call{FastBaseExtend}{x, \mathcal{B}_Q, \mathcal{B}_P} \cdot P
 \end{equation}
 
-Furthermore, in \gls{rns}, the $P$-towers
+Furthermore, in \gls{rns}, the $P$-towers ($\bmod{q_i} \;\forall\; i$) all become 0 when multiplied by $P = p_0\dots p_{k'-1}$. This operation is therefore far cheaper in reality as it can be executed by only appending $k'$ empty towers with the $p_i$ moduli to $x$, and multiplying each $Q$-tower by $P$.
+
+\begin{algorithm}[ht!]
+\caption{\protect\Call{Scale}{x, P}}
+\label{alg:scale}
+\begin{algorithmic}[1]
+    \Require $\NTT{[x]}_{\mathcal{B}_Q}$ with $\|\mathcal{B}_{Q}\| = k_q$ and a basis $\mathcal{B}_P$ with $\|\mathcal{B}_{P}\| = k_p$
+    \Ensure $\NTT{[xP]}_{\mathcal{B}_{QP}}$
+    \For{$(x_i, q_i)\in x$}
+        \State $x_i \gets x_i \cdot P \bmod{q_i}$
+    \EndFor
+    \For{$i \in [0, k_p)$}
+        \State $x_{k + i} \gets 0 \bmod{\mathcal{B}_P[i]}$
+        \Comment{Append empty $p_i$-tower to $x$}
+    \EndFor
+    \Return $x$
+\end{algorithmic}
+\end{algorithm}
 
 \subsubsection{\color{red} Modulus Switching}
 In RNS, modulus switching --- also referred to as \textit{mod down} --- from $Q$ to $Q' = Q/q_{k-1}$ amounts to \textit{dropping the last limb} with a small correction, computed limb-wise without CRT reconstruction:

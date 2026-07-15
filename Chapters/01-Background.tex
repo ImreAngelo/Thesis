@@ -5,15 +5,17 @@ Anonymous communication aims to enable users to exchange messages over a network
 
 Systems with stronger anonymity guarantees based on \gls{mpc} exist. However, these suffer from poor scalability due to their high interactivity, making them impractical for large-scale networks. A \gls{dc-net}, for example, can provide anonymity even if there are no trusted components in the network infrastructure. Doing so requires every participant to interact with every other participant, for every round of messages sent.
 
-Recently, a new line of research has proposed fundamentally different designs, aiming to offer strong anonymity even in the presence of compromised or adversarial components in the network actively attempting to break anonymity. The first such design was the \gls{niar}~\cite{cryptoeprint:2021/435}. This paper proposed using \gls{mcfe} to allow a single, untrusted router to shuffle or permute messages from a set of clients \emph{obliviously}; without learning anything about the permutation. Thereby making it infeasible for the router to link any of the messages to its sender.
+Recently, a new line of research has proposed fundamentally different designs, aiming to offer strong anonymity even in the presence of compromised or adversarial components in the network actively attempting to break anonymity. The first such design was the \gls{niar}~\cite{cryptoeprint:2021/435}, which proposing using \gls{mcfe} to allow a single, untrusted router to shuffle or permute messages from a set of clients \emph{obliviously}; without learning anything about the permutation. Thereby making it infeasible for the router to link any of the messages to its sender.
 
 \gls{niar} was a breakthrough in anonymous communication, not only showing the theoretical possibility of designing anonymous routers, but also that such routers can be \emph{non-interactive}: clients only send one message to the router and do not need to perform any additional interaction to achieve anonymity. Using a centralized (anonymous) router in this way yields similar benefits to existing \gls{mpc}-based systems, without needing any interactions between clients. However, there are a number of problems that makes \gls{niar} impractical, if not impossible, to implement in practice.
 
 \begin{enumerate}
     \item The cryptographic components required by NIAR are extremely computationally expensive or not known to be implementable in practice.
-    \item Achieving anonymity for recipients assumes the existence of a very strong primitive called \emph{indistinguishability obfuscation with sub-exponential security}. The practicality of such a construction is unknown.
-    \item Reusing the same setup across multiple rounds makes messages from the same sender linkable, unless the expensive setup phase is rerun for every round
+    \item Achieving anonymity for recipients assumes the existence of a very strong primitive called \emph{indistinguishability obfuscation with sub-exponential security}: guaranteeing that no efficient adversary can distinguish between the obfuscations of two functionally equivalent circuits with more than a sub-exponentially small advantage. The practicality of such a construction is unknown.
+    \item Reusing the same setup across multiple rounds makes messages from the same sender linkable, unless the expensive setup phase is rerun for every round.
 \end{enumerate}
+
+These problems were highlighted in \gls{spar}
 
 \begin{itemize}
     \item Anonymous communication
