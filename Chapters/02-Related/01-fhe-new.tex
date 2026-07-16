@@ -1,0 +1,100 @@
+\renewcommand{\vec}[1]{\overrightarrow{\mathbf{#1}}}
+
+\section{Fully Homomorphic Encryption}
+\label{sec:fhe}
+\gls{he} allows computation directly on encrypted data: an untrusted party can evaluate a function over ciphertexts without learning anything about the underlying plaintexts. Schemes are usually distinguished by the circuits they can evaluate --- \emph{leveled} schemes support circuits up to a fixed multiplicative depth, whereas true \gls{fhe} supports arbitrary depth. The constructions in this thesis are leveled, so the additional machinery required to lift a leveled scheme to a fully homomorphic one is not needed here.
+
+With few exceptions, the best-performing FHE frameworks \cite{cryptoeprint:2011/277, BFV, CKKS, TFHE} base their security on the \gls{lwe} problem introduced by Regev \cite{regev:2009}, or on one of its ring variants. Throughout, $\|\cdot\|$ denotes the infinity norm $\|\cdot\|_\infty$, that is, the largest absolute value among the coefficients of a polynomial (equivalently, among its residues in the representation of \autoref{sec:rns}).
+
+\begin{definition}[Working ring]
+    All plaintexts and ciphertexts are elements of the cyclotomic ring $R_Q = \mathbb{Z}_Q[X]/(X^N + 1)$, where $N$ is a power of two and $Q$ is the ciphertext modulus. Elements are polynomials of degree at most $N - 1$ whose coefficients are reduced into a centered range about zero.
+\end{definition}
+
+\begin{definition}[Centered residue representation]
+    \label{def:centered}
+    For a modulus $q$, an element of $\mathbb{Z}_q$ is identified with its balanced representative through the map
+    \begin{equation}
+        [a]_q = \big( a + \lfloor q/2 \rfloor \bmod q \big) - \lfloor q/2 \rfloor .
+    \end{equation}
+    The flooring makes the map well defined for every $q$, and its image is the run of $q$ consecutive integers centered at the origin, so that $|[a]_q| \leq \lfloor q/2 \rfloor$. Working with balanced representatives is what allows every noise term to be bounded by $\|\epsilon\| \leq \lfloor q/2 \rfloor$ rather than by $q$.
+\end{definition}
+
+%%
+%% RLWE
+\begin{definition}[RLWE ciphertext]
+    \label{def:rlwe}
+    An \gls{rlwe} ciphertext is a pair $\vec{x} = (b, a) \in R_Q^2$ consisting of a uniformly random \emph{public element} $a$ and a \emph{masked element}
+    \begin{equation}
+        b = a \cdot s + \Delta m + \epsilon ,
+    \end{equation}
+    where $s$ is a persistent secret key, $m \in R_t$ is the plaintext for a plaintext modulus $t$, $\Delta$ is the message scaling factor, and $\epsilon$ is a freshly sampled noise term. These are drawn as
+    \begin{equation}
+        s \overset{\$}{\leftarrow} \{-1, 0, 1\}^N , \qquad \epsilon \overset{\$}{\leftarrow} \chi , \qquad a \overset{\$}{\leftarrow} R_Q ,
+    \end{equation}
+    with $s$ a ternary secret and $\chi$ a discrete Gaussian error distribution. We write $\rlwe_s(m)$ for an encryption of $m$ under $s$, abbreviated to $\rlwe(m)$ when the key is clear from context.
+\end{definition}
+
+\begin{definition}[Public key]
+    \label{def:pk}
+    A public key is an encryption of zero, $pk = \rlwe_s(0) = (a \cdot s + \epsilon, a)$. Because encryptions add homomorphically (below), it enables encryption without the secret key: one simply adds the encoded message onto $pk$, i.e. $\Call{Encrypt}{m, pk} = pk + (\Call{Encode}{m}, 0)$.
+\end{definition}
+
+\begin{definition}[Encryption]
+    $\Call{Encrypt}{m} \mapsto \rlwe(m)$ returns a fresh ciphertext encrypting $m$; given a public key $pk$, the map $\Call{Encrypt}{m, pk} \mapsto \rlwe(m)$ does the same without the secret key.
+\end{definition}
+
+\begin{definition}[Decryption]
+    \label{def:decrypt-generic}
+    $\Call{Decrypt}{\rlwe(m), s} \mapsto m$ recovers the plaintext using the secret key $s$. Recovery is correct only while the ciphertext noise stays within a scheme-dependent bound; the concrete bound for the scheme used in this thesis is given in \autoref{def:decrypt-bgv}.
+\end{definition}
+
+FHE schemes support homomorphic addition and multiplication, and typically one of the two comes for \emph{free}, in the sense that applying it directly to the ciphertexts applies it to the underlying plaintexts with no additional machinery. Schemes built on \gls{rlwe} have free addition:
+\begin{gather*}
+    \vec{x} + \vec{y} = (b_x, a_x) + (b_y, a_y) \\
+    = (a_x s + \Delta m_x + \epsilon_x, \, a_x) + (a_y s + \Delta m_y + \epsilon_y, \, a_y) \\
+    = \big( (a_x + a_y) s + \Delta (m_x + m_y) + (\epsilon_x + \epsilon_y), \; a_x + a_y \big) .
+\end{gather*}
+Setting $a = a_x + a_y$ and $\epsilon = \epsilon_x + \epsilon_y$ gives $\vec{x} + \vec{y} = (a s + \Delta(m_x + m_y) + \epsilon, \, a) = \rlwe_s(m_x + m_y)$.
+
+\begin{definition}[RLWE Addition]
+    Following ... define addition as...
+    \begin{equation}
+        \rlwe_s(m_x) + \rlwe_s(m_y) = \rlwe_s(m_x + m_y) .
+    \end{equation}
+\end{definition}
+
+The sum encrypts $m_x + m_y$ but carries the combined noise $\epsilon_x + \epsilon_y$, and it is precisely this accumulation that shapes the design of every LWE-based scheme. Grounding security in \gls{lwe} carries an unavoidable cost: each ciphertext must hold a random error term. This is inconsequential for ordinary encryption, but in the homomorphic setting the error is the resource that determines how much computation a ciphertext can withstand. Every operation enlarges it, and a ciphertext decrypts correctly only while its error remains beneath a scheme-dependent threshold; once that budget is spent, the plaintext is irrecoverable.
+
+Two broad remedies exist. The first is \emph{bootstrapping}, due to Gentry \cite{gentry:2009}: the decryption function is itself evaluated homomorphically on an encryption of the ciphertext, yielding a fresh encryption of the same plaintext in which the accumulated error has been discharged and replaced by the comparatively small error of the bootstrapping procedure alone. Bootstrapping removes any restriction on circuit depth, but it is expensive; this thesis avoids it entirely. The constructions considered here are leveled and instead rely on the external product (\autoref{sec:key-switching}), whose noise growth is mild enough that the full protocol completes within a single budget. The second remedy, natural to leveled schemes, is to spend the budget sparingly: both by shedding accumulated error through modulus switching, and by restraining its growth at the source. The standard instrument for the latter is the \emph{gadget decomposition} \cite{BV11}, treated in detail in \autoref{sec:key-switching}, which is also the foundation of the external product on which the whole construction rests. Homomorphic multiplication, by contrast, is considerably more involved and noisy in LWE-based schemes; the present work sidesteps native ciphertext-ciphertext multiplication altogether, obtaining multiplication of binary digits from external products instead.
+
+\begin{definition}[Modulus switching]
+    Modulus switching transforms a ciphertext $\vec{x} \in R_Q^2$ under a modulus $Q$ into a ciphertext $\vec{x}' \in R_{Q'}^2$ under a smaller modulus $Q' < Q$ that decrypts to the same plaintext, by scaling each component by $Q'/Q$ and rounding to the nearest integer. As the scaling reduces the noise by the same factor, it is the primary noise-management tool in leveled schemes, allowing continued computation without the cost of bootstrapping. Its realization in the residue setting is deferred to \autoref{sec:rns}.
+\end{definition}
+
+\begin{definition}[Key-switching]
+    Key-switching converts a ciphertext encrypted under one secret key into a ciphertext of the same plaintext under a different secret key. The techniques it relies on are developed in \autoref{sec:key-switching}.
+\end{definition}
+
+\subsection{Multi-Party FHE}
+\label{sec:mpfhe}
+Anonymous routing places the ciphertexts in the hands of a server that is not merely untrusted but may actively attempt to break privacy, so no single party can be allowed to hold the decryption key. Several multi-party variants of FHE address this; the method used in this thesis distributes both key generation and decryption across the participants. Each party $i$ samples its own secret key $s_i$ and publishes a corresponding public share, and the shares are aggregated once during setup into a single joint public key under which everyone encrypts. The associated joint secret $s = \sum_i s_i$ is never reconstructed by any party.
+
+Decryption proceeds in two stages. Each party partially decrypts a ciphertext with its own share $s_i$, adding extra noise to the partial result --- a step known as \emph{noise flooding} --- so that the released value leaks nothing about $s_i$. Because decryption is linear in the secret, the server then combines the partial decryptions into the plaintext without any party ever learning the joint secret.
+
+\subsection{The BGV scheme}
+\label{sec:bgv}
+While most of the development in this thesis is scheme-agnostic, the implementation is built on the BGV scheme \cite{cryptoeprint:2011/277}. BGV is a convenient choice for several reasons: it places the message in the \emph{least} significant bits of the ciphertext, so that a binary value encodes cleanly as $v \in \{0,1\} \mapsto m \in \{0,1\}$ --- exactly the behaviour the digit-wise external product depends on; it supports SIMD batching natively (below); it has a mature residue-based instantiation in OpenFHE \cite{cryptoeprint:2022/915}; and its theory is close enough to BFV that support for the latter would require little additional work.
+
+Concretely, BGV fixes the message scale to $\Delta = 1$ and scales the noise by the plaintext modulus, $\epsilon = t \cdot \epsilon_{\mathsf{rlwe}}$, so that the masked element of \autoref{def:rlwe} reads $b = a \cdot s + m + t\,\epsilon_{\mathsf{rlwe}}$ for a base noise term $\epsilon_{\mathsf{rlwe}} \overset{\$}{\leftarrow} \chi$.\footnote{Some noise-management strategies, such as OpenFHE's \texttt{FLEXIBLEAUTO}, vary $\Delta$ in practice.} To keep the exposition general, ciphertexts are written throughout in the form of \autoref{def:rlwe}, with the BGV specialization left implicit.
+
+\begin{definition}[BGV decryption]
+    \label{def:decrypt-bgv}
+    \begin{equation}
+        \Call{Decrypt}{\vec{x}, s} = \big[\, [b - a \cdot s]_Q \,\big]_t ,
+    \end{equation}
+    which is valid as long as $\|\epsilon\| < Q/2$. Under this bound the inner centered reduction recovers $m + t\,\epsilon_{\mathsf{rlwe}}$ exactly over the integers, and the outer reduction modulo $t$ then returns $m$.
+\end{definition}
+
+\begin{definition}[SIMD batching]
+    If the plaintext modulus $t$ is a prime satisfying $t \equiv 1 \pmod{2N}$, then BGV admits per-slot SIMD packing \cite{cryptoeprint:2011/133}. Batching reinterprets a plaintext, ordinarily a polynomial of degree at most $N - 1$, as $N$ independent constants $[c_i]_t$, and homomorphic operations then act slot-wise; for example $(1, 2) \cdot (2, 3) = (2, 6)$, in contrast to the polynomial product $(1 + 2X)(2 + 3X) = (2, 7, 6)$.
+\end{definition}

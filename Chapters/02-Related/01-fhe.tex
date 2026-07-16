@@ -3,7 +3,7 @@
 \section{Fully Homomorphic Encryption}
 \gls{he} allows computation directly on encrypted data: an untrusted party can evaluate a function over ciphertexts without learning anything about the underlying plaintexts. % Schemes are classified by the computations they support --- \gls{she} and \textit{leveled} schemes evaluate circuits of bounded (multiplicative) depth, while \gls{fhe} supports circuits of arbitrary depth, typically by resetting the accumulated noise through bootstrapping.
 
-With few exceptions, all of the best performing FHE frameworks \cite{cryptoeprint:2011/277, BFV, CKKS, TFHE} rely on the hardness of (the ring-variant of) the \gls{lwe} problem first introduced in \cite{regev:2009}. 
+With few exceptions, all of the best performing FHE frameworks \cite{cryptoeprint:2011/277, BFV, CKKS, TFHE} rely on the hardness of the \gls{lwe} problem first introduced in \cite{regev:2009}, or variants thereof. 
 
 
 % Modern \gls{fhe} schemes operate on polynomials in the ring $\mathbb{Z}_q[X]/(\phi(m))$ where $\phi(m)$ is a cyclotomic (I denote $R_q = \mathbb{Z}_q[X]/(X^N+1)$) and base their security on the hardness of the (decision) \gls{rlwe} problem: distinguishing samples of the form $(a, a\cdot s + \epsilon)$ from uniformly random pairs in $R_q^2$. This section focuses on the BGV scheme \cite{cryptoeprint:2011/277} used by the implementation of this thesis; the required TFHE primitives are presented in a later section.
@@ -19,6 +19,17 @@ With few exceptions, all of the best performing FHE frameworks \cite{cryptoeprin
 \begin{itemize}
     \item Concretely state what happens when $2 \not| q$ for example $\mathbb{Z}_5 = \{-2, -1, 0, 1, 2\}$ is not really $\pm5/2 = 2.5$
 \end{itemize}
+
+%%
+%% R_Q
+\begin{definition}[Canonical Form]
+    We are interested in polynomials in the ring $R_Q = \mathbb{Z}_Q[X]/(X^N+1)$ with degree (up to) $N - 1$ and coefficients in $[-Q/2, Q/2)$ 
+    %, and different representations of this polynomial. The canonical form \eqref{form:canonical} of such a polynomial $a$ is the form most is familiar with.
+    \begin{equation}
+        \label{form:canonical}
+        a = c_0 + c_1X + \cdots + c_{N-1}X^{N-1} = \sum_{i=0}^{N-1} c_iX^i
+    \end{equation}
+\end{definition}
 
 %%
 %% RLWE
@@ -79,18 +90,15 @@ Schemes based on \gls{rlwe} have free addition, as seen below:
 
 %%
 %% MODULUS SWITCHING
-\begin{definition}[\color{red}Modulus Switching]
-    The process of converting a ciphertext $\vec{x}\in R_Q^2$ encrypted under a ciphertext modulus $Q$ into a ciphertext $\vec{x}'\in R_{Q'}^2$ encrypted under a different modulus $Q'$, while ensuring that both ciphertexts still decrypt to the same message. 
-    
-    Scaling the message by a factor of $Q'/Q$ and rounding to the nearest integer achieves this, 
-    
-    This process is typically the primary tool for noise management in leveled schemes, as scaling down the modulus also scales down the noise, allowing further computation without bootstrapping.
+\begin{definition}[Modulus Switching]
+    Modulus switching is an operation transforming a ciphertext $\vec{x}\in R_{Q}^{2}$ encrypted under a large modulus $Q$ into a new ciphertext $\vec{x}^{\prime}\in R_{Q^{\prime}}^{2}$ defined under a smaller modulus $Q^{\prime} < Q$, while guaranteeing that both ciphertexts decrypt to the identical underlying plaintext message. This can be achieved by scaling the ciphertext by a factor of $Q^{\prime}/Q$ and rounding the result to the nearest integer.
+    \begin{equation}
+        x\in R_{Q'}^{2} = (b', a') = (\lfloor b\frac{Q}{Q'} \rceil, \lfloor a\frac{Q}{Q'} \rceil)
+    \end{equation}
 \end{definition}
 
-    % The process of converting a ciphertext $\vec{x}\in R_q^2$ into a ciphertext $\vec{x}'\in R_{q'}^2$ encrypting the same message under a smaller modulus $q' < q$, by rescaling and rounding
-%     \begin{equation}
-%         \vec{x}' = \left\lceil \frac{q'}{q}\, \vec{x} \right\rfloor,
-%     \end{equation}
+In leveled FHE schemes, modulus switching functions as the primary mechanism for noise management. Because scaling down the ciphertext modulus induces a proportional reduction in the associated noise, the procedure permits continuous homomorphic computations without incurring the significant performance penalty associated with bootstrapping.
+
 %     where the rounding is chosen such that $\vec{x}' \equiv \vec{x} \pmod{t}$ to preserve correct decryption. The noise is scaled by the same factor $q'/q$ (plus a small rounding term), so modulus switching is the primary tool for noise management in leveled schemes. Its realization in RNS is different and will be revisited in \autoref{sec:rns-base-conversion}.
 % \end{definition}
 
