@@ -2,7 +2,7 @@
 TEXFILE = main
 
 # Fix reference file and compile source
-default: mk clean
+default: mk
 
 PDFLATEX = pdflatex -shell-escape -interaction=nonstopmode
 

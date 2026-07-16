@@ -54,15 +54,16 @@ Digit decomposition has two important properties. First, if the digits $\gamma_i
     \end{proof}
 \end{lemma}
 
-\subsubsection{RNS Instantiation}
-Digit decomposition cannot be applied directly the \gls{rlwe} sample in an \gls{rns} scheme, where the system only has access to the residues. When Bajard et. al. first implemented the BV cryptosystem using \gls{rns} \cite{cryptoeprint:2016/510} they exchanged digit decomposition for CRT decomposition, exploiting the fact that this decomposition is already required by the \gls{rns}.
 
-\begin{definition}[Chinese Remainder Theorem]
-    is clearly a gadget
-    \begin{equation}
-        CRT: \sum N
-    \end{equation}
-\end{definition}
+
+
+
+
+\subsubsection{RNS Instantiation}
+Digit decomposition cannot be applied directly the \gls{rlwe} sample in an \gls{rns} scheme, where the system only has access to the residues. When Bajard et. al. first implemented the BV cryptosystem using \gls{rns} \cite{cryptoeprint:2016/510} they exchanged digit decomposition for \gls{crt} decomposition, exploiting the fact that this decomposition is already required by the \gls{rns}.
+
+%% TODO: Clean up, make sure \hat{q} notation is known 
+By stating the \gls{crt} as an inner product \autoref{eq:crt-gadget}, it is immediately clear that \gls{crt} with moduli $q_i$ is an exact decomposition on $g = (\hat{q}_0\cdot\hat{q}_0^{-1}\bmod{Q}, \dots, \hat{q}_{k-1}\cdot\hat{q}_{k-1}^{-1}\bmod{Q})$ with $\beta = \max_i\|q_i\|_\infty/2$ (assuming centered residues) and $\epsilon = 0$. 
 
 \begin{itemize}
     \item CRT idempotent used in \cite{cryptoeprint:2016/510}

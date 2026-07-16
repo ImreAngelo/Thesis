@@ -1,7 +1,24 @@
 \chapter{Number Theory}
 
 \section{Chinese Remaineder Theorem}
-Could be stated here just to be more complete
+\begin{definition}[Chinese Remainder Theorem]
+    \label{def:crt}
+    co-prime moduli etc.
+    \begin{align*}
+        x &\equiv x_0 \pmod{q_0} \\
+        \vdots \\
+        x &\equiv x_{k-1} \pmod{q_{k-1}}
+    \end{align*}
+    \begin{gather}
+        \nonumber
+        \text{Let } Q = \prod_{i=0}^{k-1}q_i, \; \hat{q}_i = \frac{Q}{q_i} 
+        \\
+        \text{Then } x = \sum_{i=0}^{k-1} x_i \cdot \hat{q}_i \cdot \hat{q}_i^{-1} \pmod{Q} 
+        \\
+        \label{eq:crt-gadget}
+        x = \langle \{ x_i \}_{i=0}^{k-1}, \{ \hat{q}_i\cdot\hat{q}_i^{-1} \}_{i=0}^{k-1} \rangle \pmod{Q}
+    \end{gather}
+\end{definition}
 
 \section{Number Theoretic Transform}
 \begin{itemize}
