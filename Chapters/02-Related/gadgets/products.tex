@@ -26,15 +26,17 @@
     \end{align}
 \end{definition}
 
+% TODO: Emphasize G^{-1}(x) has 2\ell elements, matching the number of rows in G, and that x = (x_0, x_1) is an RLWE ciphertext/tuple of 2 polynomials
+% TODO: Commit to gadget property <P(n),D(m)> OR the TFHE definition
 \begin{lemma}[Gadget Matrix Construction]
     Two vectors $P(u), D(v)$ that satisfy the gadget property \eqref{def:gadget-property} define a valid pair of gadget matrices with $g=P(1)$:
     \begin{gather}
         \label{def:Gmat}
         G = I_2 \otimes P(1) \\
         \label{def:Ginvmat}
-        G^{-1}(x) = [D(x_0)|D(x_1)] \\
-        \text{s.t. } G^{-1}(x)\cdot G = x + \epsilon \pmod{Q}
+        G^{-1}(x) = [D(x_0)|D(x_1)]
     \end{gather}
+    satisfying \eqref{label}.
 
     \begin{proof}
         \begin{gather*}
@@ -52,51 +54,11 @@
 \end{lemma}
 
 \begin{remark}%[Asymmetric Noise Growth]
-    The external product has two sources of noise, as detailed in \autoref{appendix:asymmetry}. The precision $\epsilon$ of the gadget decomposition is scaled by $\mu$. This is why $\mu$ is typically constrained to $\{0,1\}$ when an inexact gadget is used. %, but this error term disappears if we are using an exact gadget with $\epsilon = 0$. 
-    The other source is the term $G^{-1}(x)\cdot Z$ which scales the sum of the masking errors by the gadgets quality: $\implies \epsilon \leq \beta\sum_i^{2\ell - 1} e_i \leq \beta\max_i\|e_i\|$. Consequently, the error of $x$ being decomposed is always $\leq \beta$ but if the errors in $Z$ are large, ... thats not good.
+    \label{rem:extprod-asymmetry}
+    The external product has two sources of noise, as detailed in \autoref{appendix:asymmetry}. The precision $\epsilon$ of the gadget decomposition is scaled by $\mu$. This is why $\mu$ is typically constrained to $\{0,1\}$ when an inexact gadget is used.
+    The other source is the term $G^{-1}(x)\cdot Z \leq (a\cdot s + \beta\sum_{i=0}^{2\ell-1} \epsilon_i, a)$ which scales the sum of the masking errors by the decomposition quality. Consequently, the error of the left-hand-side has no effect on the error of the external product. This gives rise to an asymmetry where the external product has excellent noise-growth properties so long as the right hand side is always a fresh ciphertext/has small noise. % $\implies \epsilon \leq \beta\sum_i^{2\ell - 1} e_i \leq \beta\max_i\|e_i\|$
 
-    %% TODO: Move 'proof' to appendix 
-    \label{appendix:asymmetry}
-    \begin{gather*}
-        x\cdot C = G^{-1}(x)(Z + \mu G) \\ % \pmod{Q} \\
-        G^{-1}(x)\cdot Z + \mu(G^{-1}(x)\cdot G) \\
-        G^{-1}(x)Z + \mu(x + \epsilon_g)
-    \end{gather*}
-    where $\|G^{-1}\|_\infty \leq \beta$
-
-    \begin{gather*}
-        \text{Using \eqref{def:Ginvmat}: } G^{-1}(x) Z = 
-        [D(x_0)|D(x_1)]\begin{pmatrix}
-            \Call{RLWE}{0} \\
-            \vdots \\
-            \Call{RLWE}{0} \\
-        \end{pmatrix}
-        \\
-        \text{Let } D_i = G^{-1}(x)[i] \text{ and } Z_i = (a_i\cdot s + \epsilon_i, a_i)
-        \\
-        \\
-        \implies  G^{-1}(x)\cdot Z = \left(\sum_{i=0}^{2\ell - 1} a_i D_i s + \epsilon_i D_i, \;\; \sum_{i=0}^{2\ell - 1} a_i D_i\right)
-        \\
-         \left(\left[\sum_{i=0}^{2\ell - 1} a_i D_i \right]s + \sum_{i=0}^{2\ell - 1}\epsilon_i D_i, \;\; \sum_{i=0}^{2\ell - 1} a_i D_i\right)
-        \\
-        \\
-        \text{Let } a = \sum_{i=0}^{2\ell - 1} a_i D_i \text{ and } \epsilon = \sum_{i=0}^{2\ell - 1}\epsilon_i \text{, and recall } \|D(x_i)\|_\infty \leq \beta
-        \\
-        (a\cdot s + \sum_{i=0}^{2\ell - 1}\epsilon_i D_i, a) \leq (a\cdot s + \sum_{i=0}^{2\ell - 1}\epsilon_i \beta, a)
-        \\
-        \therefore G^{-1}(x)\cdot Z \leq (a\cdot s + \beta \epsilon, a)
-    \end{gather*}
-
-    So clearly, the error sources are:
-    \begin{itemize}
-        \item $\mu \epsilon_g$ which is 0 if the gadget is exact
-        \item $\beta\sum e_z$ the sum of 
-    \end{itemize}
-
-    \begin{gather*}
-        xxxx
-    \end{gather*}
-    \newpage
+    %% TODO: Move derivation to appendix? 
 \end{remark}
 
 \begin{itemize}
@@ -116,18 +78,14 @@
     \end{gather}
 \end{definition}
 
-\begin{remark}
-    \label{remark:noise-asymmetry-products}
-    Since the quality $\beta$ of gadget decomposition is determined only by the
-\end{remark}
+The asymmetry noted in~\autoref{rem:extprod-asymmetry} applies to the internal product, and can dictates the order in which the product should be used. If the right hand side of the internal product 
 
-
-\begin{itemize}
-    \item \textcolor{red}{Future work/results:} Though digit decomposition is often used, emphasize the external product only requires $G^{-1}(x)\cdot G \approx x\bmod{Q}$
-    % \item (R)GSW ciphertexts \cite{cryptoeprint:2013/340, cryptoeprint:2014/816}
-    % \item External product \cite{cryptoeprint:2014/816, cryptoeprint:2018/421}
-    % \begin{itemize}
-    %     \item Lemma/corollary: If two vectors satisfy the gadget property \eqref{def:gadget-property}, then $G = I_2\otimes P(1)$ and $G^{-1}(x) = [D(x_0)|D(x_1)]$ is a valid choice and \autoref{alg:external-product} returns the external product
-    % \end{itemize}
-    % \item Internal product \cite{cryptoeprint:2018/421}
-\end{itemize}
+% \begin{itemize}
+%     \item \textcolor{red}{Future work/results:} Though digit decomposition is often used, emphasize the external product only requires $G^{-1}(x)\cdot G \approx x\bmod{Q}$
+%     % \item (R)GSW ciphertexts \cite{cryptoeprint:2013/340, cryptoeprint:2014/816}
+%     % \item External product \cite{cryptoeprint:2014/816, cryptoeprint:2018/421}
+%     % \begin{itemize}
+%     %     \item Lemma/corollary: If two vectors satisfy the gadget property \eqref{def:gadget-property}, then $G = I_2\otimes P(1)$ and $G^{-1}(x) = [D(x_0)|D(x_1)]$ is a valid choice and \autoref{alg:external-product} returns the external product
+%     % \end{itemize}
+%     % \item Internal product \cite{cryptoeprint:2018/421}
+% \end{itemize}

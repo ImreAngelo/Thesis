@@ -14,6 +14,7 @@ Digit decomposition has two important properties. First, if the digits $\gamma_i
 
 %%
 %% Gadget Decomposition
+%% TODO: Settle this definition OR the gadget property definition
 \begin{definition}[(Abstract) Gadget Decomposition]
     \label{def:tfhe:gadget-decomposition}
     An efficient algorithm $\decomp{v}{g,\beta,\epsilon}$ is a valid decomposition on the gadget $g\in \mathbb{Z}_q^\ell$ with quality $\beta \in \mathbb{Z}^{+}$ and precision $\epsilon \in \mathbb{Z}^+$ if and only if for any \gls{rlwe} sample $v\in R_Q$ it efficiently and publicly outputs a small vector $u \in \mathbb{Z}_q$ such that $\|u\|_\infty \leq \beta$ and $\langle u, g\rangle \leq v + \epsilon$.
@@ -38,6 +39,7 @@ Digit decomposition has two important properties. First, if the digits $\gamma_i
 %     \item Centered representation
 % \end{itemize}
 
+% TODO: Clean up: 2\epsilon, establish P_1 \circ P_2 = P_1(P_2(u)) better
 \begin{lemma}%[Layered Gadget Decomposition]
     \label{thm:gadget-layers}
     The composition of two gadget decompositions is itself a valid gadget decomposition.
@@ -47,10 +49,10 @@ Digit decomposition has two important properties. First, if the digits $\gamma_i
     \end{gather*}
 
     \begin{proof}
-        This is clear from applying the gadget property twice.
-        \begin{gather*}
-            \langle P_1(P_2(u)), D_1(D_2(u)) \rangle = P_2(u) \cdot D_2(u) + \epsilon_1 = u\cdot v + \epsilon_2 + \epsilon_1 \pmod{Q}
-        \end{gather*}
+        Apply the gadget property twice.
+        % \begin{gather*}
+        %     \langle P_1(P_2(u)), D_1(D_2(u)) \rangle = P_2(u) \cdot D_2(u) + \epsilon_1 = u\cdot v + \epsilon_2 + \epsilon_1 \pmod{Q}
+        % \end{gather*}
     \end{proof}
 \end{lemma}
 
@@ -62,21 +64,36 @@ Digit decomposition has two important properties. First, if the digits $\gamma_i
 \subsubsection{RNS Instantiation}
 Digit decomposition cannot be applied directly the \gls{rlwe} sample in an \gls{rns} scheme, where the system only has access to the residues. When Bajard et. al. first implemented the BV cryptosystem using \gls{rns} \cite{cryptoeprint:2016/510} they exchanged digit decomposition for \gls{crt} decomposition, exploiting the fact that this decomposition is already required by the \gls{rns}.
 
-%% TODO: Clean up, make sure \hat{q} notation is known 
-By stating the \gls{crt} as an inner product \autoref{eq:crt-gadget}, it is immediately clear that \gls{crt} with moduli $q_i$ is an exact decomposition on $g = (\hat{q}_0\cdot\hat{q}_0^{-1}\bmod{Q}, \dots, \hat{q}_{k-1}\cdot\hat{q}_{k-1}^{-1}\bmod{Q})$ with $\beta = \max_i\|q_i\|_\infty/2$ (assuming centered residues) and $\epsilon = 0$. 
-
-\begin{itemize}
-    \item CRT idempotent used in \cite{cryptoeprint:2016/510}
-    \item HPS optimization for specifically keyswitching \cite{cryptoeprint:2018/117}
-    \item Definition: gadget with $\beta = Q/2, \epsilon = 0$
-\end{itemize}
-
+%% TODO: Clean up, make sure \hat{q} notation is known --- have it listed as notation somewhere or refer back to base conversion e.g. recall \hat{q} from {ref}
+By stating the \gls{crt} as an inner product \eqref{eq:crt-gadget}, it is immediately clear that \gls{crt} with moduli $q_i$ is an exact decomposition on $g = (\hat{q}_0\cdot\hat{q}_0^{-1}, \dots, \hat{q}_{k-1}\cdot\hat{q}_{k-1}^{-1})$ with $\beta = \max_i\|q_i\|_\infty/2$ (assuming centered residues) and $\epsilon = 0$. This leads to... % somehow include HPS 
+%
+%% TODO: We can skip this, but we need to correct attribution so that the bridge from BEHZ -> HPS is clear
+% \begin{align}
+%     \behz{P}(u) = () \\
+%     \behz{D}(v) = ()
+% \end{align}
+%
 \begin{align}
-    \hps{P}(u) = () \\
-    \hps{D}(v) = ()
+    \label{def:hps:P}
+    \hps{P}(a) &= (a\cdot[\hat{q}^{-1}_0]_{q_0}\cdot \hat{q}_0, \dots, a\cdot[\hat{q}^{-1}_{k-1}]_{q_0}\cdot [\hat{q}_{k-1}]_Q) \\
+    \label{def:hps:D}
+    \hps{D}(a) &= ([a]_{q_0}, [a]_{q_1}, \dots, [a]_{q_{k-1}})
 \end{align}
+
+The HPS gadget is especially powerful, because both \eqref{def:hps:P} and \eqref{def:hps:D} amount to looking up limbs in \gls{rns} (no calculations). $[a]_{q_i}$ is by definition the $q_i$-tower of $a$, while
+\begin{equation*}
+    [a]_{q_j} [\hat{q}^{-1}_i]_{q_i}\cdot \hat{q}_0 \bmod Q = 
+    \begin{cases}
+        0, & i \not= j\\
+        [a]_{q_j}, & i = j
+    \end{cases}
+\end{equation*}
 
 \begin{itemize}
     \item Note on HPS gadget = RNS limb lookup $\to$ \autoref{sec:impl:core}
     \item HPS is exact but noise is large ($\beta = Q/2,\; \epsilon = 0$); can apply digit decomposition to each residue polynomial as per \autoref{thm:gadget-layers}, lowering $\beta \to B/2$ and still exact ($\epsilon = 0$) if $B = \lfloor \max{q_i}/\ell \rfloor + 1$
 \end{itemize}
+
+\begin{definition}[BV-RNS Gadget]
+    
+\end{definition}

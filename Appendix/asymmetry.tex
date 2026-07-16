@@ -1,0 +1,42 @@
+\section{Derivation of External Product Noise Asymmetry}
+\label{appendix:asymmetry}
+\begin{gather*}
+    x\cdot C = G^{-1}(x)(Z + \mu G) \\ % \pmod{Q} \\
+    G^{-1}(x)\cdot Z + \mu(G^{-1}(x)\cdot G) \\
+    G^{-1}(x)Z + \mu(x + \epsilon_g)
+\end{gather*}
+where $\|G^{-1}\|_\infty \leq \beta$
+
+\begin{gather*}
+    \text{Using \eqref{def:Ginvmat}: } G^{-1}(x) Z = 
+    [D(x_0)|D(x_1)]\begin{pmatrix}
+        \Call{RLWE}{0} \\
+        \vdots \\
+        \Call{RLWE}{0} \\
+    \end{pmatrix}
+    \\
+    \text{Let } D_i = G^{-1}(x)[i] \text{ and } Z_i = (a_i\cdot s + \epsilon_i, a_i)
+    \\
+    \\
+    \implies  G^{-1}(x)\cdot Z = \left(\sum_{i=0}^{2\ell - 1} a_i D_i s + \epsilon_i D_i, \;\; \sum_{i=0}^{2\ell - 1} a_i D_i\right)
+    \\
+        \left(\left[\sum_{i=0}^{2\ell - 1} a_i D_i \right]s + \sum_{i=0}^{2\ell - 1}\epsilon_i D_i, \;\; \sum_{i=0}^{2\ell - 1} a_i D_i\right)
+    \\
+    \\
+    \text{Let } a = \sum_{i=0}^{2\ell - 1} a_i D_i \text{ and } \epsilon = \sum_{i=0}^{2\ell - 1}\epsilon_i \text{, and recall } \|D(x_i)\|_\infty \leq \beta
+    \\
+    (a\cdot s + \sum_{i=0}^{2\ell - 1}\epsilon_i D_i, a) \leq (a\cdot s + \sum_{i=0}^{2\ell - 1}\epsilon_i \beta, a)
+    \\
+    \therefore G^{-1}(x)\cdot Z \leq (a\cdot s + \beta \epsilon, a)
+\end{gather*}
+
+So clearly, the error sources are:
+\begin{itemize}
+    \item $\mu \epsilon_g$ which is 0 if the gadget is exact
+    \item $\beta\sum e_z$ the sum of 
+\end{itemize}
+
+\begin{gather*}
+    xxxx
+\end{gather*}
+\newpage
