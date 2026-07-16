@@ -1,55 +1,46 @@
 \subsection{Base Conversion}
 \label{sec:rns-base-conversion}
-%
-\begin{definition}[RNS Basis] 
-    Given a large modulus $Q = \prod_{i=0}^{k-1} q_i$ composed of pairwise coprime factors, the \textit{RNS basis} is defined as $\mathcal{B}_Q = \{q_0, q_1, \dots, q_{k-1}\}$ as the set of RNS moduli used in the RNS/CRT representation \eqref{form:crt}.
-    \begin{equation}
+Several FHE procedures require changing the set of moduli a value is represented in: extending the basis before operations that need headroom, and reducing it again to manage noise. This subsection defines base conversion and the operations derived from it in the residue setting.
+
+\begin{definition}[RNS Basis]
+    Given a modulus $Q = \prod_{i=0}^{k-1} q_i$ composed of $k$ pairwise coprime factors, the \textit{RNS basis} $\mathcal{B}_Q = \{q_0, q_1, \dots, q_{k-1}\}$ is the set of moduli used in the CRT representation \eqref{form:crt}:
+    \begin{equation} %% TODO: This is a neat formula but it doesn't fit here at all, is more applicable to RNS in general or CRT
         \mathbb{Z}_Q \cong \mathbb{Z}_{q_0} \times \mathbb{Z}_{q_1} \times \cdots \times \mathbb{Z}_{q_{k-1}}
     \end{equation}
 \end{definition}
 
-% A subset $\mathcal{B}_{Q} \subseteq \mathcal{B}$ forms the basis for the $Q$-towers of...
+%% TODO: Denote this as abuse of notation or formally "extend the notation of~\autoref{def:centered} to sets" or bases
+%% TODO: This whole paragraph is awkward, it does too much: extends notation, defines notation of CRT and evaluation form in one sentence 
+The centered modulo notation of \autoref{def:centered} extends to bases: $[a]_{\mathcal{B}_Q} = ([a]_{q_0}, \dots, [a]_{q_{k-1}})$ denotes the CRT form \eqref{form:crt} of $a$, and $\ntt{[a]_{\mathcal{B}_Q}}$ its evaluation form \eqref{form:eval}.
 
-%%
-%% BASE EXTENSION (NAIVE)
-\begin{definition}[Base conversion]
+\begin{definition}[Base Conversion]
     Let $\mathcal{B}_Q = \{q_0,\dots,q_{k-1}\}$ and
-    $\mathcal{B} = \{b_0,\dots,b_{\ell-1}\}$ be RNS bases with
+    $\mathcal{B} = \{b_0,\dots,b_{k'-1}\}$ be RNS bases with
     $\gcd(Q, B) = 1$, where $B = \prod_{j} b_j$. Base conversion is
     the map that takes the representation of $x$ in $\mathcal{B}_Q$
     to the representation of $[x]_Q$ in $\mathcal{B}$, i.e.
     \begin{equation*}
         \left([x]_{q_0}, \dots, [x]_{q_{k-1}}\right)
         \;\longmapsto\;
-        \left([x]_{b_0}, \dots, [x]_{b_{\ell-1}}\right)
+        \left([x]_{b_0}, \dots, [x]_{b_{k'-1}}\right)
     \end{equation*}
     When the residues in $\mathcal{B}$ are appended to those in $\mathcal{B}_Q$, so that $x$ becomes represented in the \textit{extended} basis $\mathcal{B}_Q \cup \mathcal{B}$ for the modulus $QB$, the operation is also referred to as \emph{base extension}.
 \end{definition}
 
-% \begin{definition}[Base Extension.]
-%     Special case of base conversion where we convert from $\mathcal{B}_Q \longmapsto \mathcal{B}_{QP}$. Note $\mathcal{B}_{QP} = \mathcal{B}_{Q} \cup \mathcal{B}_{P}$ and $P = \prod_i p_i$ etc. 
-% \end{definition}
-
-\begin{remark}
-    \color{purple}
-    Extend mod notation for RNS polynomials: $[a]_{\mathcal{B}_Q} = ([a]_{q_0}, \dots, [a]_{q_{k-1}})$ for the basis $\mathcal{B}_Q = \{q_i\}_{i=0}^{k-1}$ means $a$ must be in RNS form 
-    % (\textcolor{red}{TODO: distinguish CRT vs NTT mode... maybe $[a]^\mathsf{NTT}_{\mathcal{B}_Q}$?})
-\end{remark}
-
-The naive approach to base conversion reconstructs $a$ from its residues through inverse \gls{crt}, and then reduces the result against each modulus of the new basis. This reintroduces the multi-precision arithmetic that RNS was meant to avoid. % Cheaper but approximate alternatives exists, described next.
-
+%% TODO: Presenting the rest of the chapter here is awkward. Find another angle entirely.
+The naive approach to base conversion reconstructs $x$ from its residues through the inverse \gls{crt}, and then reduces the result against each modulus of the new basis. This reintroduces exactly the multi-precision arithmetic that \gls{rns} was meant to avoid; the remainder of this section covers the cheaper, approximate alternative and the operations built on top of it.
 
 \subsubsection{Fast Base Conversion}
-Introduced by \cite{cryptoeprint:2016/510}, fast base conversion operates directly on the residues in CRT mode, avoiding the CRT reconstruction and multi-precision integers entirely. \textcolor{red}{(Does not work in evaluation mode).} The price is approximation, since \eqref{eq:fastbconv} produces not $x$ but $x + \alpha_x Q$ for some integer $\alpha_x \in [0, k)$. \textcolor{purple}{Computing the exact overflow $\alpha_x$ is possible but would require costly operations in RNS, and is unnecessary in \textit{extension} by $P$.} \textcolor{red}{Introduce the notation $\hat{q}_i = Q/q_i$ here?}
-
+Write $\hat{q}_i = Q/q_i$ for the CRT factors of the basis $\mathcal{B}_Q$, and $[\hat{q}_i^{-1}]_{q_i}$ for their modular inverses. Introduced in \cite{cryptoeprint:2016/510}, fast base conversion operates directly on the residues, avoiding the CRT reconstruction and multi-precision integers entirely.
 \begin{equation}
     \label{eq:fastbconv}
-    \mathsf{FastBConv}(x, \mathcal{B}_Q, \mathcal{B}) = \left(\left[\sum_{i=0}^{k-1}\left[x_i\left(\frac{Q}{q_i}\right)^{-1}\right]_{q_i} \times \frac{Q}{q_i}\right]_b\right)_{b\in \mathcal{B}}
-\end{equation}
+    \Call{FastBConv}{x, \mathcal{B}_Q, \mathcal{B}} = \left\{\left[\sum_{i=0}^{k-1}\left[x_i\, \hat{q}_i^{-1}\right]_{q_i} \cdot \hat{q}_i\right]_b\right\}_{b\in \mathcal{B}}
+\end{equation} %% TODO: Computing \alpha exactly or bounding it to {-1, 0, 1}, I think they showed how to do in that paper. Verify and write into single sentence.
+The price is approximation: because the sum is never reduced modulo $Q$, \eqref{eq:fastbconv} produces not $[x]_Q$ but $[x]_Q + \alpha_x Q$ for some integer $\alpha_x \in [0, k)$. Computing $\alpha_x$ exactly is possible but requires costly operations in \gls{rns} \cite{cryptoeprint:2018/117}, and is unnecessary when converting as part of an \textit{extension}. Note also that \eqref{eq:fastbconv} operates on the CRT form: an operand held in evaluation form must first be brought back with the inverse \gls{ntt}, which is part of the true cost of the conversion.
 
-
-\subsubsection{Fast Base Extension}
-\textcolor{red}{We can use} \eqref{eq:fastbconv} as a subroutine in base extension. Only the new residues $\mathcal{B}_Q \longmapsto \mathcal{B}_P$ need to be calculated, and since $\mathcal{B}_{QP} = \mathcal{B}_Q\cup \mathcal{B}_P$ the original residues are kept unchanged.
+%% TODO: This needs a sentence like "Assuming gdc(b_i, p_i) = 1" or "all b_i and p_i are pair-wise co-prime" ... "only the $P$-residues need to be calculated"
+\subsubsection{Fast Base Extension} %% TODO: Define "$P$-towers" formally: the towers $\bmod{p_i}$ where $p_i \in \mathcal{B}_P$
+Base extension only requires the new residues, so \eqref{eq:fastbconv} can be used as a subroutine: the $\mathcal{B}_P$-residues are computed with $\Call{FastBConv}{x, \mathcal{B}_Q, \mathcal{B}_P}$, and since $\mathcal{B}_{QP} = \mathcal{B}_Q \cup \mathcal{B}_P$ the original residues are kept unchanged.
 
 %%%
 %%% Fast Base Extension
@@ -58,97 +49,74 @@ Introduced by \cite{cryptoeprint:2016/510}, fast base conversion operates direct
 \caption{Fast Base Extension}
 \label{alg:fast_base_extension}
 \begin{algorithmic}[1]
-    \Require $\NTT{[a]}_{\mathcal{B}_Q}$ and a basis $\mathcal{B}_P$
-    \Ensure $\NTT{[a + \epsilon]}_{\mathcal{B}_{QP}}$ where $\epsilon = \alpha_aQ$ for some $\alpha_a\in[0, k)$
-    % \State $\mathsf{shared} \gets 0$
-    % \For{$c \in \Call{InverseNTT}{a}$}
-    %     \Comment{Convert to CRT form}
-    %     \State $\mathsf{shared} \gets \mathsf{shared} + [c\cdot\hat{q}_i^{-1}]$ 
-    % \EndFor
-    \State $a_{Q} := \Call{InverseNTT}{a}$
-    \State $\mathsf{shared} \gets \sum_{i = 0}^{k} [a_Q[i]\hat{q}_i^{-1}]_{q_i}\cdot \hat{q}_i$
+    \Require $\ntt{[a]_{\mathcal{B}_Q}}$ and a basis $\mathcal{B}_P$
+    \Ensure $\ntt{[a + \alpha_aQ]_{\mathcal{B}_{QP}}}$ for some $\alpha_a\in[0, k)$
+    \State $a_{Q} \gets \Call{InverseNTT}{a}$
+    \State $\mathsf{conv} \gets \sum_{i = 0}^{k-1} [a_Q[i]\cdot\hat{q}_i^{-1}]_{q_i}\cdot \hat{q}_i$
+    \Comment{Fast Base Conversion}
     \For{$p \in \mathcal{B}_P$}
-        \State $a \gets a \cup \Call{NTT}{[\mathsf{shared}]_p}$
+        \State $a \gets a \cup \Call{NTT}{[\mathsf{conv}]_p}$
     \EndFor
     \State\Return $a$
 \end{algorithmic}
 \end{algorithm}
 
-% \State $a_{Q} := \Call{InverseNTT}{a}$
-% \State $a_{P} := \mathsf{FastBConv}(a_Q, \mathcal{B}_Q, \mathcal{B}_P)$
-% \State\Return $a \cup \Call{NTT}{a_{P}}$ 
-
-% Notably, \eqref{eq:fastbconv} is approximate as a \textit{conversion} but exact as an \textit{extension}: the extended residue vector over $\mathcal{B}_Q\cup\mathcal{B}_P$ is an exact RNS representation of the lifted integer $x' = [x]_Q + \alpha_x Q \in \mathbb{Z}_{QP}$, since $\alpha_x Q \equiv 0 \pmod{q_i}$ keeps the original (reused) $Q$-residues consistent with $x'$. The RNS schemes are designed to tolerate this overflow, which is removed --- or shrunk to the small $\alpha_x$ --- by a subsequent division during mod down.
-
+%% TODO: This should replace the section explaining "Computing $\alpha_x$ exactly is possible but... " in a similar way to how Scale(x, P) is introduced
 \begin{remark}
-    The factors $\hat{q}^{-1}_i =[(\frac{Q}{q_i})^{-1}]_{q_i}$ and $\hat{q}_i =\frac{Q}{q_i}$ can be pre-calculated and stored in memory (discussed in \autoref{sec:impl:core}).
+    \label{rem:fbe-exact-extension}
+    Fast base conversion is approximate as a \textit{conversion} but exact as an \textit{extension}: because $\alpha_x Q \equiv 0 \pmod{q_i}$, the reused $Q$-residues remain consistent, and the extended vector is the exact RNS representation of the lifted integer $x' = [x]_Q + \alpha_x Q \in \mathbb{Z}_{QP}$. The operations below are designed around this overflow, either cancelling it outright or shrinking it to a small additive term.
 \end{remark}
 
+%% TODO: I like the formulation from the original paper, essentially: FBC is fast assuming the factors are available (pre-computed)
+\begin{remark}
+    The factors $\hat{q}_i$ and $[\hat{q}^{-1}_i]_{q_i}$ depend only on the basis, and can be pre-calculated and stored in memory (discussed in \autoref{sec:impl:core}).
+\end{remark}
+
+%% TODO: This section seems pointless when 
 \subsubsection{Scale}
-Note that the error $\alpha_xQ \pmod{QP}$ produced by \autoref{alg:fast_base_extension} would be completely removed if we multiplied by $P$. This observation leads to the specialized operation ``\textit{extend and scale by} $P$''. I refer to this operation as $\Call{Scale}{x, P} \mapsto [xP]_{\mathcal{B}_{QP}}$. 
+The overflow $\alpha_xQ$ produced by \autoref{alg:fast_base_extension} is removed completely if the result is multiplied by $P$:
 \begin{gather*}
     x' = x + \alpha_xQ \pmod{QP} \\
     x'P = xP + \alpha_x QP = xP \pmod{QP}
 \end{gather*}
+This observation leads to the specialized operation ``\textit{extend and scale by} $P$''. I refer to this operation as $\Call{Scale}{x, P} \mapsto [xP]_{\mathcal{B}_{QP}}$.
 \begin{equation}
     \label{def:scale}
     \Call{Scale}{x, P} = \Call{FastBaseExtend}{x, \mathcal{B}_Q, \mathcal{B}_P} \cdot P
 \end{equation}
 
-Furthermore, in \gls{rns}, the $P$-towers ($\bmod{q_i} \;\forall\; i$) all become 0 when multiplied by $P = p_0\dots p_{k'-1}$. This operation is therefore far cheaper in reality as it can be executed by only appending $k'$ empty towers with the $p_i$ moduli to $x$, and multiplying each $Q$-tower by $P$.
+In \gls{rns} the operation is far cheaper than \eqref{def:scale} suggests. Every $P$-residue of $xP$ is $0$ modulo $p_i$, so no conversion is needed at all: each $Q$-tower is multiplied by $[P]_{q_i}$, and $k'$ empty towers are appended (\autoref{alg:scale}). In particular, \textsc{Scale} avoids the \gls{ntt} conversions of the fast base extension entirely and operates directly on the evaluation form.
 
 \begin{algorithm}[ht!]
 \caption{\protect\Call{Scale}{x, P}}
 \label{alg:scale}
 \begin{algorithmic}[1]
-    \Require $\NTT{[x]}_{\mathcal{B}_Q}$ with $\|\mathcal{B}_{Q}\| = k_q$ and a basis $\mathcal{B}_P$ with $\|\mathcal{B}_{P}\| = k_p$
-    \Ensure $\NTT{[xP]}_{\mathcal{B}_{QP}}$
+    \Require $\ntt{[x]_{\mathcal{B}_Q}}$ with $|\mathcal{B}_{Q}| = k$ and a basis $\mathcal{B}_P$ with $|\mathcal{B}_{P}| = k'$
+    \Ensure $\ntt{[xP]_{\mathcal{B}_{QP}}}$
     \For{$(x_i, q_i)\in x$}
         \State $x_i \gets x_i \cdot P \bmod{q_i}$
     \EndFor
-    \For{$i \in [0, k_p)$}
-        \State $x_{k + i} \gets 0 \bmod{\mathcal{B}_P[i]}$
+    \For{$i \in [0, k')$}
+        \State $x_{k + i} \gets 0 \bmod{p_i}$
         \Comment{Append empty $p_i$-tower to $x$}
     \EndFor
-    \Return $x$
+    \State\Return $x$
 \end{algorithmic}
 \end{algorithm}
 
-\subsubsection{\color{red} Modulus Switching}
-As rounding is not natively supported in \gls{rns}, the textbook approach to modulus switching is replaced by dropping the last limb and applying a small correction to each limb. 
-
+\subsubsection{Modulus Switching}
+%% TODO: Poorly written and sounds like AI. Rewrite entire (subsub)section. 
+Rounding is not natively supported in \gls{rns}: the residues are independent and non-positional, so the magnitude of a value --- and with it any fractional correction --- is inaccessible without CRT reconstruction. The modulus switch of \autoref{def:modswitch}, scaling a ciphertext element $c$ from $Q$ to $Q' = Q/q_{k-1}$, is instead realized by \textit{dropping the last limb} and applying a small correction to each remaining limb \cite{cryptoeprint:2021/204}:
 \begin{equation}
-    [c']_{q_i} = [q_{k-1}^{-1}(c - \delta)]_{q_i}, \quad 0 \leq i < k - 1
+    \label{eq:rns-modswitch}
+    [c']_{q_i} = \left[q_{k-1}^{-1}\left(c - \delta\right)\right]_{q_i}, \quad 0 \leq i < k - 1
 \end{equation}
+where the correction $\delta \equiv c \pmod{q_{k-1}}$ replicates the rounding and, for BGV, must additionally satisfy $\delta \equiv 0 \pmod{t}$ so that the plaintext is preserved. The noise shrinks by a factor $q_{k-1}$, matching the classical modulus switch. %% TODO: Remove BGV stuff, we don't really care.
 
-
-
-% Rounding is not natively supported in \gls{rns} because the independent, non-positional nature of the residue limbs obscures the overall magnitude, making fractional corrections impossible without full Chinese Remainder Theorem (CRT) reconstruction. Consequently, to emulate the modulus switch—scaling down from $Q$ to $Q^{\prime}=Q/q_{k-1}$—the classical approach must be adapted. In an \gls{rns} architecture, this fundamentally amounts to dropping the last limb $q_{k-1}$. However, to mathematically replicate the rounding step and preserve decryption correctness, a precise correction term $\delta\equiv c \pmod{q_{k-1}}$ must be applied to the remaining limbs. The exact \gls{rns} modulus switch is therefore computed limb-wise as:  
-
-% When operating within a Residue Number System (RNS), the classical modulus switch—scaling down from $Q$ to $Q^{\prime}=Q/q_{k-1}$—amounts to dropping the last RNS limb $q_{k-1}$. However, to mathematically replicate the "rounding" step of Definition 2.7 and maintain correct decryption, a small correction term $\delta \equiv c \pmod{q_{k-1}}$ must be applied to the remaining limbs. The exact RNS modulus switch is computed limb-wise as:  $$[c^{\prime}]_{q_{i}}=[q_{k-1}^{-1}(c-\delta)]_{q_{i}}$$for $0\le i<k-1$. For the BGV scheme specifically, the correction must additionally satisfy $\tilde{\delta}\equiv0 \pmod{t}$ to ensure the plaintext message is maintained. This exact operation successfully shrinks the noise by a factor of $q_{k-1}$.
-
-
-
-% Modulus switching is performed 
-
-% In leveled homomorphic encryption, modulus switching is the primary tool for noise management, converting a ciphertext $\vec{x} \in R_{Q}^{2}$ to a smaller ciphertext modulus $Q^{\prime}$ while preserving the underlying plaintext after decryption. In a standard setting, this is achieved by scaling the message by a factor of $Q^{\prime}/Q$ and rounding to the nearest integer. 
-
-% % This process proportionally scales down the intrinsic noise, permitting further homomorphic computation without the need for bootstrapping
-
-% In RNS, modulus switching --- also referred to as \textit{mod down} --- from $Q$ to $Q' = Q/q_{k-1}$ amounts to \textit{dropping the last limb} with a small correction, computed limb-wise without CRT reconstruction:
-% \begin{equation}
-%     \label{eq:rns-modswitch}
-%     [c']_{q_i} = \left[q_{k-1}^{-1}\left(c - \delta\right)\right]_{q_i}, \quad 0 \leq i < k-1,
-% \end{equation}
-% where $\delta \equiv c \pmod{q_{k-1}}$ and, for BGV, $\delta \equiv 0 \pmod{t}$ so that decryption correctness is maintained. The noise shrinks by a factor $q_{k-1}$, matching the classical modulus switch.
-
-\subsubsection{\color{red} Approximate Mod Down}
-Modulus switching exactly requires multiprecision integers.. can use FBE again... exploits the fact that the polynomial is pre-multiplied by $P$...
-
-Uses $\delta = \Call{FastBConv}{[x]_{\mathcal{B}_P}, \mathcal{B}_P, \mathcal{B}_Q}$
-% The reverse operation, switching from the extended modulus $QP$ back down to $Q$, uses \eqref{eq:fastbconv} to convert the $P$-part back to $\mathcal{B}_Q$ before dividing by $P$ \autocite{cryptoeprint:2012/099, cryptoeprint:2018/117}:
+\subsubsection{Approximate Mod Down}
+Switching from the extended modulus $QP$ back down to $Q$ faces the same obstacle: dividing by $P$ requires rounding, and thus a correction congruent to $x$ modulo $P$. The correction is obtained by converting the $P$-part of $x$ back to $\mathcal{B}_Q$ with \eqref{eq:fastbconv} \cite{cryptoeprint:2012/099, cryptoeprint:2018/117}:
 \begin{equation}
     \label{eq:approxmoddown}
     \Call{ApproxModDown}{x} = \left[P^{-1}\left(x - \Call{FastBConv}{[x]_{\mathcal{B}_P}, \mathcal{B}_P, \mathcal{B}_Q}\right)\right]_{\mathcal{B}_Q}
 \end{equation}
-For BGV the converted term must additionally be corrected modulo $t$ to preserve the plaintext \cite{cryptoeprint:2021/204}. % This operation also corrects the fast base conversion error: the conversion overflow $\alpha P$ is divided by $P$, shrinking it to the small additive term $\alpha$ --- which is why the approximation in \eqref{eq:fastbconv} is tolerable.
+The inner conversion carries its own overflow $\alpha P$, which survives the division as a small additive error $\alpha \in [0, k')$ --- hence \textit{approximate} mod down. In typical use the operand is pre-multiplied by $P$, by \textsc{Scale} or by $P$-scaled key material, so the division returns the value to its original scale while shrinking the noise accumulated at modulus $QP$ by a factor $P$; this is what makes the approximation tolerable in practice. For BGV the converted term must additionally be corrected modulo $t$ to preserve the plaintext \cite{cryptoeprint:2021/204}.
