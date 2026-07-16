@@ -1,79 +1,44 @@
 %
 \newpage
 \section{Experimental Setup}
+\label{sec:experimental-setup}
 
-\subsubsection{sPAR}
-The design 
-To simulate communication between parties, a single ``all-knowing'' orchestrator with access to the secret key. 
-
+\subsection{Protocol Simulation}
 \begin{itemize}
-    \item An ``all-knowing'' orchestrator performs the setup and 1 full round
-    \item In \texttt{benchmark} dir
+    \item A single ``all-knowing'' orchestrator process (with access to all key material) simulates every party and performs the setup plus one full protocol round; no networking is involved.
+    \item Round structure, parameterized over the number of users $\eta$ (\texttt{benchmark} directory):
     \begin{itemize}
-        \item Takes the number of users $\eta$ as an input
-        \item Every ``user'' generates a private key share, and corresponding public key share
-        \item The public key shares are all synthesized to make one large public key
-        \item For keeping track, each user has a unique ID 
-        \item Each user encodes their ID in an RGSW using the public key, and sends that message to the server
-        \item Each user also sends 3 random indices 
-        \item After receiving all messages, the server performs the write operation on each message
+        \item each virtual user holds a unique ID and a secret key share; the joint public key is produced by OpenFHE's chained multiparty key generation (each user extends the previous user's public key share; the final key is the joint public key);
+        % FLAG: earlier notes said the public key shares are all "synthesized" into one key --- the generation is sequential/chained, not a combination of independent shares.
+        \item each user submits an RLWE encryption of its value and $D$ one-hot RGSW index vectors under the joint key;
+        % FLAG: earlier notes said each user "encodes their ID in an RGSW"; in the benchmark the written value is a plaintext value encrypted as RLWE, and the indices are the one-hot RGSW vectors of sec. impl:spar.
+        \item the server executes \Call{Server::Write}{} once per user;
+        \item decryption is multiparty: every user produces a partial decryption; fusion yields the plaintext.
     \end{itemize}
-    \item Setup phase (considered ``free'')
-    \begin{itemize}
-        \item Generate public key shares and attributes them to $\eta$ virtual users
-        \item Hybrid setup phase is more complicated; requires additional MPC to generate a joint public key in QP used to encrypt \gls{rgsw} ciphertexts 
-    \end{itemize}
+    \item The setup phase (key generation, state initialization) is considered free and excluded from all measurements.
 \end{itemize}
 
-\subsubsection{Unit Tests + Benchmarks}
+\subsection{Unit Tests and Benchmarks}
 \begin{itemize}
-    \item To empirically evaluate correctness and catch bugs early, the functionality of the program is unit tested
-    \item The RGSW encryption + TFHE operations are tested for plaintext 0 and 1, and a larger message
-    \item SIMD and regular variants are tested
-    \item For sPAR protocol, the number of users is parameterized over $\eta$
-    \item \texttt{test} checks for correctness at every stage, no failures means the protocol can handle $\eta$ users
-    \item Even though $q_i$ are randomly generated each time, its empirically clear there is no difference between runs, no matter what $q_i$ are (as long as $\|Q\|$ is at the same bit size)
-    \item Difference between benchmarks and unit tests: 
-    \begin{itemize}
-        \item Benchmarks are optimized for speed, and do not perform any correctness checks (which could affect performance). Functions only need to run once and total time can be extrapolated: for the client encryption/decryption which can be run in parallel over/independently by each user, and the server/final decryption, the one-shot runtime \textit{is} the correct runtime. For the server write, we only care about the per-user runtime anyway.
-        \item Unit tests are not optimized for speed (in the compilation etc.) and does perform correctness checks multiple times, at different levels; that way, the library provides reasonable diagnostics. Not just that an operation failed, but also \textit{why}/where it failed. 
-        \item Unit tests and benchmarks match in parameter and other code, so a successful unit test empirically validates correctness while the benchmarks provides real performance numbers in a production setting.
-    \end{itemize}
+    \item Unit tests (\texttt{test} directory) empirically validate correctness: RGSW encryption and both products are tested for the plaintexts $0$, $1$ and a larger message, in both coefficient-packed and SIMD variants; the full protocol is tested parameterized over $\eta$ --- a passing run certifies the parameter set handles $\eta$ users.
+    \item Tests check correctness at every stage and thereby localize failures (which operation failed and why), at the cost of speed.
+    \item Benchmarks perform no correctness checks. One-shot timings suffice: client-side operations run independently per user, so the single-run time is the per-user latency, and for the server write only the per-user time is of interest.
+    \item Tests and benchmarks share parameters and code paths, so a passing test validates exactly the computation the benchmark measures.
+    \item The moduli $q_i$ are randomly generated per run; empirically the results do not depend on the specific $q_i$, only on the bit size of $Q$.
 \end{itemize}
 
-% \subsubsection{Choice of Parameters}
-% \begin{itemize}
-%     \item There are two interesting choices of parameters:
-%     \begin{itemize}
-%         \item Small: Security parameter $\lambda \approx 128$ bits ($2^\lambda$)
-%         \item \textcolor{red}{Large: Fastest parameteres that allow SIMD operations in BGV \cite{cryptoeprint:2011/133}}
-%     \end{itemize}
-%     \item To determine parameters, I used the lattice estimator \cite{cryptoeprint:2015/046} 
-%     \item Try 
-% \end{itemize}
-
-% \subsubsection{Hybrid}
-% \begin{itemize}
-%     \item GHS must evaluate security under ciphertext modulus $QP$
-%     \begin{itemize}
-%         \item Since $|P| \approx |Q|$, security is approx. halved
-%         \item Compensate by doubling the polynomial degree $N$ shows empirically (via estimator) to bring it back to approximately the same level
-%     \end{itemize}
-%     \item \textcolor{red}{Three sets of parameters: 2 for security parity and shared for SIMD capable}
-% \end{itemize}
-
-\subsubsection{Noise Analysis}
+\subsection{Noise Measurement}
 \begin{itemize}
-    \item For testing RGSW products, error is checked directly
-    \item Simulation/benchmark/testing environment always has access to the secret key
-    \begin{gather}
-        x = (c_0, c_1) = (c_1s + \Delta m + \epsilon, c_1) \\
-        \implies \epsilon = c_0 - c_1s - \Delta m, \quad m = \Call{Decrypt}{x, s}
-    \end{gather}
-    \item RGSW is an 'intermediate' object used in calculations, in some cases (when the result is an RGSW e.g., the internal product, notHasWritten in the server) two methods exist to evaluate noise:
+    \item The testing environment always has access to the secret key, so RLWE noise is measured directly:
+    \begin{equation*}
+        x = (c_0, c_1) = (c_1 s + \Delta m + \epsilon,\; c_1)
+        \implies \epsilon = c_0 - c_1 s - \Delta m, \qquad m = \Call{Decrypt}{x, s}.
+    \end{equation*}
+    % FLAG: state the reported metric explicitly (log2 of the infinity norm of eps, per limb?) --- ch. 4 tables depend on it.
+    \item RGSW ciphertexts are intermediate objects; two ways to measure their noise:
     \begin{enumerate}
-        \item The first (or $\ell$-th) row encodes $\mu \cdot 1$, so we can extract only this row and check it's error
-        \item We calculate the external product with $\Call{RLWE}{1}$, and this ciphertext can be noiseless as to not add any noise.
+        \item extract the row encoding $\mu \cdot 1$ (exists whenever the gadget contains the entry $1$) and measure it as an RLWE ciphertext;
+        \item compute the external product with a noiseless $\Call{RLWE}{1}$ (via \Call{MakePublicRGSW}{}-style zero-noise encryption) and measure the result.
     \end{enumerate}
-    \item I use the latter method because the first method relies on the fact that a gadget $g = (1, \dots)$ containing $1$ is used, which is not necessarily always the case, even though this is traditionally the case.
+    \item The latter is used: it applies to arbitrary gadgets, whereas the former assumes $1$ is a gadget entry --- traditional, but not guaranteed (and not true for the BV gadget rows scaled by $\tilde{e}_j$).
 \end{itemize}

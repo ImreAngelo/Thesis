@@ -1,40 +1,34 @@
 %%
 %% Implementation Details (sPAR)
-%% Specifics to the library, if any?
 %%
 \section{Implementation Details of sPAR}
-My instantiation of \gls{spar} contains some differences from the specification in \cite{cryptoeprint:2025/860}:
+\label{sec:impl:spar}
+
+\subsection{Deviations from the Specification}
 \begin{itemize}
-    \item Some functions are missing: bucket sorting, all extras such as equivocation protection etc.
-    \item Sorting is negligible, estimated $< 100$ ms according to \cite{} and highly parallelizable.
-    \item Write step has been separated into two steps
+    \item Implemented: setup, client encryption, the server write step, and (multiparty) decryption. Omitted: bucket sorting and the protocol extras (equivocation protection, etc.).
+    \item Sorting is computationally negligible relative to the write step --- estimated $< 100$ ms and highly parallelizable. \textcolor{red}{\textbf{FLAG:} missing citation for the estimate.}
+    \item Indices are submitted as $D$ one-hot RGSW indicator vectors $z_d \in \Call{RGSW}{\{0,1\}}^{\eta}$, $d \in [0, D)$, rather than as $\log \eta$ encrypted bits per index.
+    % FLAG: the old algorithm header required "log eta encrypted bits" (as in the sPAR paper) while its body and the implementation use one-hot vectors z directly; reconcile with the paper (bit-decomposed indices would require the homomorphic demux/expansion, which is not implemented).
+    \item The write step is split in two: pre-processing and the write loop itself. \textcolor{red}{\textbf{FLAG:} state precisely what the pre-processing computes.}
 \end{itemize}
 
+\subsection{Procedural Design}
 \begin{itemize}
-    \item Uses a procedural programming paradigm, meaning the library implements the required functions but does not provide a full state-maintaining implementation of the server nor client. 
-    \item The benchmarks and testing framework is what actually composes the protocol, using the functions from this library.
-    \item This was done so that the functionality is not tightly coupled to the benchmarking without spending time implementing actual communication which would require additional work: serializing data, error handling, and coordinating multiple machines.
+    \item The libraries implement the protocol \emph{functions}; they do not provide state-maintaining server or client processes. The tests and benchmarks compose these functions into the full protocol.
+    \item Rationale: decouples the functionality from the benchmarking harness without implementing real communication (serialization, error handling, coordination of multiple machines), which is orthogonal to the questions studied here.
 \end{itemize}
 
-\subsection{Server Write Step}  
+\subsection{Server Write Step}
 \begin{itemize}
-    \item Most important algorithm; does the actual homomorphic sorting
-    \item Some changes compared to \cite{cryptoeprint:2025/860}
-    \begin{itemize}
-        \item Splits the write step and pre-processing step
-        \item HasWrite is inverted i.e. ``notHasWrite''
-        \item Uses external products to handle deep circuits as \cite{cryptoeprint:2025/860} recommends.
-        \item Not implementable using only external products: must use internal products
-        \item As the sever does not care about the privacy of its users, and we can assume it is actively attempting to break privacy, to manage noise \textbf{the server does not actually encrypt the initial entries of $L$, $I$ and $hasNotWritten$}. They are in the correct form but generated using $\epsilon = 0, a = 0$. This has a very minor impact on noise but worth noting, major impact on setup phase as it does not spend any time on encrypting or generating random values.
-        \item Variables:
-        \begin{itemize}
-            \item $z_{i,d},\; I_{i,k},\;\mathsf{hasNotWritten}$ are $ \Call{RGSW}{m}, m \in \{0, 1\}^{N}$
-            \item $L_{i,k} = \Call{RLWE}{m}, m \in R_t$
-        \end{itemize}
-    \end{itemize}
-    \item Swapping order so $h = (\mathsf{hasNotWritten} \boxtimes I_{i,k}) \boxtimes z_{i,d})$ saw a 30 to 40 bit improvement in the noise of \Call{Server::Write}{}
+    \item The central algorithm: performs the oblivious writes and all homomorphic multiplications; everything else in the round is encryption or decryption.
+    \item State: $I \in \Call{RGSW}{\{0,1\}}^{\eta \times K}$ (slot-availability indicators, initially $1$) and $L \in \Call{RLWE}{R_t}^{\eta \times K}$ (value accumulators, initially $0$).
+    \item Noiseless initial state: the server generates the initial $I$, $L$ and $\mathsf{notHasWritten}$ as public (noiseless) ciphertexts via \Call{MakePublicRGSW}{} resp.\ zeroed RLWE elements ($a = 0$, $\epsilon = 0$). Justification: these initial values are protocol constants the server knows anyway, and the server is the adversary --- nothing is hidden from it by encrypting them. Effect: setup spends no time on encryption or randomness generation; minor reduction in accumulated noise.
+    \item The paper's $\mathsf{hasWritten}$ flag is inverted to $\mathsf{notHasWritten}$ (initial value $1$, decremented on write), which the algorithm also returns as its success indicator ($1$ iff no slot accepted the value).
+    \item Order of internal products: $h = (\mathsf{notHasWritten} \boxtimes I_{i,k}) \boxtimes z_{d,i}$, with the accumulating operand on the left per \autoref{sec:impl:bv:intprod}; compared to the original formulation $(z \boxtimes I) \boxtimes \mathsf{notHasWritten}$ this improved the output noise of \Call{Server::Write}{} by 30--40 bits (\autoref{chp:results}).
+    \item Deep circuits are handled with external/internal products only, as recommended by \cite{cryptoeprint:2025/860}; the value write $L_{i,k} \mathrel{+}= V_r \boxdot h$ is an external product with the RLWE-encrypted value $V_r$, but the indicator updates are not expressible with external products alone --- internal products are required for $h$.
+    % FLAG: old algorithm declared V_r an RGSW and wrote "L += V_r · h" (plaintext-style product); V_r is RLWE and the operation is an external product (cf. commit "Change L to be matrix of RLWE").
 \end{itemize}
-
 
 %%%
 %%% Server write loop
@@ -43,26 +37,26 @@ My instantiation of \gls{spar} contains some differences from the specification 
 \caption{\texttt{Server::Write}}
 \label{alg:spar:write}
 \begin{algorithmic}[1]
-\Require Reference to state matrices $I$ and $L$
-\Require Encrypted RGSW value $V_r$
-\Require RGSW indices $A_0$, $A_1$ and $A_2$ where $A_j$ is $\log{\eta}$ encrypted bits $\{c_{j,0}, \dots, c_{j,\eta -1}\}$ for $j \in [0, 3)$
-\Ensure Updates the state matrices $I$ and $L$
-\Ensure Encrypted boolean indicating wether the operation was successful
-\State $\mathsf{hasNotWritten} \gets \Call{EncryptRGSW}{1}$
-\For{$d \gets \{0, 1, 2\}$} % [0, D) 
-    \For{$k \gets \{0, 1, 2\}$}
+\Require References to the state matrices $I$ and $L$
+\Require RLWE-encrypted value $V_r$
+\Require One-hot RGSW index vectors $z_d = (z_{d,0}, \dots, z_{d,\eta-1})$ for $d \in [0, D)$
+\Ensure Updates $I$ and $L$; returns encrypted failure indicator
+\State $\mathsf{notHasWritten} \gets \Call{MakePublicRGSW}{1}$
+\For{$d \gets [0, D)$}
+    \For{$k \gets [0, K)$}
         \For{$i \gets [0, \eta)$}
-            \State $h \gets (\mathsf{hasNotWritten} \boxtimes I_{i,k}) \boxtimes z_{i,d})$
-            \State $L_{i,k} \gets L_{i,k} + V_r \cdot h$ % use different symbol for pt * ct
+            \State $h \gets (\mathsf{notHasWritten} \boxtimes I_{i,k}) \boxtimes z_{d,i}$
+            \State $L_{i,k} \gets L_{i,k} + (V_r \boxdot h)$
             \State $I_{i,k} \gets I_{i,k} - h$
-            \State $\mathsf{hasNotWritten} \gets \mathsf{hasNotWritten} + h$
+            \State $\mathsf{notHasWritten} \gets \mathsf{notHasWritten} - h$
+            % FLAG: the previous version added h here; the implementation subtracts (notHasWritten starts at 1 and is consumed).
         \EndFor
     \EndFor
 \EndFor
-\State \Return $\mathsf{hasNotWritten}$
+\State \Return $\mathsf{notHasWritten}$
 \end{algorithmic}
 \end{algorithm}
 
 \begin{remark}
-    From a programming perspective, the choice of $K = 3$ and $D = 3$ is arbitrary. The library allows a developer to configure different values for $K$ and $D$ as compile-time constants, with no impact on the size of the compiled binary/program. They are implemented as C++ generics, also known as template specialization.
+    The choice $K = D = 3$ is not hard-coded: both are compile-time constants (C++ template parameters), configurable with no effect on the size of the compiled program.
 \end{remark}

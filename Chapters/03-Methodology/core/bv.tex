@@ -1,107 +1,81 @@
-{
-    \color{purple}
-    \begin{itemize}
-        \item A result of this thesis: a C++ library which extends OpenFHE's BGV implementation to support RGSW operations
-        \item And sPAR which was built on top of this library
-        \item The code base is split into three sections found in the \texttt{lib} directory:
-        \begin{enumerate}
-            \item \corelib extends OpenFHE's \texttt{CryptoContext<T>} with the operations:
-            \begin{itemize}
-                \item \texttt{EncryptRGSW} outputs the RGSW encryption of the input plaintext
-                \item \texttt{EvalExternalProduct} takes an RLWE and RGSW ciphertext
-                \item \texttt{EvalInternalProduct} takes two RGSW ciphertexts
-                \item Supporting functions like AddRGSW and MultRGSWPlaintext etc.
-            \end{itemize}
-            \item \serverlib builds the sPAR server functions on top of \corelib
-            \item \clientlib builds the sPAR client functions on top of \corelib
-        \end{enumerate}
-        \item There are also two auxiliary directories \texttt{benchmarks} and \texttt{tests} that contain code to benchmark and unit test functions, respectively.
-        \item And \texttt{scripts} contain python code for running the estimator
-    \end{itemize}
-}
+%%
+%% The BV instantiation: gadget, encryption, external/internal product, SIMD
+%%
+\subsection{The BV Instantiation}
+\label{sec:impl:bv}
 
-\subsection{Concrete Implementation}
+\subsubsection{The Gadget}
+\label{sec:impl:bv:gadget}
 \begin{itemize}
-    \item Digit decomposition of each residual limb
-    \item Two functions that output $P(v)$ and $D(u)$ with quality $\beta$ s.t. $\|D(u)\|_\infty \leq B/2 = \lceil \max{q_i}/(2\ell) \rceil$
-    \item The outputs has $k\times \ell$ entries, where $k$ is the number of RNS moduli (corresponding to the first decomposition) and $\ell$ is the number of base $B$ digits
-    \item Takes only $\ell$ as an input parameter and computes $\log{B} = \left\lfloor \max\{\log(q_i)\}/\ell \right\rfloor + 1$
-    \item The base $B = \lfloor \max q_i \rfloor$ is chosen automatically so to be the smallest $B$ that covers the largest RNS prime with $\ell$ digits when the program starts. This makes the gadget exact, even if the $q_i$ are generated at different orders (in OpenFHE the first prime is typically larger than the other primes for some reason).
+    \item Instantiates the layered gadget of \autoref{thm:gadget-layers}: the CRT/RNS gadget $\hps{P}$ on the limbs, composed with signed base-$B$ digit decomposition of each limb.
+    \item Concrete gadget pair, indexed by $(i, j) \in [0, \ell) \times [0, k)$; let $\tilde{e}_j \in \mathbb{Z}_Q$ denote the CRT idempotent with $\tilde{e}_j \equiv 1 \pmod{q_j}$, $\tilde{e}_j \equiv 0 \pmod{q_{j'}}$ for $j' \neq j$:
+    \begin{gather*}
+        \bv{P}(v)_{(i,j)} = B^i\, \tilde{e}_j\, v, \qquad
+        \bv{D}(u)_{(i,j)} = d_i\!\left([u]_{q_j}\right),
+    \end{gather*}
+    where $d_i(\cdot)$ is the $i$-th signed base-$B$ digit and the (small) digit is embedded into $R_Q$ (``broadcast'' to every tower).
+    \item Exactness and quality: since $\sum_i d_i([u]_{q_j}) B^i = [u]_{q_j}$,
+    \begin{equation*}
+        \langle \bv{D}(u), \bv{P}(v) \rangle
+        = \sum_j \tilde{e}_j\, [u]_{q_j}\, v
+        = u \cdot v \pmod{Q},
+    \end{equation*}
+    i.e.\ the gadget is exact ($\epsilon = 0$) with quality $\beta = B/2$.
+    \item In RNS storage $\tilde{e}_j$ zeroes every tower except tower $j$, so $\bv{P}(v)_{(i,j)}$ occupies a single native tower; the zero towers are never touched (neither stored computations nor products), cf.\ \autoref{sec:impl:bv:encrypt}.
+    \item Parameter selection: the context takes only $\ell$ and derives the digit width
+    \begin{equation*}
+        b = \log_2 B = \left\lfloor \max_j \lceil \log_2 q_j \rceil / \ell \right\rfloor + 1,
+    \end{equation*}
+    the smallest power-of-two base covering the largest limb with $\ell$ digits and one extra bit of headroom; the headroom absorbs the decomposition offset of \autoref{sec:impl:bv:extprod}. This keeps the gadget exact regardless of how OpenFHE sizes the individual $q_j$ (the first prime is generated with a different bit size than the rest).
+    % FLAG: earlier notes stated ``B = \lfloor \max q_i \rfloor'' and (ch.2) ``B = \lfloor \max q_i/\ell \rfloor + 1''; both wrong --- the formula applies to the bit length, as above. Harmonize with the ch.2 statement (currently at the end of Chapters/02-Related/gadgets/bv.tex).
+    \item $B$ a power of two enables branchless digit extraction via bitwise operations (\autoref{tab:bitwise}).
 \end{itemize}
 
 \subsubsection{RGSW Encryption}
+\label{sec:impl:bv:encrypt}
 \input{Chapters/03-Methodology/core/bv-encrypt}
 
 \subsubsection{External Product}
+\label{sec:impl:bv:extprod}
 \begin{itemize}
-    \item \textbf{IMPORTANT:} decomposition determines the quality $\beta$, so the order of operations does matter for noise growth!
-    \item Decomposition used = per limb digit extraction
-    \item Must choose to decompose into $[-B/2, B/2)$ or $[0, B)$
-    \begin{itemize}
-        \item Centered has lower noise as the quality is $\beta = B/2$ but more complicated
-        \item Unsigned is far simpler and easily parallelizable but $\beta = B$
-    \end{itemize}
-    \item Centered representation creates an order; parallelization requires \textit{pre-processing}
+    \item Computes $x \boxdot C = G^{-1}(x) \cdot C$ per \autoref{alg:external-product} with the gadget above; the sum runs over $2k\ell$ rows.
+    % FLAG: alg:external-product and def:prod:internal are defined in Chapters/02-Related/04-tfhe.tex, which is currently NOT \input in ch.2 --- references are dangling. Either re-include 04-tfhe or move the definitions into 02-Related/gadgets/products.tex (which currently duplicates them without labels).
+    \item Signed vs.\ unsigned digits: unsigned extraction ($d_i \in [0, B)$) is trivially parallel but has quality $\beta = B$; centering ($d_i \in [-B/2, B/2)$) halves the quality to $\beta = B/2$ at the cost of carry propagation between digits, which serializes the extraction.
+    \item Offset trick --- carry-free signed extraction. Precompute the global constant
+    \begin{equation*}
+        \mathsf{offset} = \frac{B}{2} \sum_{i=0}^{\ell - 2} B^i = \frac{B}{2}\cdot\frac{B^{\ell-1} - 1}{B - 1}.
+    \end{equation*}
+    % FLAG: earlier notes had (B^\ell - 1)/(B-1); the sum excludes the top digit, as implemented.
+    For $x \in [0, q_j)$ set $u_i = \left\lfloor (x + \mathsf{offset})/B^i \right\rfloor \bmod B$ and
+    \begin{equation*}
+        d_i = u_i - \tfrac{B}{2} \;\; (i < \ell - 1), \qquad d_{\ell - 1} = u_{\ell - 1}.
+    \end{equation*}
+    Then $\sum_i d_i B^i = x$ exactly, $d_i \in [-B/2, B/2)$ for $i < \ell - 1$, and the top digit is non-negative and bounded by $B/2$ (the headroom bit).
+    % FLAG: state and prove the top-digit bound precisely (uses b = \lfloor \log q_{\max}/\ell \rfloor + 1).
+    Each $u_i$ depends only on $x$, so all $k\ell$ digits of all $N$ coefficients extract independently (branchless: one shift and one mask each, \autoref{tab:bitwise}).
+    \item Negative digits are stored per tower as $q_t - |d_i|$; centering per \autoref{alg:center}.
+    \item Digit extraction requires the coefficient representation; the NTT round trips are the dominant cost of the BV-RNS gadget. The implementation is staged so every transform is an independent single-tower task:
+    \begin{enumerate}
+        \item inverse NTT of each tower of $(c_0, c_1)$ --- $2k$ tasks;
+        \item digit extraction, signed lift, and forward NTT per (digit slot, target tower) --- $2k\ell \cdot k$ tasks;
+        \item accumulation $\sum_s d_s \cdot C_s$ per (component, tower) --- $2k$ contention-free tasks (no reduction across threads).
+    \end{enumerate}
+    \item Cost per product: $2k$ inverse and $2k^2\ell$ forward single-tower NTTs, and $4k^2\ell$ native-polynomial multiply--accumulates.
+    % FLAG: add a final algorithm float for the staged product (replaces the old inline C++ listing, removed as a programming detail).
 \end{itemize}
 
-\begin{gather*}
-    \text{Let } offset = \frac{B}{2}\cdot \frac{B^\ell - 1}{B - 1} \text{ be a global (pre-calculated) value} \\
-    % offset = \frac{2^b}{2}\cdot \frac{2^{b\ell} - 1}{2^b - 1} = 2^{b-1} \cdot \frac{2^{b\ell} - 1}{2^b - 1} = \frac{2^{b\ell(b-1)}-2^{b-1}}{2^b - 1}
-\end{gather*}
-
-%%%
-%%% Unsigned digit decomposition (optimized for B = 2^b)
-%%% TODO: Move this to gadgets/BV section and have signed digit decomposition here
-\begin{algorithm}
-\caption{Decompose wrt. $B$ (\textcolor{red}{TODO: Signed digit decomposition})}
-\label{alg:bv:decompose}
-\begin{algorithmic}[1]
-\Require RNS polynomial $[x]_{\mathcal{B}_Q} \in \mathbb{Z}_{q_0} \times \mathbb{Z}_{q_1} \times \dots \times  \mathbb{Z}_{q_{k-1}}$, base $B = 2^b$, and decomposition parameter $\ell$
-\Ensure $\ell$ RNS ``digit'' polynomials $\mathbf{d} = (d_0, d_1, \dots, d_{k\ell-1}) \in \mathbb{Z}_B^{k\ell}$
-\State $a' \gets a$
-\For{$j = 0$ to $\ell - 1$}
-    \State $d_j \gets a' \pmod B$ \Comment{Extract the lower bits}
-    \If{$d_j \ge B/2$}
-        \State $d_j \gets d_j - B$ \Comment{Shift to signed range}
-    \EndIf
-    \State $a' \gets \frac{a' - d_j}{B}$ \Comment{Shift down and apply the carry}
-\EndFor
-\State \Return $\mathbf{d}$
-\end{algorithmic}
-\end{algorithm}
-
-\begin{itemize}
-    \item Uses the standard external product function \autoref{alg:external-product}
-    \item Or a slightly parallelized version: the decompose function runs in parallel, not much gain from parallizing further, the additions are already cheap/fast-ish.
-\end{itemize}
-
-\ifnotes{
-    \begin{minted}{c++}
-    const auto& cv    = ct->GetElements();  // (c0, c1), EVALUATION format
-    const auto params = cv[0].GetParams();
-    const size_t l    = cv[0].GetNumOfElements() * m_ell;
-    
-    const auto d0 = Decompose(cv[0]);
-    const auto d1 = Decompose(cv[1]);
-    
-    DCRTPoly acc0(params, Format::EVALUATION, true);
-    DCRTPoly acc1(params, Format::EVALUATION, true);
-    
-    for (size_t r = 0; r < l; r++) {
-        const auto& row0 = C[r]->GetElements();      // (mg, 0) row
-        const auto& row1 = C[r + l]->GetElements();  // (0, mg) row
-        acc0 += d0[r] * row0[0] + d1[r] * row1[0];
-        acc1 += d0[r] * row0[1] + d1[r] * row1[1];
-    }
-    
-    auto result = ct->Clone();
-    result->SetElements({std::move(acc0), std::move(acc1)});
-    return result;
-    \end{minted}
-}\fi
-
+\input{Chapters/03-Methodology/core/bitwise}
 
 \subsubsection{Internal Product}
+\label{sec:impl:bv:intprod}
 \begin{itemize}
-    \item Trivially implemented as repeated external products as per the definition \autoref{def:prod:internal}
+    \item Implemented as $2k\ell$ external products, one per row of the left operand, per \autoref{def:prod:internal}.
+    \item Ordering matters: in $X \boxtimes Y$ the rows of $X$ are decomposed, so the noise of $X$ enters the result scaled only by the (binary) message of $Y$, while the noise of $Y$ enters scaled by $\beta$ and summed over rows (\autoref{remark:noise-asymmetry-products}). In a chain of products the accumulating (noisy) operand must therefore be the left operand; the fresh, low-noise operand the right.
+    \item This rule dictates the order of products in \Call{Server::Write}{} (\autoref{sec:impl:spar}); its quantitative effect (30--40 bits) is reported in \autoref{chp:results}.
+\end{itemize}
+
+\subsubsection{SIMD Batching}
+\begin{itemize}
+    \item With batching-compatible parameters, packed encoding (\texttt{MakePackedPlaintext} in place of \texttt{MakeCoefPackedPlaintext}) turns every RGSW encryption and external/internal product into up to $N$ independent slot-wise products, at no additional cost relative to the same parameters without batching.
+    % FLAG: state the slot count precisely (depends on the order of t mod 2N); ``up to N'' is the upper bound.
 \end{itemize}

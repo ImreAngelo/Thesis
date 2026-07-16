@@ -1,28 +1,5 @@
 %%
-%% Implementation Details (RGSW)
-%% The specifics of the program that are not necessarily important for the math, and other (novel) optimizations
+%% The core library: architecture (api) and the BV instantiation (bv)
 %%
-
 \input{Chapters/03-Methodology/core/api}
 \input{Chapters/03-Methodology/core/bv}
-% \input{Chapters/03-Methodology/core/hybrid}
-
-% \textcolor{red}{\textbf{TODO:} Organize pre-computed Values}
-% \begin{itemize}
-%     \item For BV:
-%     \begin{itemize}
-%         \item $B^i \bmod{q_j}$ for all $i, j$
-%         \item Get $B = \lceil \max_j\|q_j\|/\hat{\ell}\rceil$ from $\ell$
-%     \end{itemize}
-%     \item For GHS/Hybrid:
-%     \begin{itemize}
-%         \item $\hat{q}_j$ 
-%     \end{itemize}
-% \end{itemize}
-
-\subsubsection{SIMD Batching}
-\begin{itemize}
-    \item Assuming parameters that support SIMD batching are set
-    \item Requires using \texttt{MakePackedPlaintext} instead of \texttt{MakeCoefPackedPlaintext} in OpenFHE
-    \item This allows up to $N$ RGSW/External/Internal prodcuts simultaneously at no additional cost compared to the same parameters with \Call{MakeCoefPackedPlaintext}.
-\end{itemize}

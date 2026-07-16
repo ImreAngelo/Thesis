@@ -1,9 +1,14 @@
 \section{Implementation Details of the Core Library}
 \label{sec:impl:core}
-The core library, located in the \texttt{lib/core} directory of \cite{gitrepo} provides an abstract interface named \texttt{ExtendendedCryptoContext} which provides a number of RGSW functions, including RGSW encryption, external product and internal product. % The most important of which are \texttt{EncryptRGSW}, \texttt{EvalExternalProduct} and \texttt{EvalInternalProduct}
-The advantage of this design is that any number of concrete implementations can be developed for the interface, while any project that requires the provided functionality can import the library and consume the interface without worrying about the implementation of the interface. 
 
-The library is built on top of OpenFHE~\cite{cryptoeprint:2022/915} and the interface reflects that, mirroring the API of OpenFHE. A user who is familiar with OpenFHE should as a result have no problem using this library in their own projects.
+\subsection{Architecture}
+\begin{itemize}
+    \item \corelib{} (directory \texttt{libs/core} of \cite{gitrepo}) extends OpenFHE's \texttt{CryptoContext} with an abstract interface \texttt{IExtendedContext} exposing the RGSW operations of \autoref{tab:main-functions}.
+    % FLAG: earlier draft called the interface ``ExtendendedCryptoContext''; the type is IExtendedContext, handled via the alias ExtendedContext (a shared pointer).
+    \item Interface/implementation separation: any number of concrete instantiations (one per gadget construction) implement the same interface; consuming code depends only on the interface, not on the instantiation.
+    \item The interface mirrors OpenFHE's API and naming conventions (\texttt{Encrypt*}, \texttt{Eval*}); a user familiar with OpenFHE can adopt the library directly.
+    \item Codebase layout (\texttt{libs} directory): \corelib{} (RGSW functionality), \serverlib{} and \clientlib{} (\gls{spar} server/client functions built on \corelib). Auxiliary directories: \texttt{benchmark} and \texttt{test} (see \autoref{sec:experimental-setup}), and \texttt{scripts} (Python; security/parameter estimation via the lattice estimator).
+\end{itemize}
 
 % TODO: Keep 1
 \begin{figure}[!htb]
@@ -11,7 +16,6 @@ The library is built on top of OpenFHE~\cite{cryptoeprint:2022/915} and the inte
     \begin{subfigure}[b]{0.54\linewidth}
         \centering
         \input{Figures/dependency-graph}
-        % \includegraphics[width=\linewidth]{Figures/dependency-graph-preview.png}
         \caption{Dependency graph}
         \label{fig:depgraph}
     \end{subfigure}
@@ -26,18 +30,26 @@ The library is built on top of OpenFHE~\cite{cryptoeprint:2022/915} and the inte
 
 \begin{table}[H]
     \centering
+    \caption{Operations provided by \texttt{IExtendedContext}}
     \label{tab:main-functions}
-    \caption{Primary functionality provided by \texttt{ExtendedCryptoContext}}
     \begin{tabular}{r|l}
-        \Call{EncryptRGSW}{pk, pt}              & Outputs an RGSW ciphertext \\
-        \Call{EvalExternalProduct}{rlwe, rgsw}  & Outputs the external product \\
-        \Call{EvalInternalProduct}{lhs, rhs}    & Outputs the internal product
+        \Call{EncryptRGSW}{pk, pt}              & RGSW encryption of a plaintext \\
+        \Call{MakePublicRGSW}{pk, pt}           & Noiseless (public) RGSW, $Z = 0$ \\
+        \Call{EvalExternalProduct}{rlwe, rgsw}  & External product $\boxdot$ \\
+        \Call{EvalInternalProduct}{lhs, rhs}    & Internal product $\boxtimes$ \\
+        \Call{EvalAddRGSW}{lhs, rhs}            & Row-wise RGSW addition \\
+        \Call{EvalSubRGSW}{lhs, rhs}            & Row-wise RGSW subtraction \\
+        \Call{EvalMultRGSW}{rgsw, pt}           & RGSW--plaintext multiplication
     \end{tabular}
 \end{table}
 
-The \texttt{ExtendedCryptoContext} interface comes bundled with two concrete implementations. One is designed around gadget decomposition of the RNS primes as described in \autoref{sec:gadget-decomposition}, and will be referred to as the BV implementation. The other implementation is designed around the hybrid keyswitching mechanism from \autoref{sec:hybrid}. Of these, the former should be considered the ``canonical'' implementation because (1) this design is the most closely related to the external product as discussed in the literature, where this product is traditionally defined using digit decomposition \cite{examples-of-this, cryptoeprint:2025/860}, and (2) the other implementation does not use true \gls{rgsw} ciphertexts.
+\begin{itemize}
+    \item RGSW data structure: a vector of RLWE ciphertexts --- the rows of $C = Z + \mu G$ \eqref{def:rgsw} --- each an ordinary OpenFHE ciphertext. The number of rows is determined by the gadget ($2k\ell$ for the BV instantiation below).
+    \item \Call{MakePublicRGSW}{} outputs $\mu G$ exactly ($Z = 0$, i.e.\ $a = 0,\ \epsilon = 0$): not a ciphertext in the cryptographic sense but a plaintext carried in RGSW form, enabling products with true ciphertexts. Used for server-side constants in \autoref{sec:impl:spar}.
+    \item Two concrete implementations are bundled. This chapter documents the canonical one, built on the layered RNS/digit gadget of \autoref{sec:gadget-decomposition} and referred to as the \emph{BV} instantiation; it is canonical because it matches how the external product is defined in the literature (via digit decomposition) \cite{cryptoeprint:2018/421, cryptoeprint:2025/860} and uses true \gls{rgsw} ciphertexts. The second implementation, based on modulus extension, is deferred to \autoref{chp:results}.
+    % FLAG: previous draft cited the placeholder \cite{examples-of-this} and referenced sec:hybrid, which lives in the commented-out ghs-old.tex; both removed here.
+\end{itemize}
 
 \begin{remark}
-    \color{red}
-    The implementations are hard coupled to the BGV-RNS (\texttt{CryptoContextBGVRNS}) scheme. As OpenFHE provides a unified interface for both BGV and BFV --- and the TFHE products are defined independent of scheme --- it would not require much work to add support for BFV to the core library.
+    The implementations are coupled to OpenFHE's \texttt{CryptoContextBGVRNS}. Since OpenFHE exposes a unified interface for BGV and BFV, and the RGSW products are scheme-agnostic, extending the library to BFV would require little work.
 \end{remark}

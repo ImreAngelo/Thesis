@@ -1,25 +1,22 @@
 \chapter{Methodology}
 \label{chp:methodology}
 
-% % \section{Notes}
-% % In Brakerski's scheme, similar to previous FHE schemes based on LWE, the ciphertext $\overset{_\rightarrow}{c}$ and secret key $\overset{_\rightarrow}{s}$ are $n$-dimensional vectors whose dot product $\langle \overset{_\rightarrow}{c}, \overset{_\rightarrow}{s}\rangle \approx \mu$ equals the message $\mu$, up to some small ``error'' that is removed by rounding.
-
-% \textcolor{red}{\textbf{Move implementation details from \autoref{sec:impl:hps} here?}}
-
 \newcommand{\corelib}{\texttt{core}}
 \newcommand{\serverlib}{\texttt{server}}
 \newcommand{\clientlib}{\texttt{client}}
 
 %%
-%% Introduction
+%% Introduction — main points (to be written as prose):
 \vfill
-A gap needed to be filled: implementing TFHE-style RGSW products (external and internal) in BGV-RNS. As a result of this thesis, a C++ library (\corelib) was developed to bring this functionality to the OpenFHE~library~\cite{cryptoeprint:2022/915}. The sPAR protocol has also been implemented in C++ using the RGSW library. I will stress the libraries are separate; the RGSW library can be used on its own as is, and the sPAR library can in theory be used without it --- provided a different library is developed to provide the same functionality and API. 
-
-This section also explains the set up of the various tests; the numbers from running these tests are presented in \autoref{chp:results}.
+\begin{itemize}
+    \item Gap: TFHE-style RGSW products (external and internal) were not available in BGV-RNS; a C++ library (\corelib) was developed to add this functionality on top of OpenFHE~\cite{cryptoeprint:2022/915}.
+    \item Second artifact: an instantiation of the \gls{spar} protocol~\cite{cryptoeprint:2025/860} (\serverlib, \clientlib) built on \corelib.
+    \item The two are independent: \corelib{} is usable on its own, and the \gls{spar} implementation depends only on the abstract interface of \autoref{sec:impl:core}, not on a particular instantiation.
+    \item Chapter structure: \autoref{sec:impl:core} documents the library architecture and its canonical (BV) instantiation; \autoref{sec:impl:spar} the \gls{spar} instantiation; \autoref{sec:experimental-setup} the experimental methodology. All measurements are deferred to \autoref{chp:results}.
+\end{itemize}
 
 \newpage
 
-\input{Chapters/03-Methodology/core/bitwise}
 \input{Chapters/03-Methodology/impl-core}
 \input{Chapters/03-Methodology/impl-spar}
 \input{Chapters/03-Methodology/experimental-setup}
