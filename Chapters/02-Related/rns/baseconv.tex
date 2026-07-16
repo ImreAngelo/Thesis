@@ -1,17 +1,28 @@
 \subsection{Base Conversion}
 \label{sec:rns-base-conversion}
-Several FHE procedures require changing the set of moduli a value is represented in: extending the basis before operations that need headroom, and reducing it again to manage noise. This subsection defines base conversion and the operations derived from it in the residue setting.
+The evaluation form \eqref{form:eval} makes addition and multiplication cheap, but pins the modulus: the residues are independent and non-positional, so the magnitude of a value --- and with it division and rounding, the operations noise management is made of --- is inaccessible without \gls{crt} reconstruction. Changing the modulus fares no better, as a representation in $\mathcal{B}_Q$ says nothing about a value modulo anything outside $\mathcal{B}_Q$. This subsection recovers both.
+
+The operations are best understood through the pattern they serve: the temporary modulus extension introduced for key switching (\autoref{sec:gadget-decomposition}) by Gentry--Halevi--Smart \cite{cryptoeprint:2012/099}. A value is raised from $Q$ to an extended modulus $QP$, multiplied there against operands carrying a factor $P$, and brought back down by a division by $P$: the payload returns to its original scale, while the noise of the intermediate computation shrinks by the same factor. One primitive and three derived operations realize the trip.
+
+\begin{center}
+    \renewcommand{\arraystretch}{1.5}
+    \begin{tabular}{@{}lll@{}}
+        \toprule
+        Operation & Computes & Error \\
+        \midrule
+        \textsc{FastBConv}      & $[x]_{\mathcal{B}_Q} \mapsto [x + \alpha_x Q]_{\mathcal{B}}$      & exact for the lift $x + \alpha_x Q$ \\
+        \textsc{FastBaseExtend} & $[x]_{\mathcal{B}_Q} \mapsto [x + \alpha_x Q]_{\mathcal{B}_{QP}}$ & exact, as an extension \\
+        \textsc{Scale}          & $[x]_{\mathcal{B}_Q} \mapsto [xP]_{\mathcal{B}_{QP}}$             & exact \\
+        \textsc{ApproxModDown}  & $[x]_{\mathcal{B}_{QP}} \mapsto [\lfloor x/P \rceil - \alpha]_{\mathcal{B}_Q}$ & additive, small $\alpha$ \\
+        \bottomrule
+    \end{tabular}
+\end{center}
 
 \begin{definition}[RNS Basis]
-    Given a modulus $Q = \prod_{i=0}^{k-1} q_i$ composed of $k$ pairwise coprime factors, the \textit{RNS basis} $\mathcal{B}_Q = \{q_0, q_1, \dots, q_{k-1}\}$ is the set of moduli used in the CRT representation \eqref{form:crt}:
-    \begin{equation} %% TODO: This is a neat formula but it doesn't fit here at all, is more applicable to RNS in general or CRT
-        \mathbb{Z}_Q \cong \mathbb{Z}_{q_0} \times \mathbb{Z}_{q_1} \times \cdots \times \mathbb{Z}_{q_{k-1}}
-    \end{equation}
+    Given a modulus $Q = \prod_{i=0}^{k-1} q_i$ composed of $k$ pairwise coprime factors, the \textit{RNS basis} $\mathcal{B}_Q = \{q_0, q_1, \dots, q_{k-1}\}$ is the set of moduli underlying the CRT form \eqref{form:crt} of $\mathbb{Z}_Q$.
 \end{definition}
 
-%% TODO: Denote this as abuse of notation or formally "extend the notation of~\autoref{def:centered} to sets" or bases
-%% TODO: This whole paragraph is awkward, it does too much: extends notation, defines notation of CRT and evaluation form in one sentence 
-The centered modulo notation of \autoref{def:centered} extends to bases: $[a]_{\mathcal{B}_Q} = ([a]_{q_0}, \dots, [a]_{q_{k-1}})$ denotes the CRT form \eqref{form:crt} of $a$, and $\ntt{[a]_{\mathcal{B}_Q}}$ its evaluation form \eqref{form:eval}.
+By a slight abuse of notation, the centered representation of \autoref{def:centered} extends to bases: $[a]_{\mathcal{B}_Q} = ([a]_{q_0}, \dots, [a]_{q_{k-1}})$ denotes the CRT form \eqref{form:crt} of $a$, and $\ntt{[a]_{\mathcal{B}_Q}}$ its evaluation form \eqref{form:eval}.
 
 \begin{definition}[Base Conversion]
     Let $\mathcal{B}_Q = \{q_0,\dots,q_{k-1}\}$ and
@@ -24,23 +35,30 @@ The centered modulo notation of \autoref{def:centered} extends to bases: $[a]_{\
         \;\longmapsto\;
         \left([x]_{b_0}, \dots, [x]_{b_{k'-1}}\right)
     \end{equation*}
-    When the residues in $\mathcal{B}$ are appended to those in $\mathcal{B}_Q$, so that $x$ becomes represented in the \textit{extended} basis $\mathcal{B}_Q \cup \mathcal{B}$ for the modulus $QB$, the operation is also referred to as \emph{base extension}.
+    When the residues in $\mathcal{B}$ are appended to those in $\mathcal{B}_Q$, so that $x$ becomes represented in the \textit{extended} basis $\mathcal{B}_Q \cup \mathcal{B}$ for the modulus $QB$, the operation is also referred to as a \emph{base extension}.
 \end{definition}
 
-%% TODO: Presenting the rest of the chapter here is awkward. Find another angle entirely.
-The naive approach to base conversion reconstructs $x$ from its residues through the inverse \gls{crt}, and then reduces the result against each modulus of the new basis. This reintroduces exactly the multi-precision arithmetic that \gls{rns} was meant to avoid; the remainder of this section covers the cheaper, approximate alternative and the operations built on top of it.
-
 \subsubsection{Fast Base Conversion}
-Write $\hat{q}_i = Q/q_i$ for the CRT factors of the basis $\mathcal{B}_Q$, and $[\hat{q}_i^{-1}]_{q_i}$ for their modular inverses. Introduced in \cite{cryptoeprint:2016/510}, fast base conversion operates directly on the residues, avoiding the CRT reconstruction and multi-precision integers entirely.
+The naive conversion reconstructs $x$ from its residues through the inverse \gls{crt} and reduces the result against each modulus of the new basis --- reintroducing exactly the multi-precision arithmetic that \gls{rns} exists to avoid. Fast base conversion \cite{cryptoeprint:2016/510} stays on the residues. Writing $\hat{q}_i = Q/q_i$ for the CRT factors of $\mathcal{B}_Q$, $[\hat{q}_i^{-1}]_{q_i}$ for their modular inverses and $x_i = [x]_{q_i}$ for the residues of the operand,
 \begin{equation}
     \label{eq:fastbconv}
     \Call{FastBConv}{x, \mathcal{B}_Q, \mathcal{B}} = \left\{\left[\sum_{i=0}^{k-1}\left[x_i\, \hat{q}_i^{-1}\right]_{q_i} \cdot \hat{q}_i\right]_b\right\}_{b\in \mathcal{B}}
-\end{equation} %% TODO: Computing \alpha exactly or bounding it to {-1, 0, 1}, I think they showed how to do in that paper. Verify and write into single sentence.
-The price is approximation: because the sum is never reduced modulo $Q$, \eqref{eq:fastbconv} produces not $[x]_Q$ but $[x]_Q + \alpha_x Q$ for some integer $\alpha_x \in [0, k)$. Computing $\alpha_x$ exactly is possible but requires costly operations in \gls{rns} \cite{cryptoeprint:2018/117}, and is unnecessary when converting as part of an \textit{extension}. Note also that \eqref{eq:fastbconv} operates on the CRT form: an operand held in evaluation form must first be brought back with the inverse \gls{ntt}, which is part of the true cost of the conversion.
+\end{equation}
 
-%% TODO: This needs a sentence like "Assuming gdc(b_i, p_i) = 1" or "all b_i and p_i are pair-wise co-prime" ... "only the $P$-residues need to be calculated"
-\subsubsection{Fast Base Extension} %% TODO: Define "$P$-towers" formally: the towers $\bmod{p_i}$ where $p_i \in \mathcal{B}_P$
-Base extension only requires the new residues, so \eqref{eq:fastbconv} can be used as a subroutine: the $\mathcal{B}_P$-residues are computed with $\Call{FastBConv}{x, \mathcal{B}_Q, \mathcal{B}_P}$, and since $\mathcal{B}_{QP} = \mathcal{B}_Q \cup \mathcal{B}_P$ the original residues are kept unchanged.
+The sum in \eqref{eq:fastbconv} is never reduced modulo $Q$; it evaluates to the integer
+\begin{equation}
+    \label{eq:fastbconv-lift}
+    \tilde{x} \;=\; \sum_{i=0}^{k-1}\left[x_i\, \hat{q}_i^{-1}\right]_{q_i} \cdot \hat{q}_i \;=\; [x]_Q + \alpha_x Q,
+    \qquad |\tilde{x}| \leq \tfrac{k}{2}\,Q,
+\end{equation}
+since $\tilde{x} \equiv x \pmod{q_i}$ for every $q_i \in \mathcal{B}_Q$ while each centered digit is bounded by $q_i/2$. \textsc{FastBConv} therefore computes the $\mathcal{B}$-residues of the \emph{lift} $\tilde{x}$ exactly, and is approximate only as a conversion of $x$: the output represents $[x]_Q + \alpha_x Q$ for an unknown overflow $\alpha_x \in \mathbb{Z}$ with $|\alpha_x| \leq \lceil k/2 \rceil$. Recovering $\alpha_x$, and with it the exact conversion, is possible at additional cost \cite{cryptoeprint:2018/117}; none of the operations built on the primitive requires it.
+%% NOTE: bounds follow the centered digits of def:centered; for representatives in [0, q_i) the literature (HPS/BEHZ) states alpha_x in [0, k).
+%% TODO: Verify the alpha-recovery claim against BEHZ (2016/510, redundant modulus) and HPS (2018/117, float estimate) and cite the right one.
+
+The conversion is \emph{fast} under one standing assumption and one caveat. The assumption: the constants $[\hat{q}_i]_b$ and $[\hat{q}_i^{-1}]_{q_i}$ depend only on the two bases, and are precomputed once and stored (\autoref{sec:impl:core}); what remains at runtime is $k \cdot k'$ single-word multiply-accumulates per coefficient. The caveat: \eqref{eq:fastbconv} operates on the CRT form, so an operand held in evaluation form must first be brought back with the inverse \gls{ntt} --- in practice the dominant cost of a conversion.
+
+\subsubsection{Fast Base Extension}
+Let $\mathcal{B}_P = \{p_0, \dots, p_{k'-1}\}$ be a second basis with every modulus coprime to those of $\mathcal{B}_Q$, and write $\mathcal{B}_{QP} = \mathcal{B}_Q \cup \mathcal{B}_P$ for the extended basis. Raising $x$ from $\mathbb{Z}_Q$ to $\mathbb{Z}_{QP}$ requires only the new residues: the $Q$-limbs are kept unchanged, and the $P$-limbs --- the limbs modulo the $p_j \in \mathcal{B}_P$ --- are produced by $\Call{FastBConv}{x, \mathcal{B}_Q, \mathcal{B}_P}$ (\autoref{alg:fast_base_extension}).
 
 %%%
 %%% Fast Base Extension
@@ -50,7 +68,7 @@ Base extension only requires the new residues, so \eqref{eq:fastbconv} can be us
 \label{alg:fast_base_extension}
 \begin{algorithmic}[1]
     \Require $\ntt{[a]_{\mathcal{B}_Q}}$ and a basis $\mathcal{B}_P$
-    \Ensure $\ntt{[a + \alpha_aQ]_{\mathcal{B}_{QP}}}$ for some $\alpha_a\in[0, k)$
+    \Ensure $\ntt{[a + \alpha_aQ]_{\mathcal{B}_{QP}}}$ for some $\alpha_a \in \mathbb{Z}$, $|\alpha_a| \leq \lceil k/2 \rceil$
     \State $a_{Q} \gets \Call{InverseNTT}{a}$
     \State $\mathsf{conv} \gets \sum_{i = 0}^{k-1} [a_Q[i]\cdot\hat{q}_i^{-1}]_{q_i}\cdot \hat{q}_i$
     \Comment{Fast Base Conversion}
@@ -61,31 +79,25 @@ Base extension only requires the new residues, so \eqref{eq:fastbconv} can be us
 \end{algorithmic}
 \end{algorithm}
 
-%% TODO: This should replace the section explaining "Computing $\alpha_x$ exactly is possible but... " in a similar way to how Scale(x, P) is introduced
-\begin{remark}
-    \label{rem:fbe-exact-extension}
-    Fast base conversion is approximate as a \textit{conversion} but exact as an \textit{extension}: because $\alpha_x Q \equiv 0 \pmod{q_i}$, the reused $Q$-residues remain consistent, and the extended vector is the exact RNS representation of the lifted integer $x' = [x]_Q + \alpha_x Q \in \mathbb{Z}_{QP}$. The operations below are designed around this overflow, either cancelling it outright or shrinking it to a small additive term.
-\end{remark}
+\begin{proposition}[Exactness as an extension]
+    \label{prop:fbe-exact}
+    The output of \autoref{alg:fast_base_extension} is the exact RNS representation in $\mathcal{B}_{QP}$ of the lifted integer $\tilde{x} = [x]_Q + \alpha_x Q \in \mathbb{Z}_{QP}$: the appended $P$-limbs are those of $\tilde{x}$ by \eqref{eq:fastbconv-lift}, and the reused $Q$-limbs agree with $\tilde{x}$ because $\tilde{x} \equiv x \pmod{q_i}$.
+\end{proposition}
 
-%% TODO: I like the formulation from the original paper, essentially: FBC is fast assuming the factors are available (pre-computed)
-\begin{remark}
-    The factors $\hat{q}_i$ and $[\hat{q}^{-1}_i]_{q_i}$ depend only on the basis, and can be pre-calculated and stored in memory (discussed in \autoref{sec:impl:core}).
-\end{remark}
+The approximation of the primitive is thus not an error in any residue, but a change of representative: the extension represents, exactly, an integer that is congruent to $x$ modulo $Q$ and bounded by $\frac{k}{2}Q$.
 
-%% TODO: This section seems pointless when 
 \subsubsection{Scale}
-The overflow $\alpha_xQ$ produced by \autoref{alg:fast_base_extension} is removed completely if the result is multiplied by $P$:
-\begin{gather*}
-    x' = x + \alpha_xQ \pmod{QP} \\
-    x'P = xP + \alpha_x QP = xP \pmod{QP}
-\end{gather*}
-This observation leads to the specialized operation ``\textit{extend and scale by} $P$''. I refer to this operation as $\Call{Scale}{x, P} \mapsto [xP]_{\mathcal{B}_{QP}}$.
+The raising leg of the modulus extension needs operands that carry the factor $P$: whatever is meant to survive the final division must be $P$-scaled before it. I refer to the operation supplying them, ``\textit{extend and scale by} $P$'', as $\Call{Scale}{x, P} \mapsto [xP]_{\mathcal{B}_{QP}}$. Composing the extension with a multiplication defines it,
 \begin{equation}
     \label{def:scale}
     \Call{Scale}{x, P} = \Call{FastBaseExtend}{x, \mathcal{B}_Q, \mathcal{B}_P} \cdot P
 \end{equation}
+and the composition is exact even though its ingredient is not, because multiples of $Q$ are annihilated by $P$ in $\mathbb{Z}_{QP}$:
+\begin{equation*}
+    (x + \alpha_x Q) \cdot P = xP + \alpha_x QP \equiv xP \pmod{QP}
+\end{equation*}
 
-In \gls{rns} the operation is far cheaper than \eqref{def:scale} suggests. Every $P$-residue of $xP$ is $0$ modulo $p_i$, so no conversion is needed at all: each $Q$-tower is multiplied by $[P]_{q_i}$, and $k'$ empty towers are appended (\autoref{alg:scale}). In particular, \textsc{Scale} avoids the \gls{ntt} conversions of the fast base extension entirely and operates directly on the evaluation form.
+In \gls{rns} the operation is far cheaper than \eqref{def:scale} suggests: no conversion needs to take place at all. Every $P$-limb of $xP$ is zero --- each $p_j$ divides $P$ --- so the limbs that the extension would have to compute are known in advance. Each $Q$-limb is multiplied by $[P]_{q_i}$ and $k'$ zero limbs are appended (\autoref{alg:scale}); \textsc{Scale} never leaves the evaluation form, and is limb-local, \gls{ntt}-free and exact.
 
 \begin{algorithm}[ht!]
 \caption{\protect\Call{Scale}{x, P}}
@@ -104,19 +116,32 @@ In \gls{rns} the operation is far cheaper than \eqref{def:scale} suggests. Every
 \end{algorithmic}
 \end{algorithm}
 
+\begin{remark}
+    \label{rem:scale-collapse}
+    Read right to left, \eqref{def:scale} states that a multiplication by $P$ collapses the two raising operations into one: $P$-scaling the output of \autoref{alg:fast_base_extension} yields the same element of $\mathbb{Z}_{QP}$ as \textsc{Scale}, with the overflow annihilated en route.
+\end{remark}
+
 \subsubsection{Modulus Switching}
-%% TODO: Poorly written and sounds like AI. Rewrite entire (subsub)section. 
-Rounding is not natively supported in \gls{rns}: the residues are independent and non-positional, so the magnitude of a value --- and with it any fractional correction --- is inaccessible without CRT reconstruction. The modulus switch of \autoref{def:modswitch}, scaling a ciphertext element $c$ from $Q$ to $Q' = Q/q_{k-1}$, is instead realized by \textit{dropping the last limb} and applying a small correction to each remaining limb \cite{cryptoeprint:2021/204}:
+The modulus switch of \autoref{def:modswitch} scales a ciphertext element by $Q'/Q$ and rounds --- a positional operation, and the first casualty of the residue representation. Realized subtractively, however, it needs no positions: for the switch from $Q$ to $Q' = Q/q_{k-1}$, a correction $\delta \equiv c \pmod{q_{k-1}}$ makes $c - \delta$ an exact multiple of $q_{k-1}$, the division becomes a modular multiplication by $[q_{k-1}^{-1}]_{q_i}$ on each remaining limb, and the last limb --- identically zero after the subtraction --- is dropped \cite{cryptoeprint:2021/204}:
 \begin{equation}
     \label{eq:rns-modswitch}
     [c']_{q_i} = \left[q_{k-1}^{-1}\left(c - \delta\right)\right]_{q_i}, \quad 0 \leq i < k - 1
 \end{equation}
-where the correction $\delta \equiv c \pmod{q_{k-1}}$ replicates the rounding and, for BGV, must additionally satisfy $\delta \equiv 0 \pmod{t}$ so that the plaintext is preserved. The noise shrinks by a factor $q_{k-1}$, matching the classical modulus switch. %% TODO: Remove BGV stuff, we don't really care.
+The correction is read directly off the limb being dropped: with the centered representative $\delta = [c]_{q_{k-1}}$, subtracting $\delta$ moves $c$ to the nearest multiple of $q_{k-1}$, and \eqref{eq:rns-modswitch} computes exactly $\lfloor c/q_{k-1} \rceil$. The noise shrinks by the same factor, matching \autoref{def:modswitch}.
 
 \subsubsection{Approximate Mod Down}
-Switching from the extended modulus $QP$ back down to $Q$ faces the same obstacle: dividing by $P$ requires rounding, and thus a correction congruent to $x$ modulo $P$. The correction is obtained by converting the $P$-part of $x$ back to $\mathcal{B}_Q$ with \eqref{eq:fastbconv} \cite{cryptoeprint:2012/099, cryptoeprint:2018/117}:
+The descent of the modulus extension is the same switch performed from $QP$ down to $Q$, dropping all of $\mathcal{B}_P$ at once. The correction must now be congruent to $x$ modulo the composite $P$, and it is already present in the operand: the $P$-limbs hold precisely $[x]_{\mathcal{B}_P}$. What the single-limb switch could read off directly must here be carried across bases --- a base conversion \cite{cryptoeprint:2012/099, cryptoeprint:2018/117}:
 \begin{equation}
     \label{eq:approxmoddown}
     \Call{ApproxModDown}{x} = \left[P^{-1}\left(x - \Call{FastBConv}{[x]_{\mathcal{B}_P}, \mathcal{B}_P, \mathcal{B}_Q}\right)\right]_{\mathcal{B}_Q}
 \end{equation}
-The inner conversion carries its own overflow $\alpha P$, which survives the division as a small additive error $\alpha \in [0, k')$ --- hence \textit{approximate} mod down. In typical use the operand is pre-multiplied by $P$, by \textsc{Scale} or by $P$-scaled key material, so the division returns the value to its original scale while shrinking the noise accumulated at modulus $QP$ by a factor $P$; this is what makes the approximation tolerable in practice. For BGV the converted term must additionally be corrected modulo $t$ to preserve the plaintext \cite{cryptoeprint:2021/204}.
+The conversion being the fast one, the subtracted term is not $[x]_P$ but a lift $[x]_P + \alpha P$ with $|\alpha| \leq \lceil k'/2 \rceil$ \eqref{eq:fastbconv-lift}, and the extra multiple of $P$ survives the division as an additive error on the result --- hence \emph{approximate}:
+\begin{equation*}
+    \Call{ApproxModDown}{x} \equiv \left\lfloor x/P \right\rceil - \alpha \pmod{Q}
+\end{equation*}
+
+The error exchange is what the temporary extension exists to buy. Everything of value at modulus $QP$ carries a factor $P$ --- put there by \textsc{Scale} or by $P$-scaled key material --- so the operand arriving at the descent has the form $x = Py + e$, with $e$ the noise deposited by the computation at $QP$. \textsc{ApproxModDown} returns
+\begin{equation*}
+    y + \lfloor e/P \rceil - \alpha \pmod{Q}
+\end{equation*}
+The payload lands at its original scale, the noise arrives divided by $P$, and the price is an additive term of a few integers. For BGV the subtraction must additionally not disturb the plaintext residue, so the converted correction is chosen congruent to $0$ modulo $t$ \cite{cryptoeprint:2021/204}.

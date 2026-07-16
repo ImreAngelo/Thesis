@@ -25,6 +25,13 @@ These problems were highlighted in \gls{spar}
     \item FHE 'holy grail' of privacy-preserving communication
     \item \gls{spar}
     \item RSA is multiplicatively homomorphic, but (follow-up) paper theorized a \emph{fully} homomorphic scheme may be possible \cite{gentry:2009, rivest:1978:databanks}
+    \item \emph{Contributions}
+    \begin{itemize}
+        \item Port of TFHE-style external/internal products to BGV-RNS
+        \item A reusable OpenFHE library
+        \item Complete sPAR implementation
+        \item First empirical evaluation of it
+    \end{itemize}
 \end{itemize}
 
 \subsubsection{Structure of the thesis}
@@ -35,3 +42,5 @@ These problems were highlighted in \gls{spar}
     \item Results, benchmarks, noise analysis 
     \item Future work
 \end{itemize}
+
+%% TODO: nowhere in the thesis is there an explicit "this thesis contributes:" list. You have at least four defensible contributions scattered across chapter intros: (a) the first (to your knowledge — verify) port of TFHE-style external/internal products to BGV-RNS, as a reusable OpenFHE library; (b) a complete sPAR implementation and the first empirical evaluation of it; (c) the noise-asymmetry ordering analysis and the resulting 30–40 bit improvement in Server::Write; (d) the hybrid-RGSW construction and its open problem. Claim them in the introduction, in this order of confidence, and map each to the chapter that delivers it.

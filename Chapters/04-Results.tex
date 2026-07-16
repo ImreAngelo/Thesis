@@ -25,3 +25,6 @@ suggest a new approach... % hybrid
 %% DISCUSSIONS
 \input{Chapters/04-Results/discussions}
 \input{Chapters/04-Results/hybrid}
+
+
+%% TODO: RQ2's answer is actually computable from your own data and is more interesting than the noise extrapolation you lead with. Your benchmark table shows per-write time growing linearly in $\eta$ (~4.2 s/user·$\eta$/2... at $\eta=16$, 67 s per write), which means total server work per round is quadratic in $\eta$. That curve, extrapolated, gives a concrete "impractical beyond $\eta \approx X$ for latency budget $Y$" statement — the headline result of the thesis. State it explicitly. The current discussion section is six bullet lines.
