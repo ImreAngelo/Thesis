@@ -42,8 +42,24 @@ An alternative to gadget decomposition used in \gls{rns} key-switching is \texti
 \input{Algorithms/new/extprod-hybrid}
 
 \begin{itemize}
+    \item This was actually implemented as below
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.54\linewidth}
+        \centering
+        \input{Figures/dependency-graph}
+        % \includegraphics[width=\linewidth]{Figures/dependency-graph-preview.png}
+        \caption{Dependency graph}
+        \label{fig:depgraph}
+    \end{subfigure}
+\end{figure}
+
+\begin{itemize}
     \item This method shows far better noise handling and 
     \item Show graphs for same parameters but $|P| \approx |Q|$ i.e. $d_{num} = 1$ and security parameter smaller but still $\geq 128$ bits
+    \item Also show numbers with security-parity
     \item Problem: internal product does not work with both sides as Hybrid-RGSW and one $P$ is consumed each external product!
 \end{itemize}
 

@@ -13,7 +13,11 @@
 %%
 %% Introduction - Present code contributions: spar and 
 \vfill
-TFHE-style \gls{rgsw} 
+\begin{itemize}
+    \item RGSW and external products are typically not exposed in non-binary scheme implementations (even in TFHE-rs the external product is kindof hidden deep in some module)
+    \item 
+\end{itemize}
+TFHE-style \gls{rgsw} are generally not exposed in . This thesis 
 
 A gap needed to be filled: TFHE-style RGSW products are rarely exposed in BGV-RNS, even if the products are used internally. As a result of this thesis, a C++ library (\corelib) was developed to bring this functionality to the OpenFHE~library~\cite{cryptoeprint:2022/915}. The sPAR protocol has also been implemented in C++ using the RGSW library. I will stress the libraries are separate; the RGSW library can be used on its own as is, and the sPAR library can in theory be used without it --- provided a different library is developed to provide the same functionality and API. 
 
@@ -21,7 +25,7 @@ This section also explains the set up of the various tests; the numbers from run
 
 \newpage
 
-\input{Chapters/03-Methodology/core/bitwise}
+\input{Chapters/03-Methodology/structure}
 \input{Chapters/03-Methodology/impl-core}
 \input{Chapters/03-Methodology/impl-spar}
 \input{Chapters/03-Methodology/experimental-setup}

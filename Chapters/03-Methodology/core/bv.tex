@@ -1,27 +1,29 @@
-{
-    \color{purple}
-    \begin{itemize}
-        \item A result of this thesis: a C++ library which extends OpenFHE's BGV implementation to support RGSW operations
-        \item And sPAR which was built on top of this library
-        \item The code base is split into three sections found in the \texttt{lib} directory:
-        \begin{enumerate}
-            \item \corelib extends OpenFHE's \texttt{CryptoContext<T>} with the operations:
-            \begin{itemize}
-                \item \texttt{EncryptRGSW} outputs the RGSW encryption of the input plaintext
-                \item \texttt{EvalExternalProduct} takes an RLWE and RGSW ciphertext
-                \item \texttt{EvalInternalProduct} takes two RGSW ciphertexts
-                \item Supporting functions like AddRGSW and MultRGSWPlaintext etc.
-            \end{itemize}
-            \item \serverlib builds the sPAR server functions on top of \corelib
-            \item \clientlib builds the sPAR client functions on top of \corelib
-        \end{enumerate}
-        \item There are also two auxiliary directories \texttt{benchmarks} and \texttt{tests} that contain code to benchmark and unit test functions, respectively.
-        \item And \texttt{scripts} contain python code for running the estimator
-    \end{itemize}
-}
+% {
+%     \color{purple}
+%     \begin{itemize}
+%         \item A result of this thesis: a C++ library which extends OpenFHE's BGV implementation to support RGSW operations
+%         \item And sPAR which was built on top of this library
+%         \item The code base is split into three sections found in the \texttt{lib} directory:
+%         \begin{enumerate}
+%             \item \corelib extends OpenFHE's \texttt{CryptoContext<T>} with the operations:
+%             \begin{itemize}
+%                 \item \texttt{EncryptRGSW} outputs the RGSW encryption of the input plaintext
+%                 \item \texttt{EvalExternalProduct} takes an RLWE and RGSW ciphertext
+%                 \item \texttt{EvalInternalProduct} takes two RGSW ciphertexts
+%                 \item Supporting functions like AddRGSW and MultRGSWPlaintext etc.
+%             \end{itemize}
+%             \item \serverlib builds the sPAR server functions on top of \corelib
+%             \item \clientlib builds the sPAR client functions on top of \corelib
+%         \end{enumerate}
+%         \item There are also two auxiliary directories \texttt{benchmarks} and \texttt{tests} that contain code to benchmark and unit test functions, respectively.
+%         \item And \texttt{scripts} contain python code for running the estimator
+%     \end{itemize}
+% }
 
-\subsection{Concrete Implementation}
+% \subsection{Concrete Implementation}
+%% TODO: Move points that have not been covered already
 \begin{itemize}
+    \color{purple}
     \item Digit decomposition of each residual limb
     \item Two functions that output $P(v)$ and $D(u)$ with quality $\beta$ s.t. $\|D(u)\|_\infty \leq B/2 = \lceil \max{q_i}/(2\ell) \rceil$
     \item The outputs has $k\times \ell$ entries, where $k$ is the number of RNS moduli (corresponding to the first decomposition) and $\ell$ is the number of base $B$ digits

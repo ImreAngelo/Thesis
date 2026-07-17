@@ -1,0 +1,36 @@
+\begin{tikzpicture}[
+    box/.style={
+        draw=black,
+        rectangle,
+        align=center,
+        font=\sffamily,
+        minimum height=0.9cm,
+    },
+    dir/.style={
+        font=\footnotesize\ttfamily,
+        anchor=west,
+    }
+]
+
+% libs/core: the interface strip and, beneath it, the implementation
+\node[box, minimum width=8.4cm, minimum height=0.55cm, font=\small\ttfamily] (iface) {IExtendedContext};
+\node[box, minimum width=8.4cm, below=0mm of iface] (impl) {Default implementation (BV)};
+
+% sPAR libraries, resting on the interface strip
+\node[box, minimum width=4cm, above=3.5mm of iface.north west, anchor=south west] (client) {sPAR client};
+\node[box, minimum width=4cm, above=3.5mm of iface.north east, anchor=south east] (server) {sPAR server};
+
+% vendored OpenFHE at the bottom
+\node[box, minimum width=8.4cm, below=3.5mm of impl, fill=black!8] (openfhe) {OpenFHE {\footnotesize(\texttt{CryptoContext})}};
+
+% directory demarcations
+\node[dir, align=left] at ([xshift=3mm]server.east) {libs/client\\libs/server};
+\node[dir] at ([xshift=3mm, yshift=-2mm]impl.north east) {libs/core};
+\node[dir] at ([xshift=3mm]openfhe.east) {vendors/openfhe-development};
+
+% dotted demarcations between the libraries
+\coordinate (sep1) at ([yshift=1.75mm]iface.north);
+\coordinate (sep2) at ([yshift=-1.75mm]impl.south);
+\draw[densely dotted] (current bounding box.west |- sep1) -- (current bounding box.east |- sep1);
+\draw[densely dotted] (current bounding box.west |- sep2) -- (current bounding box.east |- sep2);
+\end{tikzpicture}

@@ -15,6 +15,10 @@
 % Operators
 \DeclareMathOperator{\sign}{sign}
 
+% Internal product operator: an asterisk boxed like amssymb's \boxdot
+% (amssymb provides \boxplus/\boxminus/\boxtimes/\boxdot but not \boxast)
+\newcommand{\boxast}{\mathbin{\ooalign{$\square$\cr\hidewidth\raisebox{0.2ex}{$\scriptstyle\ast$}\hidewidth\cr}}}
+
 % Autoref
 \newcommand{\algorithmautorefname}{Algorithm}
 

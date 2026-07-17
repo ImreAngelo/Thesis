@@ -8,10 +8,7 @@ The idea has since been generalized into the idea of \emph{gadget decomposition}
 %% (R)GSW - Used in GSW (cryptoeprint:2013/340), FHEW (cryptoeprint:2014/816) and TFHE (cryptoeprint:2018/421)
 %% Presumably used in the other major schemes: BGV (cryptoeprint:2011/277), BFV (cryptoeprint:2012/078, cryptoeprint:2012/144), CKKS (cryptoeprint:2016/421)  %% TODO: Verify correct paper-scheme attribution
 
-%% TODO: Settle on a name for CRT decomposition
-%% TODO: Move to implementation details
-% Following the convention of~\cite{cryptoeprint:2021/204, cryptoeprint:2022/915}, we refer to this family of decomposition-based techniques collectively as \emph{BV}. 
-
+%% TODO: Settle on a name for CRT/RNS decomposition
 \begin{definition}[Digit Decomposition]
     Given an integer $\gamma\in\mathbb{Z}_q$ for a modulus $q\geq 2$, base $\beta$ and decomposition parameter $\ell$, the digit decomposition $\decomp{\gamma}{} = (\gamma_0, \gamma_1, \dots, \gamma_{\ell-1}) \in \mathbb{Z}_\beta^\ell$ outputs an ordered list of $\ell$ base-$\beta$ digits satisfying
     \begin{equation*}

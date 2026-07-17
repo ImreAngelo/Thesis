@@ -1,0 +1,14 @@
+
+\section{Structure}
+\begin{itemize}
+    \item I provide the two libraries in a git repository \cite{gitrepo}
+    \item Results should be replicable with a single command, provided the environment is set up with the appropraite build tools
+    \item 
+\end{itemize}
+
+\begin{figure}[!htb]
+    \centering
+    \input{Figures/lib-structure}
+    \caption{Each component depends only on what lies directly beneath it. The sPAR libraries consume the core library solely through the \texttt{IExtendedContext} interface.}
+    \label{fig:lib-structure}
+\end{figure}
