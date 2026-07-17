@@ -1,5 +1,16 @@
-\subsection{Brakerski-Vaikuntanathan}
-Brakerski and Vaikuntanathan~\cite{cryptoeprint:2011/344} first proposed decomposing ciphertext elements into small digits as a means of controlling the noise growth \textcolor{red}{of this operation}. The idea has since been generalized into the idea of \emph{gadget decomposition} and applied in a variety of forms, including digit and CRT (RNS) decomposition. Following the convention of~\cite{cryptoeprint:2021/204, cryptoeprint:2022/915}, we refer to this family of decomposition-based techniques collectively as \emph{BV}.
+% \subsection{Brakerski-Vaikuntanathan}
+%% TODO: Verify claim "first" and what about cryptoeprint:2012/078 (Bra12)?
+%% TODO: Compare against list: [BGV14, MP12, Bra12, GSW13, AP14, DM15, GINX16, CKKS17, CGGI20, BIP+22] % For example: why CGGI20 not 18 or 16? Why CKKS17 not 16?
+Brakerski and Vaikuntanathan~\cite{cryptoeprint:2011/344} first proposed decomposing ciphertext elements into small digits as a means of controlling the noise in \textcolor{red}{the scalar multiplication of ciphertexts}. %% TODO: Verify 'scalar multiplication' claim
+The idea has since been generalized into the idea of \emph{gadget decomposition} and been employed in the design of many \gls{fhe} schemes % as an auxiliary tool for certain procedures, such as key-switching, or as the basis for entire scheme. 
+\cite{cryptoeprint:2011/277, cryptoeprint:2012/078, cryptoeprint:2012/144, cryptoeprint:2013/340, cryptoeprint:2014/816, cryptoeprint:2016/421, cryptoeprint:2018/421}.
+
+%% (R)GSW - Used in GSW (cryptoeprint:2013/340), FHEW (cryptoeprint:2014/816) and TFHE (cryptoeprint:2018/421)
+%% Presumably used in the other major schemes: BGV (cryptoeprint:2011/277), BFV (cryptoeprint:2012/078, cryptoeprint:2012/144), CKKS (cryptoeprint:2016/421)  %% TODO: Verify correct paper-scheme attribution
+
+%% TODO: Settle on a name for CRT decomposition
+%% TODO: Move to implementation details
+% Following the convention of~\cite{cryptoeprint:2021/204, cryptoeprint:2022/915}, we refer to this family of decomposition-based techniques collectively as \emph{BV}. 
 
 \begin{definition}[Digit Decomposition]
     Given an integer $\gamma\in\mathbb{Z}_q$ for a modulus $q\geq 2$, base $\beta$ and decomposition parameter $\ell$, the digit decomposition $\decomp{\gamma}{} = (\gamma_0, \gamma_1, \dots, \gamma_{\ell-1}) \in \mathbb{Z}_\beta^\ell$ outputs an ordered list of $\ell$ base-$\beta$ digits satisfying
@@ -10,7 +21,7 @@ Brakerski and Vaikuntanathan~\cite{cryptoeprint:2011/344} first proposed decompo
 
 %%
 %% Why its helpful
-Digit decomposition has two important properties. First, if the digits $\gamma_i$ of $\decomp{\gamma}{}$ are small, then $\langle \decomp{\gamma}{}, \epsilon\rangle \leq \ell\cdot \max\{\gamma_i\cdot \epsilon_i\} \leq \beta \epsilon \ll \gamma \epsilon$. This is the property that allows some control over the noise growth. Second, two integers can be multiplied through the decomposition. By construction, $\langle\decomp{\gamma}{}, g\rangle = \gamma$ for the fixed vector $g = (q/\beta, \dots, q/\beta^{\ell})$, meaning $\langle\decomp{\gamma}{}, g\cdot x\rangle = \gamma\cdot x$ for an arbitrary integer $x\in \mathbb{Z}$. For either of these properties, the particular form of $g$ is unimportant as long as the digits $\gamma_i$ remain small. Furthermore, as we are generally working with some intrinsic error in FHE, \cite{cryptoeprint:2018/421} proposed allowing some error $\epsilon$ in the reconstruction, giving the definition from their paper verbatim:
+Digit decomposition has two important properties. First, if the digits $\gamma_i$ of $\decomp{\gamma}{}$ are small, then $\langle \decomp{\gamma}{}, \epsilon\rangle \leq \ell\cdot \max\{\gamma_i\cdot \epsilon_i\} \leq \ell\beta\epsilon \ll \gamma\epsilon$. This is the property that allows some control over the noise growth. Second, two integers can be multiplied through the decomposition. By construction, $\langle\decomp{\gamma}{}, g\rangle = \gamma$ for the fixed vector $g = (q/\beta, \dots, q/\beta^{\ell})$, meaning $\langle\decomp{\gamma}{}, g\cdot x\rangle = \gamma\cdot x$ for an arbitrary integer $x\in \mathbb{Z}$. For either of these properties, the particular form of $g$ is unimportant as long as the digits $\gamma_i$ remain small. Furthermore, as we are generally working with some intrinsic error in FHE, \cite{cryptoeprint:2018/421} proposed allowing some error $\epsilon$ in the reconstruction, giving the definition from their paper verbatim:
 
 %%
 %% Gadget Decomposition

@@ -11,9 +11,9 @@
     \end{align*}
     \begin{gather}
         \nonumber
-        \text{Let } Q = \prod_{i=0}^{k-1}q_i, \; \hat{q}_i = \frac{Q}{q_i} \text{ and } \hat{q}_i^{-1} \equiv 1 \pmod q_i
+        \text{Let } Q = \prod_{i=0}^{k-1}q_i, \; \hat{q}_i = \frac{Q}{q_i} \text{ and } \hat{q}_i^{-1} \text{ be the inverse s.t. } \hat{q}_i^{-1}\hat{q}_i \equiv 1 \pmod q_i
         \\
-        \text{Then } x = \sum_{i=0}^{k-1} x_i \cdot \hat{q}_i \cdot \hat{q}_i^{-1} \pmod{Q} 
+        \text{Then \gls{crt} states } x = \sum_{i=0}^{k-1} x_i \cdot \hat{q}_i \cdot \hat{q}_i^{-1} \pmod{Q} 
         \\
         \label{eq:crt-gadget}
         x = \langle \{ x_i \}_{i=0}^{k-1}, \{ \hat{q}_i\cdot\hat{q}_i^{-1} \}_{i=0}^{k-1} \rangle \pmod{Q}

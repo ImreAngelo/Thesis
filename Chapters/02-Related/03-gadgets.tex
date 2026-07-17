@@ -1,22 +1,15 @@
 % Noise Management Techniques in BGV-RNS?
 % Different Variants of Key Switching?
 % Gadget decomposition in BGV-RNS?
-\section{Key-Switching}
+% Key-switching techniques?
+\section{Gadget Decomposition}
 \label{sec:gadget-decomposition}
-\begin{itemize}
-    \item A problem that arises in several areas of FHE is that of multiplying a ciphertext by some large number while keeping the error low.
-    \item The techniques covered in this section typically occur in the context of keyswitching, but we remove them entirely from that context and consider only the techniques themselves.
+% \begin{itemize}
+%     \item A problem that arises in several areas of FHE is that of multiplying a ciphertext by some large number while keeping the error low.
+%     \item The techniques covered in this section typically occur in the context of keyswitching, but we remove them entirely from that context and consider only the techniques themselves.
+% \end{itemize}
 
-    \item \textcolor{orange}{The gadget decomposition is not restricted to managing the noise in the scalar multiplication of ciphertexts, it is also central in the design of most FHE schemes as an auxiliary tool for certain FHE procedures; e.g., [BGV14, MP12, Bra12, GSW13, AP14, DM15, GINX16, CKKS17, CGGI20, BIP+22]} \cite{cryptoeprint:2012/078, cryptoeprint:2013/340, cryptoeprint:2014/816, CKKS, cryptoeprint:2018/421}
-\end{itemize}
-
-\begin{equation}
-    (a\cdot s + \Delta m + \epsilon) \cdot X = aX\cdot s + \Delta Xm + X\epsilon
-\end{equation}
-
-% \textcolor{purple}{
-% Several core operations require computing the product of a ciphertext element with noisy auxiliary material; performed naively, this scales the noise by a factor as large as $q$. This section covers the standard techniques for controlling this growth: decomposition (BV), modulus extension (GHS), and their combination (Hybrid).
-% }
+% From other paper: \textcolor{orange}{The gadget decomposition is not restricted to managing the noise in the scalar multiplication of ciphertexts, it is also central in the design of most FHE schemes as an auxiliary tool for certain FHE procedures; e.g., [BGV14, MP12, Bra12, GSW13, AP14, DM15, GINX16, CKKS17, CGGI20, BIP+22]}
 
 \newcommand{\decomp}[2]{\mathsf{Decomp}^{#2}(#1)}
 
