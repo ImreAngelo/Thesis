@@ -1,0 +1,42 @@
+%%%
+%%% sPAR Algorithm 2 - HomPlacing* for the choice of three slots
+%%% Paper-faithful (eprint 2025/860); generic homomorphic products written
+%%% "\cdot" as in the paper --- the typed instantiation is thesis material (Ch. 3).
+%%%
+\begin{algorithm}[ht!]
+\caption{Homomorphic placing $\mathsf{HomPlacing}^*$ for the choice of three slots~\cite{cryptoeprint:2025/860}}
+\label{alg:spar:homplacing}
+\begin{algorithmic}[1]
+    \Require Encrypted value $V_r$; encrypted indices $A_0, A_1, A_2$, where $A_d$ is $\log\eta$ encrypted bits $\{c_{d,0}, \dots, c_{d,\log\eta - 1}\}$
+    \Require Server state matrices $L_{\eta\times3}$ and $I_{\eta\times3}$
+    \Ensure Encrypted boolean indicating whether the value was placed
+    \State $z_{i,d} := 0$ for $i \in [0, \eta),\; d \in \{0, 1, 2\}$
+    \For{$d \gets \{0, 1, 2\}$}
+        \State $b_0 := 1$ and $b_i := 0$ for $i \in [1, 2\eta - 1)$
+        \Comment{Empty binary tree with $\eta$ leaves}
+        \For{$i \gets [0, \log\eta)$}
+            \For{$j \gets [0, 2^i)$}
+                \State $r := b_{2^i - 1 + j}$
+                \State $b_{2^{i+1} - 1 + 2j} := r - r\cdot c_{d,i}$
+                \State $b_{2^{i+1} + 2j} := r\cdot c_{d,i}$
+            \EndFor
+        \EndFor
+        \State $z_{i,d} := b_{\eta - 1 + i}$ for $i \in [0, \eta)$
+        \Comment{Leaves: indicator vector of $a_d$}
+    \EndFor
+    \State $\mathsf{hasWritten} := 0$
+    \For{$d \gets \{0, 1, 2\}$}
+        \For{$k \gets \{0, 1, 2\}$}
+            \Comment{Slots per bucket}
+            \For{$i \gets [0, \eta)$}
+                \State $h := z_{i,d}\cdot I_{i,k}\cdot(1 - \mathsf{hasWritten})$
+                \State $L_{i,k} := L_{i,k} + h\cdot V_r$
+                \State $I_{i,k} := I_{i,k} - h$
+                \Comment{Mark the slot as used}
+                \State $\mathsf{hasWritten} := \mathsf{hasWritten} + h$
+            \EndFor
+        \EndFor
+    \EndFor
+    \State\Return $\mathsf{hasWritten}$
+\end{algorithmic}
+\end{algorithm}

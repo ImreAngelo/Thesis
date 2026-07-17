@@ -1,0 +1,1141 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{anyt/global//global/global}
+    \entry{gitrepo}{software}{}
+      \name{author}{1}{}{%
+        {{hash=100d157449fd0df475fc42df620c4387}{%
+           family={Angelo},
+           familyi={A\bibinitperiod},
+           given={Imre},
+           giveni={I\bibinitperiod}}}%
+      }
+      \strng{namehash}{100d157449fd0df475fc42df620c4387}
+      \strng{fullhash}{100d157449fd0df475fc42df620c4387}
+      \strng{bibnamehash}{100d157449fd0df475fc42df620c4387}
+      \strng{authorbibnamehash}{100d157449fd0df475fc42df620c4387}
+      \strng{authornamehash}{100d157449fd0df475fc42df620c4387}
+      \strng{authorfullhash}{100d157449fd0df475fc42df620c4387}
+      \field{labelalpha}{Ang26}
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{month}{7}
+      \field{title}{{Implementation of (Somewhat) Practical Anonymous Router}}
+      \field{version}{1.0.0}
+      \field{year}{2026}
+      \verb{urlraw}
+      \verb https://github.com/ImreAngelo/sPAR
+      \endverb
+      \verb{url}
+      \verb https://github.com/ImreAngelo/sPAR
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2014/094}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=f8db94acdc1138382779b460e7d5c623}{%
+           family={Alperin-Sheriff},
+           familyi={A\bibinithyphendelim S\bibinitperiod},
+           given={Jacob},
+           giveni={J\bibinitperiod}}}%
+        {{hash=910b4f34f67502ebf51d7391c9ce096b}{%
+           family={Peikert},
+           familyi={P\bibinitperiod},
+           given={Chris},
+           giveni={C\bibinitperiod}}}%
+      }
+      \strng{namehash}{a4afce309dac80a08f559796fe3bb84c}
+      \strng{fullhash}{a4afce309dac80a08f559796fe3bb84c}
+      \strng{bibnamehash}{a4afce309dac80a08f559796fe3bb84c}
+      \strng{authorbibnamehash}{a4afce309dac80a08f559796fe3bb84c}
+      \strng{authornamehash}{a4afce309dac80a08f559796fe3bb84c}
+      \strng{authorfullhash}{a4afce309dac80a08f559796fe3bb84c}
+      \field{labelalpha}{AP14}
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2014/094}
+      \field{title}{Faster Bootstrapping with Polynomial Error}
+      \field{year}{2014}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2014/094
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2014/094
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2015/046}{misc}{}
+      \name{author}{3}{}{%
+        {{hash=a37bc8b4f2b4d2c2714c2fd0ce4e1c4b}{%
+           family={Albrecht},
+           familyi={A\bibinitperiod},
+           given={Martin\bibnamedelima R.},
+           giveni={M\bibinitperiod\bibinitdelim R\bibinitperiod}}}%
+        {{hash=0bc4763948f3fc8f6153642d7f0551d1}{%
+           family={Player},
+           familyi={P\bibinitperiod},
+           given={Rachel},
+           giveni={R\bibinitperiod}}}%
+        {{hash=2459cef831d34d56819ae42a6edefc99}{%
+           family={Scott},
+           familyi={S\bibinitperiod},
+           given={Sam},
+           giveni={S\bibinitperiod}}}%
+      }
+      \strng{namehash}{e1b8f619be59f65ab09416e414d8a1ab}
+      \strng{fullhash}{e1b8f619be59f65ab09416e414d8a1ab}
+      \strng{bibnamehash}{e1b8f619be59f65ab09416e414d8a1ab}
+      \strng{authorbibnamehash}{e1b8f619be59f65ab09416e414d8a1ab}
+      \strng{authornamehash}{e1b8f619be59f65ab09416e414d8a1ab}
+      \strng{authorfullhash}{e1b8f619be59f65ab09416e414d8a1ab}
+      \field{labelalpha}{APS15}
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2015/046}
+      \field{title}{On the concrete hardness of Learning with Errors}
+      \field{year}{2015}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2015/046
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2015/046
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2022/915}{misc}{}
+      \name{author}{23}{}{%
+        {{hash=1012420bdb02dca7a7ae029401b0888c}{%
+           family={Badawi},
+           familyi={B\bibinitperiod},
+           given={Ahmad\bibnamedelima Al},
+           giveni={A\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+        {{hash=cf4374c04002a9b3116f6edadb0d4bc9}{%
+           family={Alexandru},
+           familyi={A\bibinitperiod},
+           given={Andreea},
+           giveni={A\bibinitperiod}}}%
+        {{hash=33d769cc0e371b398e6c4e6025548c38}{%
+           family={Bates},
+           familyi={B\bibinitperiod},
+           given={Jack},
+           giveni={J\bibinitperiod}}}%
+        {{hash=e701c79624f327610701340f7b03f689}{%
+           family={Bergamaschi},
+           familyi={B\bibinitperiod},
+           given={Flavio},
+           giveni={F\bibinitperiod}}}%
+        {{hash=b25ec8e0bcc2c5af254aa7d015ed145a}{%
+           family={Cousins},
+           familyi={C\bibinitperiod},
+           given={David\bibnamedelima Bruce},
+           giveni={D\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+        {{hash=ee09c007f7e8b6e6bfbc42c3a2eef34d}{%
+           family={Erabelli},
+           familyi={E\bibinitperiod},
+           given={Saroja},
+           giveni={S\bibinitperiod}}}%
+        {{hash=ed5399219c2809d60a6452d0e3ab98d9}{%
+           family={Genise},
+           familyi={G\bibinitperiod},
+           given={Nicholas},
+           giveni={N\bibinitperiod}}}%
+        {{hash=7c86404bf6ef06056efb632aff16d2c0}{%
+           family={Halevi},
+           familyi={H\bibinitperiod},
+           given={Shai},
+           giveni={S\bibinitperiod}}}%
+        {{hash=49a59156cef4f08bf8970b2238cf3198}{%
+           family={Hunt},
+           familyi={H\bibinitperiod},
+           given={Hamish},
+           giveni={H\bibinitperiod}}}%
+        {{hash=c015d2c8e71fed27aee8e4b067d84662}{%
+           family={Kim},
+           familyi={K\bibinitperiod},
+           given={Andrey},
+           giveni={A\bibinitperiod}}}%
+        {{hash=a64cda9b4f2c545def18a8355ae9d1bc}{%
+           family={Lee},
+           familyi={L\bibinitperiod},
+           given={Yongwoo},
+           giveni={Y\bibinitperiod}}}%
+        {{hash=d6e994f41e5b6b01441612cfc7f19a4c}{%
+           family={Liu},
+           familyi={L\bibinitperiod},
+           given={Zeyu},
+           giveni={Z\bibinitperiod}}}%
+        {{hash=b3211adf5dbe7a65b2b1f58cab4f6a0c}{%
+           family={Micciancio},
+           familyi={M\bibinitperiod},
+           given={Daniele},
+           giveni={D\bibinitperiod}}}%
+        {{hash=f96cf9078c3122b2209272ac33990d98}{%
+           family={Pascoe},
+           familyi={P\bibinitperiod},
+           given={Carlo},
+           giveni={C\bibinitperiod}}}%
+        {{hash=6df71ef3203571cc841e56b6b4ce9c8e}{%
+           family={Polyakov},
+           familyi={P\bibinitperiod},
+           given={Yuriy},
+           giveni={Y\bibinitperiod}}}%
+        {{hash=8ae38442a0889bed637a3b12c20d7753}{%
+           family={Quah},
+           familyi={Q\bibinitperiod},
+           given={Ian},
+           giveni={I\bibinitperiod}}}%
+        {{hash=d0eaa118a2837401017e9265aac7b8e0}{%
+           family={R.V.},
+           familyi={R\bibinitperiod},
+           given={Saraswathy},
+           giveni={S\bibinitperiod}}}%
+        {{hash=6d83ab050b739259940399c47a243373}{%
+           family={Rohloff},
+           familyi={R\bibinitperiod},
+           given={Kurt},
+           giveni={K\bibinitperiod}}}%
+        {{hash=123c330b7a167d3849362fe3673a4b69}{%
+           family={Saylor},
+           familyi={S\bibinitperiod},
+           given={Jonathan},
+           giveni={J\bibinitperiod}}}%
+        {{hash=d2b960e977d0716ea049d925beec6e37}{%
+           family={Suponitsky},
+           familyi={S\bibinitperiod},
+           given={Dmitriy},
+           giveni={D\bibinitperiod}}}%
+        {{hash=9fa5ae7e661d8e1b0db3ab255d62b64e}{%
+           family={Triplett},
+           familyi={T\bibinitperiod},
+           given={Matthew},
+           giveni={M\bibinitperiod}}}%
+        {{hash=bcd43d9385708d5fa3dbc36c49d8e579}{%
+           family={Vaikuntanathan},
+           familyi={V\bibinitperiod},
+           given={Vinod},
+           giveni={V\bibinitperiod}}}%
+        {{hash=71599f31696c34cea011ed71a46111d9}{%
+           family={Zucca},
+           familyi={Z\bibinitperiod},
+           given={Vincent},
+           giveni={V\bibinitperiod}}}%
+      }
+      \strng{namehash}{e8025f4ab9959c44df82250d9ef792dc}
+      \strng{fullhash}{5cf17b05864e19a9bc1fc548bdacf608}
+      \strng{bibnamehash}{d4d11959aaae4522b57b1f2b34e1b6ae}
+      \strng{authorbibnamehash}{d4d11959aaae4522b57b1f2b34e1b6ae}
+      \strng{authornamehash}{e8025f4ab9959c44df82250d9ef792dc}
+      \strng{authorfullhash}{5cf17b05864e19a9bc1fc548bdacf608}
+      \field{labelalpha}{BAB+22}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2022/915}
+      \field{title}{{OpenFHE}: Open-Source Fully Homomorphic Encryption Library}
+      \field{year}{2022}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2022/915
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2022/915
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2016/510}{misc}{}
+      \name{author}{4}{}{%
+        {{hash=1280457b0fe3cd847e4dc92795b305a6}{%
+           family={Bajard},
+           familyi={B\bibinitperiod},
+           given={Jean-Claude},
+           giveni={J\bibinithyphendelim C\bibinitperiod}}}%
+        {{hash=7bb910f6a448df639a7a971e25f91df9}{%
+           family={Eynard},
+           familyi={E\bibinitperiod},
+           given={Julien},
+           giveni={J\bibinitperiod}}}%
+        {{hash=a26b9d4a38c61d1c31881b9e29f5c844}{%
+           family={Hasan},
+           familyi={H\bibinitperiod},
+           given={Anwar},
+           giveni={A\bibinitperiod}}}%
+        {{hash=71599f31696c34cea011ed71a46111d9}{%
+           family={Zucca},
+           familyi={Z\bibinitperiod},
+           given={Vincent},
+           giveni={V\bibinitperiod}}}%
+      }
+      \strng{namehash}{d91dc06cc043e68ef9e626401f17b261}
+      \strng{fullhash}{9606142b589d0c103080098b12b0102c}
+      \strng{bibnamehash}{292a3642625ee2672044e230e8ef356d}
+      \strng{authorbibnamehash}{292a3642625ee2672044e230e8ef356d}
+      \strng{authornamehash}{d91dc06cc043e68ef9e626401f17b261}
+      \strng{authorfullhash}{9606142b589d0c103080098b12b0102c}
+      \field{labelalpha}{BEHZ16}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2016/510}
+      \field{title}{A Full {RNS} Variant of {FV} like Somewhat Homomorphic Encryption Schemes}
+      \field{year}{2016}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2016/510
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2016/510
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2011/277}{misc}{}
+      \name{author}{3}{}{%
+        {{hash=9a0f2b40e3163796c628306096e94fd6}{%
+           family={Brakerski},
+           familyi={B\bibinitperiod},
+           given={Zvika},
+           giveni={Z\bibinitperiod}}}%
+        {{hash=bd007b2a3d698c39bd758b253f7c2ebf}{%
+           family={Gentry},
+           familyi={G\bibinitperiod},
+           given={Craig},
+           giveni={C\bibinitperiod}}}%
+        {{hash=bcd43d9385708d5fa3dbc36c49d8e579}{%
+           family={Vaikuntanathan},
+           familyi={V\bibinitperiod},
+           given={Vinod},
+           giveni={V\bibinitperiod}}}%
+      }
+      \strng{namehash}{9e2471e59619f19ba7b0995540830d7a}
+      \strng{fullhash}{9e2471e59619f19ba7b0995540830d7a}
+      \strng{bibnamehash}{9e2471e59619f19ba7b0995540830d7a}
+      \strng{authorbibnamehash}{9e2471e59619f19ba7b0995540830d7a}
+      \strng{authornamehash}{9e2471e59619f19ba7b0995540830d7a}
+      \strng{authorfullhash}{9e2471e59619f19ba7b0995540830d7a}
+      \field{labelalpha}{BGV11}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2011/277}
+      \field{title}{Fully Homomorphic Encryption without Bootstrapping}
+      \field{year}{2011}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2011/277
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2011/277
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2012/078}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=9a0f2b40e3163796c628306096e94fd6}{%
+           family={Brakerski},
+           familyi={B\bibinitperiod},
+           given={Zvika},
+           giveni={Z\bibinitperiod}}}%
+      }
+      \strng{namehash}{9a0f2b40e3163796c628306096e94fd6}
+      \strng{fullhash}{9a0f2b40e3163796c628306096e94fd6}
+      \strng{bibnamehash}{9a0f2b40e3163796c628306096e94fd6}
+      \strng{authorbibnamehash}{9a0f2b40e3163796c628306096e94fd6}
+      \strng{authornamehash}{9a0f2b40e3163796c628306096e94fd6}
+      \strng{authorfullhash}{9a0f2b40e3163796c628306096e94fd6}
+      \field{labelalpha}{Bra12}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2012/078}
+      \field{title}{Fully Homomorphic Encryption without Modulus Switching from Classical {GapSVP}}
+      \field{year}{2012}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2012/078
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2012/078
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2011/344}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=9a0f2b40e3163796c628306096e94fd6}{%
+           family={Brakerski},
+           familyi={B\bibinitperiod},
+           given={Zvika},
+           giveni={Z\bibinitperiod}}}%
+        {{hash=bcd43d9385708d5fa3dbc36c49d8e579}{%
+           family={Vaikuntanathan},
+           familyi={V\bibinitperiod},
+           given={Vinod},
+           giveni={V\bibinitperiod}}}%
+      }
+      \strng{namehash}{0724cea7fb00de2a7cd379011718d75a}
+      \strng{fullhash}{0724cea7fb00de2a7cd379011718d75a}
+      \strng{bibnamehash}{0724cea7fb00de2a7cd379011718d75a}
+      \strng{authorbibnamehash}{0724cea7fb00de2a7cd379011718d75a}
+      \strng{authornamehash}{0724cea7fb00de2a7cd379011718d75a}
+      \strng{authorfullhash}{0724cea7fb00de2a7cd379011718d75a}
+      \field{extraname}{1}
+      \field{labelalpha}{BV11}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2011/344}
+      \field{title}{Efficient Fully Homomorphic Encryption from (Standard) {LWE}}
+      \field{year}{2011}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2011/344
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2011/344
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2013/541}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=9a0f2b40e3163796c628306096e94fd6}{%
+           family={Brakerski},
+           familyi={B\bibinitperiod},
+           given={Zvika},
+           giveni={Z\bibinitperiod}}}%
+        {{hash=bcd43d9385708d5fa3dbc36c49d8e579}{%
+           family={Vaikuntanathan},
+           familyi={V\bibinitperiod},
+           given={Vinod},
+           giveni={V\bibinitperiod}}}%
+      }
+      \strng{namehash}{0724cea7fb00de2a7cd379011718d75a}
+      \strng{fullhash}{0724cea7fb00de2a7cd379011718d75a}
+      \strng{bibnamehash}{0724cea7fb00de2a7cd379011718d75a}
+      \strng{authorbibnamehash}{0724cea7fb00de2a7cd379011718d75a}
+      \strng{authornamehash}{0724cea7fb00de2a7cd379011718d75a}
+      \strng{authorfullhash}{0724cea7fb00de2a7cd379011718d75a}
+      \field{extraname}{2}
+      \field{labelalpha}{BV13}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2013/541}
+      \field{title}{Lattice-Based {FHE} as Secure as {PKE}}
+      \field{year}{2013}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2013/541
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2013/541
+      \endverb
+    \endentry
+    \entry{chillotti:onionring:2019}{inproceedings}{}
+      \name{author}{3}{}{%
+        {{hash=dd060cd064f8f607eb1bee6712820270}{%
+           family={Chen},
+           familyi={C\bibinitperiod},
+           given={Hao},
+           giveni={H\bibinitperiod}}}%
+        {{hash=d1ef308005a1e97548a030f0771c9cc9}{%
+           family={Chillotti},
+           familyi={C\bibinitperiod},
+           given={Ilaria},
+           giveni={I\bibinitperiod}}}%
+        {{hash=984971dd161c0b271f6c090548f3d5dd}{%
+           family={Ren},
+           familyi={R\bibinitperiod},
+           given={Ling},
+           giveni={L\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {London, United Kingdom}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computing Machinery}%
+      }
+      \strng{namehash}{4660b193664b790e1eb9719d81e39fc4}
+      \strng{fullhash}{4660b193664b790e1eb9719d81e39fc4}
+      \strng{bibnamehash}{4660b193664b790e1eb9719d81e39fc4}
+      \strng{authorbibnamehash}{4660b193664b790e1eb9719d81e39fc4}
+      \strng{authornamehash}{4660b193664b790e1eb9719d81e39fc4}
+      \strng{authorfullhash}{4660b193664b790e1eb9719d81e39fc4}
+      \field{labelalpha}{CCR19}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the 2019 ACM SIGSAC Conference on Computer and Communications Security}
+      \field{isbn}{9781450367479}
+      \field{series}{CCS '19}
+      \field{title}{Onion Ring ORAM: Efficient Constant Bandwidth Oblivious RAM from (Leveled) TFHE}
+      \field{year}{2019}
+      \field{pages}{345\bibrangedash 360}
+      \range{pages}{16}
+      \verb{doi}
+      \verb 10.1145/3319535.3354226
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1145/3319535.3354226
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1145/3319535.3354226
+      \endverb
+      \keyw{homomorphic encryption,oblivious RAM,permutation network}
+    \endentry
+    \entry{cryptoeprint:2016/870}{misc}{}
+      \name{author}{4}{}{%
+        {{hash=d1ef308005a1e97548a030f0771c9cc9}{%
+           family={Chillotti},
+           familyi={C\bibinitperiod},
+           given={Ilaria},
+           giveni={I\bibinitperiod}}}%
+        {{hash=b998636ead8888306e89d7cefe3512c9}{%
+           family={Gama},
+           familyi={G\bibinitperiod},
+           given={Nicolas},
+           giveni={N\bibinitperiod}}}%
+        {{hash=73093c70f9f986f64c466588cabf21a5}{%
+           family={Georgieva},
+           familyi={G\bibinitperiod},
+           given={Mariya},
+           giveni={M\bibinitperiod}}}%
+        {{hash=fd5b2edf8b5b6877de6d69ace5422aa8}{%
+           family={Izabachène},
+           familyi={I\bibinitperiod},
+           given={Malika},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{0ca0012845e2ad433c6eab0ee6ae15ea}
+      \strng{fullhash}{b01ea05a3dd2c24ecb735f10dc901b89}
+      \strng{bibnamehash}{d8656a4a61185eb9c0565c381684cd4a}
+      \strng{authorbibnamehash}{d8656a4a61185eb9c0565c381684cd4a}
+      \strng{authornamehash}{0ca0012845e2ad433c6eab0ee6ae15ea}
+      \strng{authorfullhash}{b01ea05a3dd2c24ecb735f10dc901b89}
+      \field{extraname}{1}
+      \field{labelalpha}{CGGI16}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2016/870}
+      \field{title}{Faster Fully Homomorphic Encryption: Bootstrapping in less than 0.1 Seconds}
+      \field{year}{2016}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2016/870
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2016/870
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2018/421}{misc}{}
+      \name{author}{4}{}{%
+        {{hash=d1ef308005a1e97548a030f0771c9cc9}{%
+           family={Chillotti},
+           familyi={C\bibinitperiod},
+           given={Ilaria},
+           giveni={I\bibinitperiod}}}%
+        {{hash=b998636ead8888306e89d7cefe3512c9}{%
+           family={Gama},
+           familyi={G\bibinitperiod},
+           given={Nicolas},
+           giveni={N\bibinitperiod}}}%
+        {{hash=73093c70f9f986f64c466588cabf21a5}{%
+           family={Georgieva},
+           familyi={G\bibinitperiod},
+           given={Mariya},
+           giveni={M\bibinitperiod}}}%
+        {{hash=fd5b2edf8b5b6877de6d69ace5422aa8}{%
+           family={Izabachène},
+           familyi={I\bibinitperiod},
+           given={Malika},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{0ca0012845e2ad433c6eab0ee6ae15ea}
+      \strng{fullhash}{b01ea05a3dd2c24ecb735f10dc901b89}
+      \strng{bibnamehash}{d8656a4a61185eb9c0565c381684cd4a}
+      \strng{authorbibnamehash}{d8656a4a61185eb9c0565c381684cd4a}
+      \strng{authornamehash}{0ca0012845e2ad433c6eab0ee6ae15ea}
+      \strng{authorfullhash}{b01ea05a3dd2c24ecb735f10dc901b89}
+      \field{extraname}{2}
+      \field{labelalpha}{CGGI18}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2018/421}
+      \field{title}{{TFHE}: Fast Fully Homomorphic Encryption over the Torus}
+      \field{year}{2018}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2018/421
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2018/421
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2016/421}{misc}{}
+      \name{author}{4}{}{%
+        {{hash=6bdc4346455a7e20ad7e61cd19bdfcd3}{%
+           family={Cheon},
+           familyi={C\bibinitperiod},
+           given={Jung\bibnamedelima Hee},
+           giveni={J\bibinitperiod\bibinitdelim H\bibinitperiod}}}%
+        {{hash=c015d2c8e71fed27aee8e4b067d84662}{%
+           family={Kim},
+           familyi={K\bibinitperiod},
+           given={Andrey},
+           giveni={A\bibinitperiod}}}%
+        {{hash=ebb1f81c865d401d1fc2acb78a8944df}{%
+           family={Kim},
+           familyi={K\bibinitperiod},
+           given={Miran},
+           giveni={M\bibinitperiod}}}%
+        {{hash=5331cd8c7d19cb38bdc22b5c454d7723}{%
+           family={Song},
+           familyi={S\bibinitperiod},
+           given={Yongsoo},
+           giveni={Y\bibinitperiod}}}%
+      }
+      \strng{namehash}{9751b11baa89a7611c73e385df96934c}
+      \strng{fullhash}{6dd888b9459f93cdb158345cdbdd3d4d}
+      \strng{bibnamehash}{c20f0fb9101a4e943a5ac58e260a27a6}
+      \strng{authorbibnamehash}{c20f0fb9101a4e943a5ac58e260a27a6}
+      \strng{authornamehash}{9751b11baa89a7611c73e385df96934c}
+      \strng{authorfullhash}{6dd888b9459f93cdb158345cdbdd3d4d}
+      \field{labelalpha}{CKKS16}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2016/421}
+      \field{title}{Homomorphic Encryption for Arithmetic of Approximate Numbers}
+      \field{year}{2016}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2016/421
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2016/421
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2014/816}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=b6d4403f80a724e07d939dd9699079e1}{%
+           family={Ducas},
+           familyi={D\bibinitperiod},
+           given={Léo},
+           giveni={L\bibinitperiod}}}%
+        {{hash=b3211adf5dbe7a65b2b1f58cab4f6a0c}{%
+           family={Micciancio},
+           familyi={M\bibinitperiod},
+           given={Daniele},
+           giveni={D\bibinitperiod}}}%
+      }
+      \strng{namehash}{ffefbe227e1cf74e9f72bc5ec26c12e9}
+      \strng{fullhash}{ffefbe227e1cf74e9f72bc5ec26c12e9}
+      \strng{bibnamehash}{ffefbe227e1cf74e9f72bc5ec26c12e9}
+      \strng{authorbibnamehash}{ffefbe227e1cf74e9f72bc5ec26c12e9}
+      \strng{authornamehash}{ffefbe227e1cf74e9f72bc5ec26c12e9}
+      \strng{authorfullhash}{ffefbe227e1cf74e9f72bc5ec26c12e9}
+      \field{labelalpha}{DM14}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2014/816}
+      \field{title}{{FHEW}: Bootstrapping Homomorphic Encryption in less than a second}
+      \field{year}{2014}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2014/816
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2014/816
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2025/860}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=5a2585ff1914aebb087c50c8a36d9719}{%
+           family={Das},
+           familyi={D\bibinitperiod},
+           given={Debajyoti},
+           giveni={D\bibinitperiod}}}%
+        {{hash=d68b74d06c03528ac096882fded0820e}{%
+           family={Park},
+           familyi={P\bibinitperiod},
+           given={Jeongeun},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{2cbdc8bd701f1d34d0b5d85fb4c86442}
+      \strng{fullhash}{2cbdc8bd701f1d34d0b5d85fb4c86442}
+      \strng{bibnamehash}{2cbdc8bd701f1d34d0b5d85fb4c86442}
+      \strng{authorbibnamehash}{2cbdc8bd701f1d34d0b5d85fb4c86442}
+      \strng{authornamehash}{2cbdc8bd701f1d34d0b5d85fb4c86442}
+      \strng{authorfullhash}{2cbdc8bd701f1d34d0b5d85fb4c86442}
+      \field{labelalpha}{DP25}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2025/860}
+      \field{title}{{sPAR}: (Somewhat) Practical Anonymous Router}
+      \field{year}{2025}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2025/860
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2025/860
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2012/144}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=c701ae48029563f55b68410f37ab3134}{%
+           family={Fan},
+           familyi={F\bibinitperiod},
+           given={Junfeng},
+           giveni={J\bibinitperiod}}}%
+        {{hash=ec6bfa044bee14362b9d05e791d67a64}{%
+           family={Vercauteren},
+           familyi={V\bibinitperiod},
+           given={Frederik},
+           giveni={F\bibinitperiod}}}%
+      }
+      \strng{namehash}{b96a9da236bf7ed93aea73ee2982402c}
+      \strng{fullhash}{b96a9da236bf7ed93aea73ee2982402c}
+      \strng{bibnamehash}{b96a9da236bf7ed93aea73ee2982402c}
+      \strng{authorbibnamehash}{b96a9da236bf7ed93aea73ee2982402c}
+      \strng{authornamehash}{b96a9da236bf7ed93aea73ee2982402c}
+      \strng{authorfullhash}{b96a9da236bf7ed93aea73ee2982402c}
+      \field{labelalpha}{FV12}
+      \field{sortinit}{F}
+      \field{sortinithash}{2638baaa20439f1b5a8f80c6c08a13b4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2012/144}
+      \field{title}{Somewhat Practical Fully Homomorphic Encryption}
+      \field{year}{2012}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2012/144
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2012/144
+      \endverb
+    \endentry
+    \entry{gentry:2009}{thesis}{}
+      \name{author}{1}{}{%
+        {{hash=bd007b2a3d698c39bd758b253f7c2ebf}{%
+           family={Gentry},
+           familyi={G\bibinitperiod},
+           given={Craig},
+           giveni={C\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Stanford University}%
+      }
+      \strng{namehash}{bd007b2a3d698c39bd758b253f7c2ebf}
+      \strng{fullhash}{bd007b2a3d698c39bd758b253f7c2ebf}
+      \strng{bibnamehash}{bd007b2a3d698c39bd758b253f7c2ebf}
+      \strng{authorbibnamehash}{bd007b2a3d698c39bd758b253f7c2ebf}
+      \strng{authornamehash}{bd007b2a3d698c39bd758b253f7c2ebf}
+      \strng{authorfullhash}{bd007b2a3d698c39bd758b253f7c2ebf}
+      \field{labelalpha}{Gen09}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{A fully homomorphic encryption scheme}
+      \field{type}{phdthesis}
+      \field{year}{2009}
+      \verb{urlraw}
+      \verb https://crypto.stanford.edu/craig
+      \endverb
+      \verb{url}
+      \verb https://crypto.stanford.edu/craig
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2012/099}{misc}{}
+      \name{author}{3}{}{%
+        {{hash=bd007b2a3d698c39bd758b253f7c2ebf}{%
+           family={Gentry},
+           familyi={G\bibinitperiod},
+           given={Craig},
+           giveni={C\bibinitperiod}}}%
+        {{hash=7c86404bf6ef06056efb632aff16d2c0}{%
+           family={Halevi},
+           familyi={H\bibinitperiod},
+           given={Shai},
+           giveni={S\bibinitperiod}}}%
+        {{hash=a9c0bec8435186506abedeec8739d0d5}{%
+           family={Smart},
+           familyi={S\bibinitperiod},
+           given={Nigel\bibnamedelima P.},
+           giveni={N\bibinitperiod\bibinitdelim P\bibinitperiod}}}%
+      }
+      \strng{namehash}{2a60e7cca7b9a17c3a79d67041541a0b}
+      \strng{fullhash}{2a60e7cca7b9a17c3a79d67041541a0b}
+      \strng{bibnamehash}{2a60e7cca7b9a17c3a79d67041541a0b}
+      \strng{authorbibnamehash}{2a60e7cca7b9a17c3a79d67041541a0b}
+      \strng{authornamehash}{2a60e7cca7b9a17c3a79d67041541a0b}
+      \strng{authorfullhash}{2a60e7cca7b9a17c3a79d67041541a0b}
+      \field{labelalpha}{GHS12}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2012/099}
+      \field{title}{Homomorphic Evaluation of the {AES} Circuit}
+      \field{year}{2012}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2012/099
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2012/099
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2013/340}{misc}{}
+      \name{author}{3}{}{%
+        {{hash=bd007b2a3d698c39bd758b253f7c2ebf}{%
+           family={Gentry},
+           familyi={G\bibinitperiod},
+           given={Craig},
+           giveni={C\bibinitperiod}}}%
+        {{hash=0e9166224409c3d193f407331ef18b02}{%
+           family={Sahai},
+           familyi={S\bibinitperiod},
+           given={Amit},
+           giveni={A\bibinitperiod}}}%
+        {{hash=86b19cae38747f83bc6146f03e291e49}{%
+           family={Waters},
+           familyi={W\bibinitperiod},
+           given={Brent},
+           giveni={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{22cc1e4c66549f4036120ecec40cce7f}
+      \strng{fullhash}{22cc1e4c66549f4036120ecec40cce7f}
+      \strng{bibnamehash}{22cc1e4c66549f4036120ecec40cce7f}
+      \strng{authorbibnamehash}{22cc1e4c66549f4036120ecec40cce7f}
+      \strng{authornamehash}{22cc1e4c66549f4036120ecec40cce7f}
+      \strng{authorfullhash}{22cc1e4c66549f4036120ecec40cce7f}
+      \field{labelalpha}{GSW13}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2013/340}
+      \field{title}{Homomorphic Encryption from Learning with Errors: Conceptually-Simpler, Asymptotically-Faster, Attribute-Based}
+      \field{year}{2013}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2013/340
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2013/340
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2018/117}{misc}{}
+      \name{author}{3}{}{%
+        {{hash=7c86404bf6ef06056efb632aff16d2c0}{%
+           family={Halevi},
+           familyi={H\bibinitperiod},
+           given={Shai},
+           giveni={S\bibinitperiod}}}%
+        {{hash=6df71ef3203571cc841e56b6b4ce9c8e}{%
+           family={Polyakov},
+           familyi={P\bibinitperiod},
+           given={Yuriy},
+           giveni={Y\bibinitperiod}}}%
+        {{hash=b7ce99f593e2c7899b27afe41a6c28a0}{%
+           family={Shoup},
+           familyi={S\bibinitperiod},
+           given={Victor},
+           giveni={V\bibinitperiod}}}%
+      }
+      \strng{namehash}{f0033857bda38bbf51abc1d7f1ed5435}
+      \strng{fullhash}{f0033857bda38bbf51abc1d7f1ed5435}
+      \strng{bibnamehash}{f0033857bda38bbf51abc1d7f1ed5435}
+      \strng{authorbibnamehash}{f0033857bda38bbf51abc1d7f1ed5435}
+      \strng{authornamehash}{f0033857bda38bbf51abc1d7f1ed5435}
+      \strng{authorfullhash}{f0033857bda38bbf51abc1d7f1ed5435}
+      \field{labelalpha}{HPS18}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2018/117}
+      \field{title}{An Improved {RNS} Variant of the {BFV} Homomorphic Encryption Scheme}
+      \field{year}{2018}
+      \verb{doi}
+      \verb 10.1007/978-3-030-12612-4_5
+      \endverb
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2018/117
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2018/117
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2021/204}{misc}{}
+      \name{author}{3}{}{%
+        {{hash=c015d2c8e71fed27aee8e4b067d84662}{%
+           family={Kim},
+           familyi={K\bibinitperiod},
+           given={Andrey},
+           giveni={A\bibinitperiod}}}%
+        {{hash=6df71ef3203571cc841e56b6b4ce9c8e}{%
+           family={Polyakov},
+           familyi={P\bibinitperiod},
+           given={Yuriy},
+           giveni={Y\bibinitperiod}}}%
+        {{hash=71599f31696c34cea011ed71a46111d9}{%
+           family={Zucca},
+           familyi={Z\bibinitperiod},
+           given={Vincent},
+           giveni={V\bibinitperiod}}}%
+      }
+      \strng{namehash}{d217975cc0ccc7f435da581a58bee668}
+      \strng{fullhash}{d217975cc0ccc7f435da581a58bee668}
+      \strng{bibnamehash}{d217975cc0ccc7f435da581a58bee668}
+      \strng{authorbibnamehash}{d217975cc0ccc7f435da581a58bee668}
+      \strng{authornamehash}{d217975cc0ccc7f435da581a58bee668}
+      \strng{authorfullhash}{d217975cc0ccc7f435da581a58bee668}
+      \field{labelalpha}{KPZ21}
+      \field{sortinit}{K}
+      \field{sortinithash}{c02bf6bff1c488450c352b40f5d853ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2021/204}
+      \field{title}{Revisiting Homomorphic Encryption Schemes for Finite Fields}
+      \field{year}{2021}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2021/204
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2021/204
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2025/1088}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=51dc17c15b06fde80df9a4787cc0d159}{%
+           family={Lee},
+           familyi={L\bibinitperiod},
+           given={Kang\bibnamedelima Hoon},
+           giveni={K\bibinitperiod\bibinitdelim H\bibinitperiod}}}%
+        {{hash=ba6bbdf178ecc1a5d627517a41836329}{%
+           family={Yoon},
+           familyi={Y\bibinitperiod},
+           given={Ji\bibnamedelima Won},
+           giveni={J\bibinitperiod\bibinitdelim W\bibinitperiod}}}%
+      }
+      \strng{namehash}{84e6613753f2d1804505c2047c95be30}
+      \strng{fullhash}{84e6613753f2d1804505c2047c95be30}
+      \strng{bibnamehash}{84e6613753f2d1804505c2047c95be30}
+      \strng{authorbibnamehash}{84e6613753f2d1804505c2047c95be30}
+      \strng{authornamehash}{84e6613753f2d1804505c2047c95be30}
+      \strng{authorfullhash}{84e6613753f2d1804505c2047c95be30}
+      \field{labelalpha}{LY25}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2025/1088}
+      \field{title}{Homomorphic Field Trace Revisited : Breaking the Cubic Noise Barrier}
+      \field{year}{2025}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2025/1088
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2025/1088
+      \endverb
+    \endentry
+    \entry{rivest:1978:databanks}{incollection}{}
+      \name{author}{3}{}{%
+        {{hash=6a630bbc1f4da3f000de53a8c3fcda9a}{%
+           family={Rivest},
+           familyi={R\bibinitperiod},
+           given={R.\bibnamedelimi L.},
+           giveni={R\bibinitperiod\bibinitdelim L\bibinitperiod}}}%
+        {{hash=4a8266f26fefcaad4dc64bfd4220a4ae}{%
+           family={Adleman},
+           familyi={A\bibinitperiod},
+           given={L.},
+           giveni={L\bibinitperiod}}}%
+        {{hash=ac83fc9c2ca6131a36d31651a7d284c2}{%
+           family={Dertouzos},
+           familyi={D\bibinitperiod},
+           given={M.\bibnamedelimi L.},
+           giveni={M\bibinitperiod\bibinitdelim L\bibinitperiod}}}%
+      }
+      \strng{namehash}{095486dc502bfb4c450b8199c7e39ed6}
+      \strng{fullhash}{095486dc502bfb4c450b8199c7e39ed6}
+      \strng{bibnamehash}{095486dc502bfb4c450b8199c7e39ed6}
+      \strng{authorbibnamehash}{095486dc502bfb4c450b8199c7e39ed6}
+      \strng{authornamehash}{095486dc502bfb4c450b8199c7e39ed6}
+      \strng{authorfullhash}{095486dc502bfb4c450b8199c7e39ed6}
+      \field{labelalpha}{RAD78}
+      \field{sortinit}{R}
+      \field{sortinithash}{5e1c39a9d46ffb6bebd8f801023a9486}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Foundations of Secure Computation}
+      \field{title}{On Data Banks and Privacy Homomorphisms}
+      \field{year}{1978}
+      \field{pages}{169\bibrangedash 180}
+      \range{pages}{12}
+    \endentry
+    \entry{sun:2015:RAPTOR}{inproceedings}{}
+      \name{author}{7}{}{%
+        {{hash=3661ee2a6af19118d372854102bb5018}{%
+           family={Sun},
+           familyi={S\bibinitperiod},
+           given={Yixin},
+           giveni={Y\bibinitperiod}}}%
+        {{hash=8b6384ea5ca6d332a6da30f31c2a4e89}{%
+           family={Edmundson},
+           familyi={E\bibinitperiod},
+           given={Anne},
+           giveni={A\bibinitperiod}}}%
+        {{hash=ae2762b7239b93801ec25f9cf2dcfd63}{%
+           family={Vanbever},
+           familyi={V\bibinitperiod},
+           given={Laurent},
+           giveni={L\bibinitperiod}}}%
+        {{hash=c4804b1243ac899b45a275f7f32041f6}{%
+           family={Li},
+           familyi={L\bibinitperiod},
+           given={Oscar},
+           giveni={O\bibinitperiod}}}%
+        {{hash=6a657c57b5943bdc829427bef740483f}{%
+           family={Rexford},
+           familyi={R\bibinitperiod},
+           given={Jennifer},
+           giveni={J\bibinitperiod}}}%
+        {{hash=66b1d926f2b165f5ee0d97ce73c91589}{%
+           family={Chiang},
+           familyi={C\bibinitperiod},
+           given={Mung},
+           giveni={M\bibinitperiod}}}%
+        {{hash=34858990bc441f232fe15809281e1ee0}{%
+           family={Mittal},
+           familyi={M\bibinitperiod},
+           given={Prateek},
+           giveni={P\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Washington, D.C.}%
+      }
+      \list{publisher}{1}{%
+        {USENIX Association}%
+      }
+      \strng{namehash}{c303bf87735dec1c6bd9cedf7643e3b8}
+      \strng{fullhash}{47c6f06d3d64ba5753091c637f6fcbb5}
+      \strng{bibnamehash}{a43cf77aa1742d72b63eabeb470f46ee}
+      \strng{authorbibnamehash}{a43cf77aa1742d72b63eabeb470f46ee}
+      \strng{authornamehash}{c303bf87735dec1c6bd9cedf7643e3b8}
+      \strng{authorfullhash}{47c6f06d3d64ba5753091c637f6fcbb5}
+      \field{labelalpha}{SEV+15}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{24th USENIX Security Symposium (USENIX Security 15)}
+      \field{isbn}{978-1-939133-11-3}
+      \field{month}{8}
+      \field{title}{{RAPTOR}: Routing Attacks on Privacy in Tor}
+      \field{year}{2015}
+      \field{pages}{271\bibrangedash 286}
+      \range{pages}{16}
+      \verb{urlraw}
+      \verb https://www.usenix.org/conference/usenixsecurity15/technical-sessions/presentation/sun
+      \endverb
+      \verb{url}
+      \verb https://www.usenix.org/conference/usenixsecurity15/technical-sessions/presentation/sun
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2011/133}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=92a7e2b77bf3dab483ab23642c8736e8}{%
+           family={Smart},
+           familyi={S\bibinitperiod},
+           given={N.\bibnamedelimi P.},
+           giveni={N\bibinitperiod\bibinitdelim P\bibinitperiod}}}%
+        {{hash=273f6ee53ad0f329ed8b2dd0253767c6}{%
+           family={Vercauteren},
+           familyi={V\bibinitperiod},
+           given={F.},
+           giveni={F\bibinitperiod}}}%
+      }
+      \strng{namehash}{735c622cd0245c1aa19c799853c7f9a9}
+      \strng{fullhash}{735c622cd0245c1aa19c799853c7f9a9}
+      \strng{bibnamehash}{735c622cd0245c1aa19c799853c7f9a9}
+      \strng{authorbibnamehash}{735c622cd0245c1aa19c799853c7f9a9}
+      \strng{authornamehash}{735c622cd0245c1aa19c799853c7f9a9}
+      \strng{authorfullhash}{735c622cd0245c1aa19c799853c7f9a9}
+      \field{labelalpha}{SV11}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2011/133}
+      \field{title}{Fully Homomorphic {SIMD} Operations}
+      \field{year}{2011}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2011/133
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2011/133
+      \endverb
+    \endentry
+    \entry{cryptoeprint:2021/435}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=edb728c71cdde40b9afd81bb8c9e733c}{%
+           family={Shi},
+           familyi={S\bibinitperiod},
+           given={Elaine},
+           giveni={E\bibinitperiod}}}%
+        {{hash=feb738a8c05b4adbcef8c7e5dd050d40}{%
+           family={Wu},
+           familyi={W\bibinitperiod},
+           given={Ke},
+           giveni={K\bibinitperiod}}}%
+      }
+      \strng{namehash}{1fb0555ede96f84cc423279d7b0c764b}
+      \strng{fullhash}{1fb0555ede96f84cc423279d7b0c764b}
+      \strng{bibnamehash}{1fb0555ede96f84cc423279d7b0c764b}
+      \strng{authorbibnamehash}{1fb0555ede96f84cc423279d7b0c764b}
+      \strng{authornamehash}{1fb0555ede96f84cc423279d7b0c764b}
+      \strng{authorfullhash}{1fb0555ede96f84cc423279d7b0c764b}
+      \field{labelalpha}{SW21}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2021/435}
+      \field{title}{Non-Interactive Anonymous Router}
+      \field{year}{2021}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2021/435
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2021/435
+      \endverb
+    \endentry
+  \enddatalist
+  \missing{BFV}
+  \missing{BV11}
+  \missing{CKKS}
+  \missing{TFHE}
+  \missing{examples-of-this}
+  \missing{regev:2009}
+\endrefsection
+\endinput
+

@@ -1,22 +1,143 @@
 \section{(Somewhat) Practical Anonymous Router}
-%% Introduction
+\label{sec:spar}
+
+%% ============================================================
+%% Skeleton. Presents sPAR AS PUBLISHED (eprint 2025/860), in
+%% thesis notation. All deviations of this thesis's instantiation
+%% belong in \autoref{sec:impl:spar}, never here.
+%% ============================================================
+
+%% Opening (no header): positioning + definition of "practical".
+%% NIAR and its problems are established in \autoref{chp:background}; refer back, do not re-derive.
+%% Paper's own positioning (7.3): "We consider our work as a second step towards designing anonymous
+%% messaging systems without any trusted infrastructure. [...] We do not attempt to achieve high
+%% scalability of Tor or Mixnets, not the performance of some MPC-based systems. Still, our
+%% proof-of-concept implementation demonstrates that our design is implementable, and suitable for
+%% small scale applications with few hundred users where the application can tolerate a few seconds
+%% of delay in message delivery."
 \begin{itemize}
-    \item Motivation?
-    \item Define practical: instantiation from common FHE primitives (yes) and wrt. time, number of users and throughput (no)
+    \item \gls{spar}~\cite{cryptoeprint:2025/860}: first \emph{(somewhat) practical} anonymous router --- a single untrusted server permutes a batch of client messages obliviously, the goal introduced by \gls{niar}~\cite{cryptoeprint:2021/435}
+    \item Resolves the three \gls{niar} obstacles from \autoref{chp:background}: (1) building blocks are standard \gls{rlwe}-based \gls{fhe} operations (the external product) instead of function-hiding \gls{mcfe} and correlated PRFs; (2) no indistinguishability obfuscation --- recipient anonymity comes from an extra classical encryption layer; (3) a \emph{fresh} permutation every round, derived from client-local randomness, so messages across rounds are unlinkable under a single setup
+    \item Trade-off: gives up non-interactivity --- two client--server round trips per round; clients still never communicate with each other
+    \item Define \emph{practical}: instantiable from \gls{fhe} primitives with existing, efficient implementations (yes); with respect to latency, throughput and number of users (no --- seconds of latency, $\approx 100$ users)
 \end{itemize}
 
-
-% \begin{itemize}
-%     \item Setup phase
-%     \item Stages
-%     \begin{itemize}
-%         \item \texttt{Client::Encrypt} - Parallel
-%         \item \texttt{Server::Write} - Sequential
-%         \item \texttt{Client::Decrypt} - Parallel
-%         \item \texttt{Server::Decrypt} - Single operation
-%     \end{itemize}
-% \end{itemize}
-
+%%
+%% SYSTEM MODEL
+\subsection{System Model}
+\label{sec:spar:model}
 \begin{itemize}
-    \item Section:  
+    \item Parties: $\eta$ senders and $\eta'$ recipients (logical roles, the same user may hold both; $\eta = \eta'$ assumed) and one router/server $P$
+    \item Round-based batch processing: every sender submits exactly one message per round (a random message if idle); a round completes before the next begins
+    \item All communication passes through $P$; no client-to-client channels
+    \item Trust: $P$ is untrusted for privacy but trusted for availability; all corrupted parties may collude; the core protocol is analyzed against passive adversaries (the paper's active-attack defenses are out of scope, see closing paragraph)
+    \item Adversary: static corruption of the server, all-but-two clients, and a global passive view of the network
+\end{itemize}
+
+%%
+%% ANONYMITY GUARANTEES
+\subsection{Anonymity Guarantees}
+\label{sec:spar:anonymity}
+%% TODO: decide definition environments vs. prose statements; games + proofs stay deferred to the paper
+\begin{itemize}
+    \item Indistinguishability-based games from the anonymous-communication literature rather than \gls{niar}'s definition --- \gls{niar}'s notion does not capture the cross-round linkability of a reused permutation
+    \item \textbf{Sender anonymity} (paper Def.~1, Thm.~1): adversary corrupts the server, all recipients, and all senders except a pair $u_0, u_1$, and must not distinguish whether the pair's challenge messages were swapped; holds with negligible advantage assuming IND-CPA security of the \gls{fhe} scheme and \emph{uniformly distributed messages}
+    \item \textbf{Recipient anonymity} (paper Def.~2, Thm.~2): each message additionally encrypted under the intended recipient's classical public key; the server broadcasts all decrypted (still classically-encrypted) outputs, so delivery leaks nothing; reduces to the classical scheme's security
+    \item Two assumptions to keep explicit, because the protocol's mechanisms exist to serve them:
+    \begin{itemize}
+        \item uniform message distribution is what makes ``sorting implies shuffling''
+        \item obliviously sorting each bucket removes intra-bucket partial-order leakage (paper Lemma~1); without it the server distinguishes the senders of two same-bucket messages with non-negligible probability
+    \end{itemize}
+\end{itemize}
+
+%%
+%% THE PROTOCOL
+\subsection{The Protocol}
+\label{sec:spar:protocol}
+%% Lead-in paragraph: one-time setup, then polynomially many rounds;
+%% each round = two client--server round trips, four computation phases (table).
+\begin{itemize}
+    \item One-time setup followed by polynomially many rounds under the same keys
+    \item A round: clients send ciphertexts up; server writes; server broadcasts state down; clients return partial decryptions; server aggregates and broadcasts plaintexts
+    \item Cost profile of the phases (\autoref{tab:spar:phases}) --- the sequential write is the round bottleneck; the client phases run in parallel across clients
+\end{itemize}
+
+\begin{table}[H]
+    \caption{One round of the \gls{spar} protocol}
+    \label{tab:spar:phases}
+    \centering
+    \begin{tabular}{llll}
+        \toprule
+        \textbf{Phase} & \textbf{Party} & \textbf{Sends} & \textbf{Cost profile} \\
+        \midrule
+        Encryption          & each client & message + indices $\to$ server & parallel across clients \\
+        Write               & server      & state broadcast $\to$ clients  & sequential per message \\
+        Partial decryption  & each client & partial decryption $\to$ server & parallel across clients \\
+        Final decryption    & server      & plaintexts $\to$ broadcast     & single aggregation \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsubsection{Setup}
+\begin{itemize}
+    \item One-time multi-party key generation as in \autoref{sec:mpfhe}: each client samples $s_i$ and publishes a public share; shares aggregate into a joint public key $\hat{pk}$ whose secret $s = \sum_i s_i$ is never reconstructed
+    \item The permutation is \emph{not} an input to setup (contrast \gls{niar}); freshness per round comes from client randomness in the online phase
+\end{itemize}
+
+\subsubsection{Client: Encryption}
+\begin{itemize}
+    \item Client $u_i$ encrypts its message under the joint key: $c_i = \rlwe(m_i)$
+    \item Picks three bucket indices $a_1, a_2, a_3 \overset{\$}{\leftarrow} [0, \eta)$, independently and uniformly
+    \item Encrypts each of the $\log\eta$ bits of each $a_w$ individually (\gls{rlwe} ciphertexts)
+    \item Sends $c_i$ and the $3\log\eta$ bit encryptions to the server over a public channel
+\end{itemize}
+
+\subsubsection{Server: Write}
+\begin{itemize}
+    \item Server state: message matrix $L$ of $\eta\times3$ slots, initialized to $\rlwe(0)$; availability matrix $I$ of $\eta\times3$ encryptions of $1$ --- $\eta$ buckets of $3$ slots, $3\eta$ slots total
+    \item \textsc{HomExpand}: received bit encryptions are expanded \gls{rlwe} $\to$ \gls{rgsw}~\cite{chillotti:onionring:2019, park:sortinghat:2022}, so clients only ever upload \gls{rlwe} material (bandwidth optimization)
+    \item \textsc{HomPlacing} (\autoref{alg:expandRlwe}, adapted from~\cite{park:sortinghat:2022}): a binary multiplexer tree of depth $\log\eta$ routes an encrypted value to the leaf addressed by the encrypted bits; $\mathcal{O}(\eta)$ homomorphic products per message
+    \item Choice-of-three variant (\autoref{alg:spar:homplacing}): one tree per index $a_d$ produces indicator vectors $z_{i,d}$; the write loop then places $V_r = c_i$ into the first free slot among the three chosen buckets, tracked by the encrypted flags $h$ and $\mathsf{hasWritten}$
+    \item Every homomorphic product is instantiated with the external product (\autoref{def:prod:external}) --- the practicality claim rests on this choice
+    \item Collision analysis (balls and bins with $d$ choices): max bucket load $\log\log\eta/\log d + \mathcal{O}(1)$; for $d = 3$ the overflow probability is $< 10^{-11}$ with only $3\eta$ slots %% TODO bib: Mitzenmacher, "The power of two choices in randomized load balancing", 2001
+    \item On the (negligible) overflow event the message is silently dropped; the client retransmits in a later round without degrading anonymity
+    \item After all $\eta$ writes: obliviously sort each bucket ($3$ elements, independent buckets, parallelizable) --- required by \autoref{sec:spar:anonymity} %% TODO bib: Cong et al. (SAC 2024 top-k) + Azogagh et al. (eprint 2024/1894) for the sorting cost
+    \item Broadcast all of $L$ to the clients
+\end{itemize}
+
+\input{Algorithms/spar-1} % paper Alg. 1: single-slot HomPlacing (existing float)
+%% TODO: rename label alg:expandRlwe -> alg:spar:homplacing-one (it is HomPlacing, not ExpandRLWE)
+\input{Algorithms/spar-2} % paper Alg. 2: choice-of-three (new float)
+
+\subsubsection{Client: Partial Decryption}
+\begin{itemize}
+    \item Each client partially decrypts every slot of the broadcast $L$ with its share $s_i$, adding flooding noise (\autoref{sec:mpfhe}); the result $d_i$ is a vector of $3\eta$ \gls{rlwe} ciphertexts sent back to the server
+    \item Total partial-decryption traffic is $\mathcal{O}(\eta^2)$ ciphertexts per round
+    \item Packing optimization: LWE-to-RLWE conversion packs a client's partial decryptions into a single ciphertext when $N > 3\eta$, reducing traffic to $\mathcal{O}(\eta^2/N)$ %% TODO bib: Chen--Dai--Kim--Song, "Efficient homomorphic conversion between (R)LWE ciphertexts", 2021
+\end{itemize}
+
+\subsubsection{Server: Final Decryption}
+\begin{itemize}
+    \item Server aggregates the $\eta$ partial decryptions per slot and recovers the plaintext list (\autoref{sec:mpfhe})
+    \item Empty slots decrypt to $0$ and are discarded; the surviving order is a fresh uniform permutation of the $\eta$ messages
+    \item Broadcast: plaintexts in the sender-anonymous version; classically-encrypted inner ciphertexts in the recipient-anonymous version
+\end{itemize}
+
+%%
+%% ORIGINAL INSTANTIATION (paper Sec. 5) --- the baseline Ch. 4 measures against
+\subsection{Original Instantiation}
+\label{sec:spar:original}
+\begin{itemize}
+    \item TFHE-style instantiation~\cite{cryptoeprint:2016/870} in Rust on the Concrete-core library; uses the external product only, no bootstrapping %% TODO bib: Concrete (Chillotti et al., WAHC 2020)
+    \item Parameters: $N = 2048$, $q = 2^{64}$, $t = 2^8$, $\sigma = 2^{-55}$; decomposition $(B, \ell) = (2^5, 11)$ for key-switching material and $(2^5, 9)$ for queries; $119$ bits of security~\cite{cryptoeprint:2015/046}
+    \item Reported timings ($\eta = 32/64/128$): client send $2.8/3.4/4.2$~s per message; server write $0.9/1.4/4.8$~s per message; partial decryption $0.27/0.54/2.4$~s for all $\eta$; sorting $< 100$~ms per bucket
+    \item Headline claim: a full round in a few seconds for $\leq 128$ users; target applications: transaction mixing, LAN-scale messaging
+\end{itemize}
+
+%%
+%% SCOPE (closing, unnumbered --- one short prose paragraph in the final version)
+\begin{itemize}
+    \item This thesis implements and evaluates the core passive-adversary protocol: setup, encryption, write, partial and final decryption
+    \item Out of scope: the defenses against active adversaries (paper \S6: equivocation protection via hash-chained keys, verifiable FHE, reactive verification), the extensions (paper \S7: threshold decryption and client churn, IND-CPA$^{D}$ countermeasures), and the recipient-anonymity layer (classical encryption, orthogonal to the \gls{fhe} pipeline)
+    \item The modifications made in this thesis's instantiation are detailed in \autoref{sec:impl:spar}
 \end{itemize}

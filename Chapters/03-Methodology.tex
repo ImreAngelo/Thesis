@@ -11,9 +11,11 @@
 \newcommand{\clientlib}{\texttt{client}}
 
 %%
-%% Introduction
+%% Introduction - Present code contributions: spar and 
 \vfill
-A gap needed to be filled: implementing TFHE-style RGSW products (external and internal) in BGV-RNS. As a result of this thesis, a C++ library (\corelib) was developed to bring this functionality to the OpenFHE~library~\cite{cryptoeprint:2022/915}. The sPAR protocol has also been implemented in C++ using the RGSW library. I will stress the libraries are separate; the RGSW library can be used on its own as is, and the sPAR library can in theory be used without it --- provided a different library is developed to provide the same functionality and API. 
+TFHE-style \gls{rgsw} 
+
+A gap needed to be filled: TFHE-style RGSW products are rarely exposed in BGV-RNS, even if the products are used internally. As a result of this thesis, a C++ library (\corelib) was developed to bring this functionality to the OpenFHE~library~\cite{cryptoeprint:2022/915}. The sPAR protocol has also been implemented in C++ using the RGSW library. I will stress the libraries are separate; the RGSW library can be used on its own as is, and the sPAR library can in theory be used without it --- provided a different library is developed to provide the same functionality and API. 
 
 This section also explains the set up of the various tests; the numbers from running these tests are presented in \autoref{chp:results}.
 
