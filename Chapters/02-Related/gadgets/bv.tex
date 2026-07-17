@@ -73,10 +73,10 @@ Digit decomposition has two important properties. First, if the digits $\gamma_i
 
 
 \subsubsection{RNS Instantiation}
-Digit decomposition cannot be applied directly the \gls{rlwe} sample in an \gls{rns} scheme, where the system only has access to the residues. When Bajard et. al. first implemented the BV cryptosystem using \gls{rns} \cite{cryptoeprint:2016/510} they exchanged digit decomposition for \gls{crt} decomposition, exploiting the fact that this decomposition is already required by the \gls{rns}.
+Digit decomposition cannot be applied directly the \gls{rlwe} sample in an \gls{rns} scheme where the system only has access to the residues. When Bajard et. al. implemented the first \gls{rns} version of the BV scheme \cite{cryptoeprint:2016/510} they exchanged digit decomposition for \gls{crt} decomposition, exploiting the fact that this decomposition is already required by the \gls{rns}.
 
-%% TODO: Clean up, make sure \hat{q} notation is known --- have it listed as notation somewhere or refer back to base conversion e.g. recall \hat{q} from {ref}
-By stating the \gls{crt} as an inner product \eqref{eq:crt-gadget}, it is immediately clear that \gls{crt} with moduli $q_i$ is an exact decomposition on $g = (\hat{q}_0\cdot\hat{q}_0^{-1}, \dots, \hat{q}_{k-1}\cdot\hat{q}_{k-1}^{-1})$ with $\beta = \max_i\|q_i\|_\infty/2$ (assuming centered residues) and $\epsilon = 0$. This leads to... % somehow include HPS 
+%% TODO: Clean up, make sure \hat{q} notation is known and well-defined --- have it listed as notation somewhere or refer back to base conversion e.g. recall \hat{q} from {ref}, also the inverse notation is a bit hand-wavy, isn't it just q_i/Q and mod doesn't matter?
+By formulating the \gls{crt} as an inner product \eqref{eq:crt-gadget}, it is immediately clear that \gls{crt} with moduli $q_i$ is an exact decomposition with $\beta = \max_i\{q_i\}/2$ (assuming centered residues) on $g = (\hat{q}_0\cdot[\hat{q}_0^{-1}]_{q_0}, \dots, \hat{q}_{k-1}\cdot[\hat{q}_{k-1}^{-1}]_{q_{k-1}})$, where $\hat{q}_i = Q/q_i$ and $[\hat{q}_i^{-1}]_{q_i}$ denotes the inverse $\hat{q}_i \hat{q}_i^{-1} \equiv 1 \bmod{q_i}$. This leads to... % somehow include HPS 
 %
 %% TODO: We can skip this, but we need to correct attribution so that the bridge from BEHZ -> HPS is clear
 % \begin{align}
@@ -105,6 +105,7 @@ The HPS gadget is especially powerful, because both \eqref{def:hps:P} and \eqref
     \item HPS is exact but noise is large ($\beta = Q/2,\; \epsilon = 0$); can apply digit decomposition to each residue polynomial as per \autoref{thm:gadget-layers}, lowering $\beta \to B/2$ and still exact ($\epsilon = 0$) if $B = \lfloor \max{q_i}/\ell \rfloor + 1$
 \end{itemize}
 
+%% TODO: Run the numbers (benchmark) \ell = 1
 \begin{definition}[BV-RNS Gadget]
     We define the \emph{BV-RNS Gadget} as the double decomposition: Applying digit decomposition to each limb of an RNS polynomial ... termed X 
 \end{definition}
