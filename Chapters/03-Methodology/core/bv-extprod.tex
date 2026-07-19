@@ -47,7 +47,7 @@ To decompose a positive integer $c \in \mathbb{Z}^{+}$ into signed digits $[d]_{
 \caption[Parallel Signed Decomposition]{\protect\Call{Decompose}{$c, b, \ell$}}
 \label{alg:decomp:parallel}
 \begin{algorithmic}[1]
-    \Statex \textbf{Global:} Bit-length $b$ (where $B = 2^b$), decomposition parameter $\ell$, offset $\varGamma$
+    \Require Bit-length $b$ (where $B = 2^b$), decomposition parameter $\ell$, offset $\varGamma$
     \Require Integer $c \in \mathbb{Z}$
     \Ensure Array of $\ell$ signed digits $d = (d_0, d_1, \dots, d_{\ell-1}) \in R_{\beta}^{\ell}$ with quality $\beta = B/2$
     
