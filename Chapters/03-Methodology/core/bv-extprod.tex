@@ -5,7 +5,7 @@ The decomposition on the power-of-$B$ gadget $g = (1, B, \dots, B^{\ell-1})$ is 
 %% TODO: Explain way better and more compact! The problem is negative digits give a carry? Is that it? Explain why the integer is not already encoded as signed.
 From~\autoref{rem:extprod-asymmetry} we know the noise in the external product is a function of $\beta$. To exert tighter control over noise growth during external products, we naturally prefer to minimize this magnitude. By centering the digits into a signed representation where $d_i \in [-B/2, B/2)$, we halve the maximum absolute value, improving the overall decomposition quality to $\beta = B/2$. However, achieving this centered representation classically complicates parallelization. Standard signed recoding algorithms evaluate digits sequentially from least significant to most significant because shifting a positive digit $d_i \ge B/2$ into the negative range requires adding a $+1$ carry to the subsequent digit $d_{i+1}$. This ripple-carry dependency prevents us from slicing the integer into independent bit-windows, creating a computational bottleneck.
 
-To avoid sequential carry propagation, we apply a well-known offset-binary trick by adding the constant $\varGamma$~\eqref{eq:carry-offset}.
+To avoid sequential carry propagation, we apply a well-known offset trick by adding the constant $\varGamma$~\eqref{eq:carry-offset}.
 \begin{equation}
     \label{eq:carry-offset}
     \varGamma = \frac{B}{2}\cdot\frac{B^{\ell} - 1}{B - 1}

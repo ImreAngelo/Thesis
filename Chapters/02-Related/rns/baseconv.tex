@@ -1,3 +1,4 @@
+%% TODO: This subsection is terrible; rewrite entirely
 \subsection{Base Conversion}
 \label{sec:rns-base-conversion}
 The evaluation form \eqref{form:eval} makes addition and multiplication cheap, but pins the modulus: the residues are independent and non-positional, so the magnitude of a value --- and with it division and rounding, the operations noise management is made of --- is inaccessible without \gls{crt} reconstruction. Changing the modulus fares no better, as a representation in $\mathcal{B}_Q$ says nothing about a value modulo anything outside $\mathcal{B}_Q$. This subsection recovers both.

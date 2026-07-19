@@ -1,10 +1,40 @@
-\section{Notations}
+
+%% TODO: Centralize control over notations
+% \renewcommand{\vec}[1]{\overrightarrow{\mathbf{#1}}}
 
 %% TODO: Move notation here:
+\section{Notations}
+
+%% General mathematical notation
 \begin{itemize}
-    \item $\log{x} = \log_2(x)$
-    \item Centered residue and $Z_q$
-    \item Working ring $R_Q$
-    \item Vector shorthand $\{i\}_{i=0}^{3} = (0, 1, 2, 3)$ etc.
-    \item NTT/CRT RNS forms?
+    \item All logarithms are base 2, that is $\log x$ denotes $\log_2 x$.
+    \item Vectors versus scalars etc.
+    \item Vectors or sequences of elements are sometimes denoted using bracket notation. For example, a sequence of $k$ elements is written as $\{f(i)\}_{i=0}^{k-1}$.
+    \item Both $\vec{v}[i]$ and $\vec{v}_i$ denotes the $i$-th element of $v$.
+    \item For a vector $\vec{x}$ we use the max norm $\|\vec{x}\|_\infty$ to refer the largest element in the vector: $\max_i\{\vec{x}_i\}$ % Throughout, $\|\cdot\|$ denotes the infinity norm $\|\cdot\|_\infty$, that is, the largest absolute value among the coefficients of a polynomial (equivalently, among its residues in the representation of \autoref{sec:rns}).
 \end{itemize}
+
+%% Specialized notations
+\begin{definition}[Centered Residue Representation] % TODO: Shorten
+    \label{def:centered}
+    Let $\mathbb{Z}_Q$ denote the quotient ring $\mathbb{Z}/Q\mathbb{Z}$. While $\mathbb{Z}_Q$ can be represented by any set of residue classes, in this work we canonically identify $\mathbb{Z}_Q$ with the set of centered residues in the interval $[-Q/2, Q/2)$. 
+    
+    We use the notation $[x]_Q$ to denote the unique representative of $x$ modulo $Q$ in this centered interval. When measuring the size of an element $a \in \mathbb{Z}_Q$ or a polynomial in $R_Q$, we inherently refer to the norm of its centered representative lifted to $\mathbb{Z}$ or $\mathbb{Z}[X]$.
+
+    % From ealier
+    For a modulus $q$, an element of $\mathbb{Z}_q$ is identified with its balanced representative through the map
+    \begin{equation}
+        [a]_q = \big( a + \lfloor q/2 \rfloor \bmod q \big) - \lfloor q/2 \rfloor .
+    \end{equation}
+    The flooring makes the map well defined for every $q$, and its image is the run of $q$ consecutive integers centered at the origin, so that $|[a]_q| \leq \lfloor q/2 \rfloor$. Working with balanced representatives is what allows every noise term to be bounded by $\|\epsilon\| \leq \lfloor q/2 \rfloor$ rather than by $q$.
+
+    The notation extends to rings. If $S$ is a set of elements $\mathbb{Z}_Q^{N}$ and $a\in \mathbb{Z}_{Q}^{N}$ then $[a]_S = ([a_0]_{S_0}, \dots, [a_{N-1}]_{S_{N-1}})$, or if $a$ is a vector and $q$ is a scalar then $[a]_q$ applies to each coefficient.
+\end{definition}
+
+\begin{definition}[Working Ring]
+    All plaintexts and ciphertexts are elements of the cyclotomic ring $R_Q = \mathbb{Z}_Q[X]/(X^N + 1)$, where $N$ is a power of two and $Q$ is the ciphertext modulus. Elements are polynomials of degree at most $N - 1$ whose coefficients are reduced into a centered range about zero.
+    \begin{equation}
+        \label{form:canonical}
+        a = c_0 + c_1X + \cdots + c_{N-1}X^{N-1} = \sum_{i=0}^{N-1} c_iX^i
+    \end{equation}
+\end{definition}

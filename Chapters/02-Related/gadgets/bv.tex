@@ -22,7 +22,7 @@ Digit decomposition has two important properties. First, if the digits $\gamma_i
 
 %%
 %% Gadget Decomposition
-%% TODO: Settle this definition OR the gadget property definition
+%% TODO: Settle for this definition OR the gadget property definition
 \begin{definition}[(Abstract) Gadget Decomposition]
     \label{def:tfhe:gadget-decomposition}
     An efficient algorithm $\decomp{v}{g,\beta,\epsilon}$ is a valid decomposition on the gadget $g\in \mathbb{Z}_q^\ell$ with quality $\beta \in \mathbb{Z}^{+}$ and precision $\epsilon \in \mathbb{Z}^+$ if and only if for any \gls{rlwe} sample $v\in R_Q$ it efficiently and publicly outputs a small vector $u \in \mathbb{Z}_q$ such that $\|u\|_\infty \leq \beta$ and $\langle u, g\rangle \leq v + \epsilon$.
@@ -42,11 +42,7 @@ Digit decomposition has two important properties. First, if the digits $\gamma_i
     \end{equation}
 \end{definition}
 
-% \begin{itemize}
-%     \item Can be applied component-wise to polynomials $\gamma\in R_q$ instead of $\mathbb{Z}_q$
-%     \item Centered representation
-% \end{itemize}
-
+% TODO: 
 % TODO: Clean up: 2\epsilon, establish P_1 \circ P_2 = P_1(P_2(u)) better
 \begin{lemma}%[Layered Gadget Decomposition]
     \label{thm:gadget-layers}
