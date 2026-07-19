@@ -79,3 +79,16 @@ To simulate communication between parties, a single ``all-knowing'' orchestrator
     \end{enumerate}
     \item I use the latter method because the first method relies on the fact that a gadget $g = (1, \dots)$ containing $1$ is used, which is not necessarily always the case, even though this is traditionally the case.
 \end{itemize}
+
+\subsubsection{Multi-Threaded Performance}
+The main advantage \gls{rns} holds over ... is multi-threading. As described above, our implementation allows efficient parallelization over $k\ell$ threads. However, if less than $k\ell$ threads are available in benchmarking we wish to extrapolate the expected performance at $k\ell$ processors.
+
+using Amdahl's law \cite{Gustafson:2011}
+
+\begin{definition}[Amdahl's Law]
+    A task .. over $T$ processors
+    \begin{equation}
+        \label{eq:amdahl}
+        \text{Speedup} = \frac{1}{f + \frac{1-f}{T}}
+    \end{equation}
+\end{definition}

@@ -4,7 +4,7 @@
 \section{Noise Analysis}
 %% TODO: Keep or trash? Maybe methodologoy? The error $\epsilon$ in an \gls{rlwe} ciphertext is a vector of values sampled from a gaussian distribution with standard deviation $\omega$, so the expected value across the error samples $\epsilon_i \in \epsilon$ is $0$. 
 %% TODO: Move to methodology section? When analyzing the noise, the exact value of the error is not as interesting . 
-In this section I present the measured error resulting by their maximum error component $\max_i\epsilon_i$. Recall from~\autoref{} that decryption is succesful if $\max_i\epsilon_i < Q$ I emphasize the plots in this section are base-2 logarithmic on the y-axis, to highlight the bits required to  
+In this section I present the measured error resulting by their maximum error component $\max_i\epsilon_i$. Recall from~\autoref{def:decrypt-generic} that decryption is succesful if $\max_i\epsilon_i < Q$ I emphasize the plots in this section are base-2 logarithmic on the y-axis, to highlight the bits required to  
 
 \begin{itemize}
     \item I present the noise growth of various functions
@@ -14,26 +14,29 @@ In this section I present the measured error resulting by their maximum error co
 \end{itemize}
 
 \subsection{Core Library}
+For the external product, we apply $x_i = x_{i-1} \boxdot A$ where $x_0 = \Call{Encrypt}{1}$ and $A = \Call{RGSW}{1}$ using the parameters from \autoref{tab:bench:params}. %% TODO: Move to methodology % Applied 1000 times, noise measured after each iteration. The table only shows 1 run, not the mean.
+
 \subsubsection{External Product}
-\begin{itemize}
-    \item Note: LHS is the accumulated value, RHS is always fresh (due to known decomposition asymmetry that should be discussed in \autoref{rem:extprod-asymmetry})
-    \item Error is additive, less than 51 bits of noise for 1000 chained operations
-    \item To illustrate linear growth: linear regression is plotted on the graph as a dotted line
-    \item Use linear regression to determine max chain length: ...
-    \item Maybe: show max chain length if RHS is accumulated noise
-\end{itemize}
+Due to the asymmetry discussed in~\autoref{rem:extprod-asymmetry} making the noise additive instead of multiplicative, we expect to see linear noise growth with repeated applications of the external product as long as the \gls{rgsw} remains fresh. %% TODO: Maybe include in methodology?
+
 \input{Figures/Plots/bv-external-product.tex}
 
+%% TODO: Save extrapolation for sPAR/Server::Write
+As expected, that is what we see.. Even after 1000 applications, the noise is strictly below $71$ bits with $\ell = 2$. Applying linear regression to the full dataset suggests the error after $i$ applications is $\num{\extSlope} \cdot i + \num{\extIntercept}$. Since the noise does not overflow until $\|\epsilon\|_\infty \geq Q \approx 2^{355}$, we can expect $i \approx \num{8.11858e88}$ operations without decryption failure in perfect conditions (rhs is always fresh).
+
 \subsubsection{Internal product}
-\begin{itemize}
-    \item Note: LHS is still the accumulated value, RHS is always fresh
-    \item Error is still additive, but each internal product is several external products
-    \item Less than 71 bits of noise for 1000 chained operations
-    \item This is much larger, on the order of $2^{20}$
-\end{itemize}
+Similarily, we see what we expect...
+
+% \begin{itemize}
+%     \item Note: LHS is still the accumulated value, RHS is always fresh
+%     \item Error is still additive, but each internal product is several external products
+%     \item Less than 71 bits of noise for 1000 chained operations
+%     \item This is much larger, on the order of $2^{20}$
+%     \item Maybe: show max chain length if RHS is accumulated noise
+% \end{itemize}
 \input{Figures/Plots/bv-internal-product.tex}
 \begin{itemize}
-    \item $\largeSlope\cdot x + \largeIntercept \leq 2^{180} \implies x \leq 1.41715\cdot 10^{36}$
+    \item $\num{\intSlope}\cdot i + \num{\intIntercept} \leq 2^{180} \implies i \leq \num{1.70283e75}$
 \end{itemize}
 
 \subsection{sPAR}

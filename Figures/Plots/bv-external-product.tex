@@ -10,10 +10,10 @@
 % \edef\smallSlope{\pgfplotstableregressiona}
 % \edef\smallIntercept{\pgfplotstableregressionb}
 
-\pgfplotstableread[col sep=comma]{Data/Noise/ExternalProd/bv.csv}\bvlarge
+\pgfplotstableread[col sep=comma]{Data/Noise/ExternalProd/bv_2.csv}\bvlarge
 \pgfplotstablecreatecol[linear regression={x=n, y=noise}]{reg}{\bvlarge}
-\edef\largeSlope{\pgfplotstableregressiona}
-\edef\largeIntercept{\pgfplotstableregressionb}
+\edef\extSlope{\pgfplotstableregressiona}
+\edef\extIntercept{\pgfplotstableregressionb}
 
 \begin{figure}[H]
     \centering
@@ -23,28 +23,32 @@
     \begin{semilogyaxis}[
         noiseaxis,
         log basis y=2,
-        xmin=0, xmax=1000,
+        xmin=0, xmax=300,
         xlabel={Chain length},
         ylabel={$\log\|\epsilon\|_\infty$},
-        legend pos=north west,
+        legend pos=south east,
         set layers,
         width=\textwidth,
         height=0.55\textwidth,
     ]
         % ---------- Scatter plots ----------
-        % \addplot[only marks, mark=*, mark size=1pt, color=gaussblue]
-        %     table[col sep=comma, x=n, y=noise] {Data/Noise/ExternalProd/bv_small.csv};
-        \addplot[only marks, mark=*, mark size=1pt, color=hpsgreen]
-            table[col sep=comma, x=n, y=noise] {Data/Noise/ExternalProd/bv.csv};
+        % \addplot[only marks, mark=*, mark size=.5pt, color=hpspurple]
+        %     table[col sep=comma, x=n, y=noise] {Data/Noise/ExternalProd/bv_1.csv};
+        \addplot[only marks, mark=square, mark size=.5pt, color=hpsgreen]
+            table[col sep=comma, x=n, y=noise] {Data/Noise/ExternalProd/bv_2.csv};
+        \addplot[only marks, mark=*, mark size=.5pt, color=canonorange]
+            table[col sep=comma, x=n, y=noise] {Data/Noise/ExternalProd/bv_3.csv};
+        \addplot[only marks, mark=*, mark size=.5pt, color=gaussblue]
+            table[col sep=comma, x=n, y=noise] {Data/Noise/ExternalProd/bv_4.csv};
             
         % ---------- Regression lines ----------
         % \addplot[thick, solid, dotted, on layer=axis foreground, color=canonorange, domain=1:1000, samples=300, forget plot]
         %     {\smallSlope*x + \smallIntercept};
-        \addplot[thick, solid, dotted, on layer=axis foreground, color=hpspurple, domain=1:1000, samples=300, forget plot]
-            {\largeSlope*x + \largeIntercept};
+        % \addplot[thick, solid, dotted, on layer=axis foreground, color=hpspurple, domain=1:1000, samples=300, forget plot]
+        %     {\largeSlope*x + \largeIntercept};
             
-        % \legend{Small Parameters, Large Parameters}
-        \legend{BV-RNS}
+        % \legend{$\lambda = 2$}
+        \legend{$\lambda = 2$ (baseline), $\lambda=3$, $\lambda=4$}
     \end{semilogyaxis}
     \end{tikzpicture}
 \end{figure}

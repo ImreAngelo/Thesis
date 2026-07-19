@@ -1,4 +1,4 @@
-% \definecolor{gaussblue}{RGB}{31,119,180}
+\definecolor{plotblue}{HTML}{00ADB5}
 % \definecolor{hpsgreen}{RGB}{44,160,44}
 % \definecolor{canonorange}{RGB}{255,165,0}
 % \definecolor{maxred}{RGB}{255,36,0}
@@ -10,10 +10,10 @@
 % \edef\smallSlope{\pgfplotstableregressiona}
 % \edef\smallIntercept{\pgfplotstableregressionb}
 
-\pgfplotstableread[col sep=comma]{Data/Noise/InternalProd/bv.csv}\bvlarge
+\pgfplotstableread[col sep=comma]{Data/Noise/InternalProd/bv_2.csv}\bvlarge
 \pgfplotstablecreatecol[linear regression={x=n, y=noise}]{reg}{\bvlarge}
-\edef\largeSlope{\pgfplotstableregressiona}
-\edef\largeIntercept{\pgfplotstableregressionb}
+\edef\intSlope{\pgfplotstableregressiona}
+\edef\intIntercept{\pgfplotstableregressionb}
 
 \begin{figure}[H]
     \centering
@@ -34,8 +34,14 @@
         % ---------- Scatter plots ----------
         % \addplot[only marks, mark=*, mark size=1pt, color=gaussblue]
         %     table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv_small.csv};
+        \addplot[only marks, mark=*, mark size=1pt, color=gaussblue]
+            table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv_1.csv};
         \addplot[only marks, mark=*, mark size=1pt, color=hpsgreen]
-            table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv.csv};
+            table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv_2.csv};
+        \addplot[only marks, mark=*, mark size=1pt, color=plotblue]
+            table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv_3.csv};
+        \addplot[only marks, mark=*, mark size=1pt, color=hpspurple]
+            table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv_4.csv};
             
         % ---------- Regression lines ----------
         % \addplot[thick, solid, dotted, on layer=axis foreground, color=canonorange, domain=1:1000, samples=300, forget plot]
