@@ -104,12 +104,13 @@ To decompose a positive integer $c \in \mathbb{Z}^{+}$ into signed digits $[d]_{
     \State half $\gets \Call{LeftShift}{1, b-1}$
     
     \For{$i \gets 0$ \textbf{to} $\ell - 1$ \textbf{in parallel}}
-        \State $u_i \gets \Call{And}{\Call{RightShift}{c',\; i \cdot b},\; \text{mask}}$ \Comment{Extract the intermediate unsigned digit}
-        \If{$i + 1 < \ell$}
-            \State $d_i \gets u_i - \text{half}$ \Comment{Undo the offset to center the digit}
-        \Else
-            \State $d_i \gets u_i$ \Comment{The most significant digit remains unsigned}
-        \EndIf
+        \State $s_i \gets \Call{RightShift}{c',\; i \cdot b}$ \Comment{Slice out the $i$-th bit-window}
+        \State $u_i \gets \Call{And}{s_i,\; \text{mask}}$ \Comment{Extract the intermediate unsigned digit}
+        % \If{$i + 1 < \ell$}
+        %     \State $d_i \gets u_i - \text{half}$ \Comment{Undo the offset to center the digit}
+        % \Else
+        %     \State $d_i \gets u_i$ \Comment{The most significant digit remains unsigned}
+        % \EndIf
     \EndFor
     
     \State\Return $d = (d_0, d_1, \dots, d_{\ell-1})$

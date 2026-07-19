@@ -1,0 +1,102 @@
+{
+  "context": {
+    "date": "2026-07-18T20:22:26+02:00",
+    "host_name": "DESKTOP",
+    "executable": "/home/angelo/thesis/fhe-master-thesis/build/benchmark/bench-write",
+    "num_cpus": 12,
+    "mhz_per_cpu": 3700,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 32768,
+        "num_sharing": 2
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 32768,
+        "num_sharing": 2
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 2
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 33554432,
+        "num_sharing": 12
+      }
+    ],
+    "load_avg": [3.16357,4.33008,7.01367],
+    "library_version": "v1.9.1",
+    "library_build_type": "release",
+    "json_schema_version": 1
+  },
+  "benchmarks": [
+    {
+      "name": "Server/Write/N4_mean",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Server/Write/N4",
+      "run_type": "aggregate",
+      "repetitions": 3,
+      "threads": 1,
+      "aggregate_name": "mean",
+      "aggregate_unit": "time",
+      "iterations": 3,
+      "real_time": 1.3597336028999658e+04,
+      "cpu_time": 1.3030794730000001e+04,
+      "time_unit": "ms"
+    },
+    {
+      "name": "Server/Write/N4_median",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Server/Write/N4",
+      "run_type": "aggregate",
+      "repetitions": 3,
+      "threads": 1,
+      "aggregate_name": "median",
+      "aggregate_unit": "time",
+      "iterations": 3,
+      "real_time": 1.3542038136998599e+04,
+      "cpu_time": 1.2950944041000001e+04,
+      "time_unit": "ms"
+    },
+    {
+      "name": "Server/Write/N4_stddev",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Server/Write/N4",
+      "run_type": "aggregate",
+      "repetitions": 3,
+      "threads": 1,
+      "aggregate_name": "stddev",
+      "aggregate_unit": "time",
+      "iterations": 3,
+      "real_time": 1.2888089456420320e+02,
+      "cpu_time": 1.4426789855597050e+02,
+      "time_unit": "ms"
+    },
+    {
+      "name": "Server/Write/N4_cv",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "Server/Write/N4",
+      "run_type": "aggregate",
+      "repetitions": 3,
+      "threads": 1,
+      "aggregate_name": "cv",
+      "aggregate_unit": "percentage",
+      "iterations": 3,
+      "real_time": 9.4783929947258091e-03,
+      "cpu_time": 1.1071304670607032e-02,
+      "time_unit": "ms"
+    }
+  ]
+}
