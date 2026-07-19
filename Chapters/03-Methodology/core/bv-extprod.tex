@@ -1,6 +1,8 @@
 %% TODO: Write about power-of-B gadget in earlier section!?
+%% TODO: Unify terminology with other section
 The decomposition on the power-of-$B$ gadget $g = (1, B, \dots, B^{\ell-1})$ is essentially digit extraction. The classical approach is to compute standard unsigned base-$B$ digits, producing a decomposition vector where each digit $d_i \in [0, B)$. Under our abstract gadget decomposition definition~\autoref{sec:gadget-decomposition}, the quality of this decomposition is $\beta = B - 1$.
 
+%% TODO: Explain way better and more compact! The problem is negative digits give a carry? Is that it? Explain why the integer is not already encoded as signed.
 From~\autoref{rem:extprod-asymmetry} we know the noise in the external product is a function of $\beta$. To exert tighter control over noise growth during external products, we naturally prefer to minimize this magnitude. By centering the digits into a signed representation where $d_i \in [-B/2, B/2)$, we halve the maximum absolute value, improving the overall decomposition quality to $\beta = B/2$. However, achieving this centered representation classically complicates parallelization. Standard signed recoding algorithms evaluate digits sequentially from least significant to most significant because shifting a positive digit $d_i \ge B/2$ into the negative range requires adding a $+1$ carry to the subsequent digit $d_{i+1}$. This ripple-carry dependency prevents us from slicing the integer into independent bit-windows, creating a computational bottleneck.
 
 To avoid sequential carry propagation, we apply a well-known offset-binary trick by adding the constant $\varGamma$~\eqref{eq:carry-offset}.
@@ -17,42 +19,9 @@ The second fraction is the standard mathematical identity for the sum of a finit
 
 To decompose a positive integer $c \in \mathbb{Z}^{+}$ into signed digits $[d]_{B}$, we first apply the global offset to compute a shifted, non-negative integer $c' = c + \varGamma$. We then slice $c'$ into intermediate unsigned base-$B$ digits $u_i$. Because $B=2^b$ is a power of two, this extraction is performed purely via the independent bitwise \autoref{alg:bit:center}, completely bypassing sequential dependencies.
 
-% \begin{algorithm}[ht!]
-% \caption[Parallel Gadget Decomposition]{\protect\Call{ParallelDecompose}{$c, \ell, b$}}
-% \label{alg:parallel-decomp}
-% \begin{algorithmic}[1]
-%     \Require Integer $c \in \mathbb{Z}$, decomposition length $\ell$, bit-length $b$
-%     \Ensure Array of digits $d = (d_0, d_1, \dots, d_{\ell-1})$ where $d_i \in [-2^{b-1}, 2^{b-1})$ for $i < \ell - 1$
-%     \State $\varGamma \gets \sum_{i=0}^{\ell-1} \Call{LeftShift}{1,\; b \cdot i + b - 1}$ \Comment{Precomputed constant offset}
-%     \State $c' \gets c + \varGamma$ \Comment{Global shift}
-%     \For{$i \gets 0$ \textbf{to} $\ell - 1$ \textbf{in parallel}}
-%         \State $u_i \gets \Call{Modulo}{\Call{RightShift}{c',\; b \cdot i},\; b}$ \Comment{Extract independent bit-window}
-%         \If{$i + 1 < \ell$}
-%             \State $d_i \gets u_i - \Call{LeftShift}{1,\; b - 1}$ \Comment{Undo offset for lower digits}
-%         \Else
-%             \State $d_i \gets u_i$ \Comment{Top digit stays unsigned}
-%         \EndIf
-%     \EndFor
-%     \State \Return $(d_0, d_1, \dots, d_{\ell-1})$
-% \end{algorithmic}
-% \end{algorithm}
-
-
-% \begin{itemize}
-%     \item \textbf{IMPORTANT:} decomposition determines the quality $\beta$, so the order of operations does matter for noise growth!
-%     \item Decomposition used = per limb digit extraction
-%     \item Must choose to decompose into $[-B/2, B/2)$ or $[0, B)$
-%     \begin{itemize}
-%         \item Centered has lower noise as the quality is $\beta = B/2$ but more complicated
-%         \item Unsigned is far simpler and easily parallelizable but $\beta = B$
-%     \end{itemize}
-%     \item Centered representation creates an order; parallelization requires \textit{pre-processing}
-% \end{itemize}
-
-
 %%%
 %%% Unsigned digit decomposition (optimized for B = 2^b)
-%%% TODO: Move this to gadgets/BV section and have signed digit decomposition here
+%%% TODO: Move this to gadgets/BV section and have signed digit decomposition here? (Optional)
 % \begin{algorithm}
 % \caption{Decompose wrt. $B$ (\textcolor{red}{TODO: Signed digit decomposition})}
 % \label{alg:bv:decompose}
@@ -72,50 +41,32 @@ To decompose a positive integer $c \in \mathbb{Z}^{+}$ into signed digits $[d]_{
 % \end{algorithm}
 
 %%%
-%%% 
+%%% Signed digit decomposition 
 %%%
-% \begin{algorithm}
-% \caption{Decompose wrt. $B$ (\textcolor{red}{TODO: Signed digit decomposition})}
-% \label{alg:bv:decompose}
-% \begin{algorithmic}[1]
-% \Require Integer $[x]_{\mathcal{B}_Q} \in \mathbb{Z}_{q_0} \times \mathbb{Z}_{q_1} \times \dots \times  \mathbb{Z}_{q_{k-1}}$, base $B = 2^b$, and decomposition parameter $\ell$
-% \Ensure $\ell$ RNS ``digit'' polynomials $\mathbf{d} = (d_0, d_1, \dots, d_{k\ell-1}) \in \mathbb{Z}_B^{k\ell}$
-% \State $a' \gets a$
-% \For{$j = 0$ to $\ell - 1$}
-%     \State $d_j \gets a' \pmod B$ \Comment{Extract the lower bits}
-%     \If{$d_j \ge B/2$}
-%         \State $d_j \gets d_j - B$ \Comment{Shift to signed range}
-%     \EndIf
-%     \State $a' \gets \frac{a' - d_j}{B}$ \Comment{Shift down and apply the carry}
-% \EndFor
-% \State \Return $\mathbf{d}$
-% \end{algorithmic}
-% \end{algorithm}
 \begin{algorithm}[ht!]
 \caption[Parallel Signed Decomposition]{\protect\Call{Decompose}{$c, b, \ell$}}
 \label{alg:decomp:parallel}
 \begin{algorithmic}[1]
-    \Require Integer $c \in \mathbb{Z}$, bit-length $b$ (where $B = 2^b$), decomposition parameter $\ell$
-    \Ensure Array of signed digits $d = (d_0, d_1, \dots, d_{\ell-1})$ with quality $\beta = 2^{b-1}$
+    \Statex \textbf{Global:} Bit-length $b$ (where $B = 2^b$), decomposition parameter $\ell$, offset $\varGamma$
+    \Require Integer $c \in \mathbb{Z}$
+    \Ensure Array of $\ell$ signed digits $d = (d_0, d_1, \dots, d_{\ell-1}) \in R_{\beta}^{\ell}$ with quality $\beta = B/2$
     
-    \State $\varGamma \gets \sum_{i=0}^{\ell-1} 2^{b-1} \cdot 2^{b \cdot i}$ \Comment{This offset is typically precomputed}
-    \State $c' \gets c + \varGamma$ \Comment{Apply the global shift}
+    \State $c' \gets c + \varGamma$ \Comment{Shift all digits to positive range [0, B)}
     \State mask $\gets \Call{LeftShift}{1, b} - 1$
-    \State half $\gets \Call{LeftShift}{1, b-1}$
-    
+    \State half $\gets \Call{LeftShift}{1, b - 1}$
+
     \For{$i \gets 0$ \textbf{to} $\ell - 1$ \textbf{in parallel}}
-        \State $s_i \gets \Call{RightShift}{c',\; i \cdot b}$ \Comment{Slice out the $i$-th bit-window}
-        \State $u_i \gets \Call{And}{s_i,\; \text{mask}}$ \Comment{Extract the intermediate unsigned digit}
-        % \If{$i + 1 < \ell$}
-        %     \State $d_i \gets u_i - \text{half}$ \Comment{Undo the offset to center the digit}
-        % \Else
-        %     \State $d_i \gets u_i$ \Comment{The most significant digit remains unsigned}
-        % \EndIf
+        \State $s_i \gets \Call{RightShift}{c',\; i \cdot b}$ \Comment{Remove smaller digits}
+        \State $u_i \gets \Call{And}{s_i,\; \text{mask}}$ \Comment{Remove larger digits}
+        \State $d_i \gets \Call{And}{u_i + \text{half},\; \text{mask}} - \text{half}$
+        \Comment{\autoref{alg:bit:center}}
     \EndFor
     
     \State\Return $d = (d_0, d_1, \dots, d_{\ell-1})$
 \end{algorithmic}
 \end{algorithm}
+
+As with $\Call{GetPower}{i,j}$ in \autoref{} the offset $\varGamma$ is calculated exactly once, when the context is first created.\footnote{Specifically the bitwise $\varGamma = (1 \ll (b-1))\cdot((2 \ll (b \ell)) - 1)/((1\ll b) - 1)$ is used, but this is slightly less human readable than \eqref{eq:carry-offset}.} 
 
 Once we have a 
 
