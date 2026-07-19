@@ -4,7 +4,8 @@
 %%
 \section{Implementation Details of sPAR}
 \label{sec:impl:spar}
-My instantiation of \gls{spar} contains some differences from the specification in \cite{cryptoeprint:2025/860}:
+My instantiation of \gls{spar} can be considered the \emph{minimal} version of the original specification~\cite{cryptoeprint:2025/860}
+% Only implements the core functions; does not consider 
 \begin{itemize}
     \item Some functions are missing: bucket sorting, all extras such as equivocation protection etc.
     \item Sorting is negligible, estimated $< 100$ ms according to \cite{} and highly parallelizable.
@@ -17,7 +18,9 @@ My instantiation of \gls{spar} contains some differences from the specification 
     \item This was done so that the functionality is not tightly coupled to the benchmarking without spending time implementing actual communication which would require additional work: serializing data, error handling, and coordinating multiple machines.
 \end{itemize}
 
-\subsection{Server Write Step}  
+\subsection{Server Write Step}
+The \texttt{Server::Write} function contains several important changes from~\cite[Algorithm 2]{cryptoeprint:2025/860}. 
+
 \begin{itemize}
     \item Most important algorithm; does the actual homomorphic sorting
     \item Some changes compared to \cite{cryptoeprint:2025/860}
@@ -45,8 +48,8 @@ My instantiation of \gls{spar} contains some differences from the specification 
 \label{alg:spar:write}
 \begin{algorithmic}[1]
 \Require Reference to state matrices $I$ and $L$
-\Require Encrypted RGSW value $V_r$
-\Require RGSW indices $A_0$, $A_1$ and $A_2$ where $A_j$ is $\log{\eta}$ encrypted bits $\{c_{j,0}, \dots, c_{j,\eta -1}\}$ for $j \in [0, 3)$
+\Require Encrypted RLWE value $V_r$
+\Require Vectors $z_0$, $z_1$ and $z_2$ where $z_j$ is a vector of $\eta$ encrypted RGSW ciphertexts (one-hot encoding) % $\{c_{j,0}, \dots, c_{j,\eta -1}\}$ for $j \in [0, 3)$ (one-hot encoding)
 \Ensure Updates the state matrices $I$ and $L$
 \Ensure Encrypted boolean indicating wether the operation was successful
 \State $\mathsf{hasNotWritten} \gets \Call{EncryptRGSW}{1}$
@@ -54,7 +57,7 @@ My instantiation of \gls{spar} contains some differences from the specification 
     \For{$k \gets \{0, 1, 2\}$}
         \For{$i \gets [0, \eta)$}
             \State $h \gets (\mathsf{hasNotWritten} \boxtimes I_{i,k}) \boxtimes z_{i,d})$
-            \State $L_{i,k} \gets L_{i,k} + V_r \cdot h$ % use different symbol for pt * ct
+            \State $L_{i,k} \gets L_{i,k} + V_r \boxdot h$
             \State $I_{i,k} \gets I_{i,k} - h$
             \State $\mathsf{hasNotWritten} \gets \mathsf{hasNotWritten} + h$
         \EndFor

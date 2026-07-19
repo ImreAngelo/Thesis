@@ -1,5 +1,5 @@
 \subsection{Theoretical Hybrid Improvement}
-An alternative to gadget decomposition used in \gls{rns} key-switching is \textit{hybrid} keyswitching \cite{cryptoeprint:2012/099, cryptoeprint:2021/204}.
+An alternative to gadget decomposition often employed in \gls{rns} key-switching is \textit{hybrid} keyswitching \cite{cryptoeprint:2012/099, cryptoeprint:2021/204}. 
 
 \begin{itemize}
     \item This approach nearly fits inside the gadget decomposition framework established in \autoref{sec:gadget-decomposition}, as $\langle u \cdot  P^{-1}, v\cdot P\rangle = u\cdot v \cdot P^{-1}\cdot P = u\cdot v \bmod{QP}$
@@ -71,7 +71,8 @@ An alternative to gadget decomposition used in \gls{rns} key-switching is \texti
 \end{definition}
 
 \begin{conjecture}[Mixed Internal Product]
-    Test test
+    Performance $\mathcal{O}(k^2\ell/d_{num})$ instead of $\mathcal{O}(k^2\ell^2)$ because hybrid has $k/d_num$ rows.
+    Is better for large $\ell$
 \end{conjecture}
 
 \begin{algorithm}

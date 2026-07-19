@@ -1,0 +1,38 @@
+\begin{algorithm}
+\caption{Parallel External Product $\rlwe \boxdot \rgsw$ (RNS)}
+\label{alg:bv:extprod}
+\begin{algorithmic}[1]
+\Require Decomposition parameter $\ell$, base $B = 2^b$, offset $\delta = \frac{B}{2}\cdot\frac{B^{\ell-1}-1}{B-1}$
+\Require RLWE ciphertext $(c_0, c_1)$, each $[c_m]^{\mathsf{NTT}}_{\mathcal{B}_Q} \in \mathbb{Z}_{q_0} \times \dots \times  \mathbb{Z}_{q_{k-1}}$
+\Require RGSW ciphertext $C$ with $2k\ell$ rows as produced by \autoref{alg:bv:encrypt}
+\Ensure RLWE ciphertext of the product
+
+\For{$(m, j) \gets [0, 2) \times [0, k)$ \textbf{in parallel}}
+    \Comment{Stage 1: $2k$ single-tower iNTTs}
+    \State $a_{m,j} \gets \Call{iNTT}{c_{m,j}}$
+    \Comment{tower $j$ of $c_m$, coefficient form}
+\EndFor
+
+\For{$(s, t) \gets [0, 2k\ell) \times [0, k)$ \textbf{in parallel}}
+    \Comment{Stage 2: slice, lift, $2k^2\ell$ single-tower NTTs}
+    \State $(m, r) \gets (\lfloor s/k\ell \rfloor,\ s \bmod k\ell)$
+    \Comment{digit slot $s$ pairs with row $s$ of $C$}
+    \State $(i, j) \gets (r \bmod \ell,\ \lfloor r/\ell \rfloor)$
+    \State $u \gets \lfloor (a_{m,j} + \delta) / B^i \rfloor \bmod B$
+    \Comment{coefficient-wise shift-and-mask}
+    \If{$i + 1 < \ell$}
+        \State $u \gets u - B/2$
+        \Comment{undo offset; the top digit stays unsigned}
+    \EndIf
+    \State $d_{s,t} \gets \Call{NTT}{[u]_{q_t}}$
+    \Comment{signed lift into $\mathbb{Z}_{q_t}$}
+\EndFor
+
+\For{$(m, t) \gets [0, 2) \times [0, k)$ \textbf{in parallel}}
+    \Comment{Stage 3: $2k$ independent accumulators}
+    \State $acc_{m,t} \gets \sum_{s=0}^{2k\ell - 1} d_{s,t} \odot C[s][m]_t$
+    \Comment{fused multiply-accumulate in $\mathbb{Z}_{q_t}$}
+\EndFor
+\State \Return $(acc_0, acc_1)$
+\end{algorithmic}
+\end{algorithm}

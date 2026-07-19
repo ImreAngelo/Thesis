@@ -1,21 +1,10 @@
 \section{Implementation Details of the Core Library}
 \label{sec:impl:core}
 The core library, located in the \texttt{libs/core} directory of the git repository \cite{gitrepo}, extends OpenFHE~\cite{cryptoeprint:2022/915} with \gls{rgsw} functionality that the framework does not itself expose. % Its centerpiece is the abstract interface \texttt{IExtendedContext}, which augments an OpenFHE \texttt{CryptoContext} with the essential \gls{rgsw} operations: encryption, the external product, and the internal product.
-This functionality is specified by an abstract interface, \texttt{IExtendedContext}, which any project can consume independently of the underlying implementation; of which the essential operations are listed in \autoref{tab:main-functions}. The default implementation realizes the interface through gadget decomposition of the RNS primes, as described in \autoref{sec:gadget-decomposition}.
+This functionality is specified by an abstract interface, \texttt{IExtendedContext}, that any project can consume independently of the underlying implementation; of which the essential operations are listed in \autoref{tab:main-functions}. The default implementation realizes the interface through gadget decomposition of the RNS primes, as described in \autoref{sec:gadget-decomposition}.
 
 %% TODO: Call it BV-impl instead of default impl
-% Following the convention of~\cite{cryptoeprint:2021/204, cryptoeprint:2022/915}, we refer to this family of decomposition-based techniques collectively as \emph{BV}. 
-
-% \begin{table}[H]
-%     \centering
-%     \caption{Primary functionality provided by \texttt{IExtendedContext}}
-%     \label{tab:main-functions}
-%     \begin{tabular}{r|l}
-%         \Call{EncryptRGSW}{pk, pt}              & Outputs an RGSW ciphertext \\
-%         \Call{EvalExternalProduct}{rlwe, rgsw}  & Outputs the external product \\
-%         \Call{EvalInternalProduct}{lhs, rhs}    & Outputs the internal product
-%     \end{tabular}
-% \end{table}
+% Either here or in gadget decomposition somewhere: Following the convention of~\cite{cryptoeprint:2021/204, cryptoeprint:2022/915}, we refer to this family of decomposition-based techniques collectively as \emph{BV}. 
 
 \begin{table}[H]
     \centering
@@ -34,11 +23,7 @@ This functionality is specified by an abstract interface, \texttt{IExtendedConte
 
 Following standard software engineering practice, the interface fixes \emph{what} each operation computes but not \emph{how}, so code written against it runs unchanged under any conforming implementation.
 
-% The \texttt{ExtendedCryptoContext} interface comes bundled with two concrete implementations. One is designed around gadget decomposition of the RNS primes as described in \autoref{sec:gadget-decomposition}, and will be referred to as the BV implementation. The other implementation is designed around the hybrid keyswitching mechanism from \autoref{sec:hybrid}. Of these, the former should be considered the ``canonical'' implementation because (1) this design is the most closely related to the external product as discussed in the literature, where this product is traditionally defined using digit decomposition \cite{examples-of-this, cryptoeprint:2025/860}, and (2) the other implementation does not use true \gls{rgsw} ciphertexts.
-
-% \begin{remark}
-%     \color{red}
-%     The implementations are hard coupled to the BGV-RNS (\texttt{CryptoContextBGVRNS}) scheme. As OpenFHE provides a unified interface for both BGV and BFV --- and the TFHE products are defined independent of scheme --- it would not require much work to add support for BFV to the core library.
-% \end{remark}
+%% TODO: Explain context -> Takes crypto context parameters that are considered global/known by all the algorithms without specifying them!
+%% TODO: Implementation is hard-coupled to the BGV-RNS scheme. Maybe: As OpenFHE provides a unified interface for both BGV and BFV --- and the TFHE products are defined independent of scheme --- it would not require much work to add support for BFV to the core library.
 
 \input{Chapters/03-Methodology/core/bitwise}

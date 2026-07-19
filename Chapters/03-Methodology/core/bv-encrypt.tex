@@ -1,57 +1,54 @@
-\begin{itemize}
-    \item \texttt{ExtendedContextBV} implements the double decomposition; digit decomposing each RNS limb
-    \item Let $P_g(v) = g\otimes v$ and $P_\mathsf{BV}(v) = P_g \circ \hps{P}(v) = g\otimes (\hps{P}(v))$
-\end{itemize}
-\begin{gather*}
-    C = Z + \mu G = Z + \mu \cdot (I_2\otimes  P_g(\hps{P}(1)) = Z + (I_2\otimes  P_g(\hps{P}(\mu)) \\
-    P_g(\hps{P}(\mu)) = g\otimes ([\mu]_{q_0}, \dots, [\mu]_{q_{k-1}}) \\
-    ([\mu g]_{q_0}, \dots [\mu g]_{q_{k-1}}) \text{ where } \mu g = (\mu, \mu B, \dots, \mu B^{\ell})\\
-    ([\mu]_{q_0}, [\mu B]_{q_0}, \dots, [\mu B^\ell]_{q_{k-1}}) \in \mathbb{Z}_Q^{k\cdot \ell}
-\end{gather*}
+% An \gls{rgsw} encryption \eqref{def:rgsw} embeds the gadget matrix $G = I_2\otimes P(1)$ \eqref{def:Gmat} directly into the ciphertext, and with it the larger, in max-norm, of the two vectors of the gadget property \eqref{def:gadget-property}: the entries of $P$ are full-size ring elements, while the small vector $D$ is first produced when a product is evaluated. Encryption is therefore determined entirely by the choice of $P$, a choice \autoref{sec:gadget-decomposition} deliberately left open. 
+Our implementation instantiates the gadget matrix $G = I_2\otimes P(1)$ with a double-layered gadget as permitted by \autoref{thm:gadget-layers}: the HPS gadget from \eqref{def:hps:P} supplies the \gls{rns} layer by mapping $R_Q \to R_{q_0}\times\dots\times R_{q_{k-1}}$, and the power-of-$B$ digit gadget $P_g(v) = v\cdot g$ with $g = (1, B, \dots, B^{\ell-1})$ is applied to each limb. %% TODO: Write about the power-of-B gadget instead/in relation to digit decomposition in gadgets section!!!!
+\begin{equation}
+    \label{def:bv:P}
+    \bv{P}\colon R_Q \to R_Q^{k\ell}, \qquad \bv{P}(v) = (P_g \circ \hps{P})(v) = \hps{P}(v) \otimes g
+\end{equation}
+Every entry of $\bv{P}(v)$ is a fixed constant times $v$, so the message can be absorbed into the gadget term of \eqref{def:rgsw}.
+\begin{equation}
+    \label{eq:hps:ciphertext}
+    C = Z + \mu G = Z + \mu\cdot(I_2\otimes \bv{P}(1)) = Z + I_2\otimes \bv{P}(\mu)
+\end{equation}
+Encryption thus reduces to evaluating $\bv{P}(\mu)$ and adding each of the $k\ell$ entries to two fresh encryptions of zero, once in each component.
 
-\begin{itemize}
-    \item Observe that this is the same information as $(\mu, \mu B, \dots, \mu B^{\ell})$
-    \item Because the $i$-th tower of $\mu$ is $[\mu]_{q_i}$, the HPS gadget row $j$ gives $[[\mu]_{q_i}]_{q_j} = 0 \forall i\not = j$
-\end{itemize}
-
+Recall from \autoref{sec:gadget-decomposition} that the $j$-th component of $\hps{P}(\mu)$ reduces to $[\mu]_{q_j}$ modulo its own prime and vanishes modulo every other; so the only non-zero residue of the corresponding entry of $\bv{P}(\mu)$ is $B^i\cdot[\mu ]_{q_j} \bmod q_j = [\mu B^i]_{q_j}$. Writing the $k\ell$ entries in \gls{crt} form~\eqref{form:crt}, where the $i$-th row corresponds to residues modulo $q_i$ and each column corresponds to a full \gls{rns} polynomial, yields $\bv{P}(\mu)$ as a \textit{sparse} matrix of $k\ell\times k$ residues rather than a dense vector in $R_Q^{k\ell}$.
 \begin{gather*}
     %([\mu]_{q_0}, [\mu B]_{q_0}, \dots, [\mu B^\ell]_{q_{k-1}}) \\
-    \left[ \begin{array}{ccc|ccc|ccc}
-        [\mu]_{q_0} & \cdots & [\mu B^{\ell -1 }]_{q_0} & 0 & \dots & 0 & 0 & \dots & 0 \\
-        0 &  \dots & 0 &[\mu]_{q_1} & \cdots & [\mu B^{\ell -1 }]_{q_{1}} & 0 & \dots & 0 \\
-        \vdots & \ddots & \vdots & \vdots & \ddots & \vdots & \vdots & \ddots & \vdots \\
-        0 & \dots & 0 & 0 & \dots & 0 &[\mu]_{q_{k-1}} & \cdots & [\mu B^{\ell -1 }]_{q_{k-1}}  \\
-    \end{array} \right]
+    \left[ \begin{array}{ccccccccc}
+        [\mu]_{q_0} & [\mu B]_{q_0} & \cdots & [\mu B^{\ell -1 }]_{q_0} & 0 & \dots & 0 & \dots & 0 \\
+        0 & 0 &  \dots & 0 &[\mu]_{q_1} & \cdots & [\mu B^{\ell -1 }]_{q_{1}} &  \dots & 0 \\
+        \vdots & \vdots & \ddots & \vdots & \vdots & \ddots & \vdots & \ddots & \vdots \\
+        0 & 0 & \dots & 0 & 0 & \dots & 0 & \cdots & [\mu B^{\ell -1 }]_{q_{k-1}}  \\
+    \end{array} \right]%^{\intercal}
 \end{gather*}
 
-\begin{itemize}
-    \item Ignore all the 0 elements, then we get the exact definition of the RNS form of $\mu$, $\mu B$, and so on
-    \item However, each row of the RGSW must still encode only 1 tower from each of the $\ell$ polynomials
-\end{itemize}
+We exploit the sparsity of this structure by discarding the zero residues. Since their contribution to any product is $0$, we can simply skip any calculations that would have involved a zero residue. Conveniently, the structure resulting from discarding these elements is exactly the \gls{crt} form of $(\mu, \mu B, \dots, \mu B^{\ell}) \in R_Q^{\ell}$. Multiplying $\mu$ by a scalar $B^i$ can be done natively in \gls{ntt}, and the previous derivation does not change if $\mu$ is in \gls{ntt} form, meaning we do not need to perform any \Call{NTT}{} or \Call{InverseNTT}{} operations as a result of this gadget.
 
-\begin{equation*}
-    {P}_{\mathsf{BV}}(\mu) \;\overset{\tiny\text{flatten}}{\longmapsto}\; 
+\begin{equation*} %% Don't edit this
+    {P}_{\mathsf{BV}}(\mu)^{\intercal} \;\overset{\tiny\text{flatten}}{\longmapsto}\;
     \begin{bmatrix}
-        [\mu]_{q_0} & \cdots & [\mu B^{\ell - 1}]_{q_0} \\
-        [\mu]_{q_1} & \cdots & [\mu B^{\ell - 1}]_{q_1} \\
-        \vdots & \ddots & \vdots  \\
-        [\mu]_{q_{k-1}} & \cdots & [\mu B^{\ell - 1}]_{q_{k-1}}  \\
+        \textcolor{hpsgreen}{[\mu]_{q_0}} & \cdots & [\mu B^{\ell - 1}]_{q_0} \\
+        \textcolor{hpsgreen}{[\mu]_{q_1}} & \cdots & [\mu B^{\ell - 1}]_{q_1} \\
+        \textcolor{hpsgreen}{\vdots} & \ddots & \vdots  \\
+        \textcolor{hpsgreen}{[\mu]_{q_{k-1}}} & \cdots & [\mu B^{\ell - 1}]_{q_{k-1}}  \\
     \end{bmatrix}
-    = ([\mu]_{\mathcal{B}_Q}, \dots, [\mu B^{\ell - 1}]_{\mathcal{B}_Q})
+    = (\textcolor{hpsgreen}{[\mu]_{\mathcal{B}_Q}}, \dots, [\mu B^{\ell - 1}]_{\mathcal{B}_Q})
 \end{equation*}
 
-\begin{itemize}
-    \item Multiplying $\mu$ by a factor of $B^i$ for a single $i$ can be done in NTT
-    \item Applying this to $Z + P_\mathsf{BV}(\mu)$ allows parallelization on $k\ell$ threads
-    \item $\mathcal{B}_Q$, $\ell$ and $B$ are all known/global variables tied to the context
-\end{itemize}
+%% TODO: Clarify benefits
+% \begin{itemize}
+%     \item Note: the \gls{rgsw} ciphertext still contains $2k\ell$ rows, each one encoding one combination of $[\mu B^{i}]_{q_j}$.
+%     \item In practice we 
+%     \item No inverse/NTT penalty; we do not require a conversion!
+%     \item Smaller memory footprint during the EncryptRGSW function
+% \end{itemize}
+
+Furthermore, every element of $\bv{P}(\mu)$ is independent, making half of the $2k\ell$ rows in~\eqref{eq:hps:ciphertext} easily parallelizable over $k\ell$ threads.
 
 %%%
 %%% Encrypt RGSW-BV
 %%%
 \input{Algorithms/new/encrypt-bv}
 
-\begin{itemize}
-    \item Pre-computed value: $\Call{GetPower}{i, j} = B^i \bmod{q_j}$ where the modulo is just to keep numbers smaller in memory, negligible for performance 
-    \item Then $\Call{TowerMul}{\mu, j, B^i}$ is really just extracting the $j-th$ limb, multiplying by the pre-computed value $B^i \bmod{q_j}$ calculate the product modulo $q_j$ before the tower is inserted back into $\mu$ 
-\end{itemize}
+%% TODO: Explain (crypto) context!
+In \autoref{alg:bv:encrypt}, $\mathcal{B}_Q$, $B$ and $\ell$ are parameters used to initialize to the cryptographic context, and are thus available to any functions that exist within the context. The values $B^i \bmod{q_j}$ are calcuated and stored ahead of time, when the context is first initialized, and are exposed through a helper function $\Call{GetPower}{i, j} \gets B^i \bmod{q_j}$. $\Call{TowerMul}{\mu, j, B^i}$ extracts the $j$-th limb from $\mu$, multiplies it by $\Call{GetPower}{i, j}$, and inserts the product modulo $q_j$ back into the $j$-th limb.

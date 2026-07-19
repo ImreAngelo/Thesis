@@ -496,6 +496,64 @@
       \endverb
       \keyw{homomorphic encryption,oblivious RAM,permutation network}
     \endentry
+    \entry{park:sortinghat:2022}{inproceedings}{}
+      \name{author}{4}{}{%
+        {{hash=9f8cc104e1e8efe96dc908571d9714b1}{%
+           family={Cong},
+           familyi={C\bibinitperiod},
+           given={Kelong},
+           giveni={K\bibinitperiod}}}%
+        {{hash=5a2585ff1914aebb087c50c8a36d9719}{%
+           family={Das},
+           familyi={D\bibinitperiod},
+           given={Debajyoti},
+           giveni={D\bibinitperiod}}}%
+        {{hash=d68b74d06c03528ac096882fded0820e}{%
+           family={Park},
+           familyi={P\bibinitperiod},
+           given={Jeongeun},
+           giveni={J\bibinitperiod}}}%
+        {{hash=f1a75a2502cdc91be2e352bb4dcdccb9}{%
+           family={Pereira},
+           familyi={P\bibinitperiod},
+           given={Hilder\bibnamedelima V.L.},
+           giveni={H\bibinitperiod\bibinitdelim V\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Los Angeles, CA, USA}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computing Machinery}%
+      }
+      \strng{namehash}{ccaea880819cd93c85669d60a4361e2b}
+      \strng{fullhash}{67d07cf57734b312dd5f693cdb9ad602}
+      \strng{bibnamehash}{982370aaa5bea4dc4b783e95dc0b462b}
+      \strng{authorbibnamehash}{982370aaa5bea4dc4b783e95dc0b462b}
+      \strng{authornamehash}{ccaea880819cd93c85669d60a4361e2b}
+      \strng{authorfullhash}{67d07cf57734b312dd5f693cdb9ad602}
+      \field{labelalpha}{CDPP22}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the 2022 ACM SIGSAC Conference on Computer and Communications Security}
+      \field{isbn}{9781450394505}
+      \field{series}{CCS '22}
+      \field{title}{SortingHat: Efficient Private Decision Tree Evaluation via Homomorphic Encryption and Transciphering}
+      \field{year}{2022}
+      \field{pages}{563\bibrangedash 577}
+      \range{pages}{15}
+      \verb{doi}
+      \verb 10.1145/3548606.3560702
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1145/3548606.3560702
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1145/3548606.3560702
+      \endverb
+      \keyw{transciphering,privacy,homomorphic encryption,decision tree}
+    \endentry
     \entry{cryptoeprint:2016/870}{misc}{}
       \name{author}{4}{}{%
         {{hash=d1ef308005a1e97548a030f0771c9cc9}{%
@@ -1134,7 +1192,6 @@
   \missing{BV11}
   \missing{CKKS}
   \missing{TFHE}
-  \missing{examples-of-this}
   \missing{regev:2009}
 \endrefsection
 \endinput

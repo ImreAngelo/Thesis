@@ -26,4 +26,7 @@ Introduction...
     \item RGSW/packed RLWE bandwidth optimization; originally planned, dropped due to time constraints, requires more complicated setup phase as $\rgsw{s}$ is required \cite{chillotti:onionring:2019, cryptoeprint:2025/1088}
     \item BFV implementation should be easy as the library sits on top of OpenFHE, it should be as easy as swapping out a few lines of code. Since BFV places its messages in the most significant bits, the decomposition gadget could be made inexact as with the powers of base, the least significant digits are dropped when $\ell$ is too small for $B^\ell$ to cover $q$
     \item The full sPAR protocols contains additional things such as equivocation protection, sorting buckets etc.
+    \item Data per message = $N\log(t)/8 \approx 16385 \cdot (16)/8 = 32770$ bytes $\approx 32$ Kb
+    \item sPAR data per msg = $2048 * 8/8 = 2048 = 2$ Kb
+    \item If larger params is 16 times slower than expected, throughput is the same
 \end{itemize}

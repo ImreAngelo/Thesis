@@ -1,50 +1,53 @@
 \subsubsection{Bitwise Operations}
-The library assumes the base $B = 2^b$ is a power of two, and ensures this by taking $b = \log{B}$ as a parameter and derives $B$. This allows common arithmetic $\mathcal{O}(1)$-performance improvements using bitwise operators:
-
-% The modulo operation is slow because it cannot be done in parallell. If we assume $B = 2^b$ is a power of 2 --- which we can enforce by accepting $\log(B) = b$ as the input parameter instead of $B$ --- then we can use the fact that right-shift \textcolor{red}{$(a \gg b) = a \bmod{2^b}$ or something} to make the modulo operation into a bit-wise (and thus easily parallellizable) operation.
-
-% table
-% \begin{align*}
-%     \textbf{Operation} & \textbf{Notation} & \textbf{Value} \\
-%     \textbf{\Call{LeftShift}{x, b}: } & (x \ll b)           & x\cdot 2^b \\
-%     \textbf{\Call{RightShift}{x, b}:} & (x \gg b)           & x/(2^b) \\
-%     \textbf{division by } \mathbf{B:} & \Call{LShift}{x, b} & x/B \\
-%     \textbf{modulo: }   & x \bmod{2^b} & {x \land ((1\ll b) - 1)} \\
-%     % (x \land (2^b - 1))
-%     \textbf{center: }   & x \mapsto [x]_{2^b}                & ((x + (1\ll (b - 1))) & m) - (B >> 1);
-%     %  = \Call{Center}{x, 2^b}
-% \end{align*}
+The implementation takes the bit-length $b = \log{B}$ as a parameter rather than the base $B$ itself. By restricting the base $B = 2^b$ to a power-of-two, we can substitute certain computationally expensive arithmetic operations with hardware-native bitwise operations. They also operate independently on each bit of a machine word without the need for carry propagation, making then highly conducive to \gls{simd} vectorization.\footnote{As an added bonus, replacing traditional branching reduction loops with bitwise masks guarantees constant-time execution, aligning with cryptographic best practices to prevent timing side-channels.} % allowing for accelerated bulk reductions across arrays of polynomial coefficients. 
 
 \begin{table}[H]
-    \caption{Bitwise Operators}
+    \caption{Common bitwise operations}
     \label{tab:bitwise}
     \centering
     \begin{tabular}{lcc}
         \toprule
-        \textbf{Named Function} & \textbf{Operator Notation} & \textbf{Value}   \\
+        \textbf{Named Function} & \textbf{Notation} & \textbf{Value}   \\
         \midrule
         \Call{LeftShift}{$x, b$}  & $x \ll b$     & $x\cdot 2^b$ \\
-        \Call{RightShift}{$x, b$} & $x \gg b$     & $x/2^b$ \\
-        \Call{And}{$x, y$}        & $x \land y$   & $\sum_i x_i^{(2)}\cdot y_i^{(2)} \cdot 2^i$ \\
+        \Call{RightShift}{$x, b$} & $x \gg b$     & $\lfloor x/2^b \rfloor$ \\
+        \Call{And}{$x, y$}        & $x \land y$   & $\sum_i x_{(2)}[i] \cdot y_{(2)}[i] \cdot 2^i$ \\
         % \Call{Or}{x, y}        & $x \lor y$   & $...$ \\
-        \color{red}\Call{Modulo}{$x, b$}     & $x \land [(1 \ll b) - 1]$ & $x \bmod{2^b}$ \\
+        % \color{red}\Call{Modulo}{$x, b$}     & $x \land [(1 \ll b) - 1]$ & $$ \\
         \bottomrule
     \end{tabular}
 \end{table}
+
+% This leads to some minor optimizations that appear throughout the implementation.
 
 %%%
 %%% Center residue
 %%%
 \begin{algorithm}[ht!]
 \caption[Center]{\protect\Call{Center}{$x,b$}}
-\label{alg:center}
+\label{alg:bit:center}
 \begin{algorithmic}[1]
-    \Require $x, b \in \mathbb{Z}$ %, \; b \in \mathbb{Z}$
-    \Ensure $[x]_{2^b} \;\longmapsto\; [-2^{b-1}, 2^{b-1})$
-    % \State x $\gets \Call{Modulo}{x, b}$
-    % \Comment{Assuming $x$ is not already in $[0, B)$}
+    \Require $x, b \in \mathbb{Z}$
+    \Ensure $[x]_{2^b} \in [-2^{b-1}, 2^{b-1})$
     \State mask $\gets \Call{LeftShift}{1, b} - 1$
     \State half $\gets \Call{LeftShift}{1, b-1}$
-    \State\Return $\Call{And}{x + \text{half}, \text{mask}} - \text{half}$
+    \State\Return $\Call{And}{x + \text{half},\; \text{mask}} - \text{half}$
 \end{algorithmic}
 \end{algorithm}
+
+%%%
+%%% Modulo
+%%% TODO: Maybe this adds nothing to the text?
+\begin{algorithm}[ht!]
+\caption[Modulo]{\protect\Call{Modulo}{$x,b$}}
+\label{alg:bit:modulo}
+\begin{algorithmic}[1]
+    \Require $x, b \in \mathbb{Z}$
+    \Ensure Unsigned residue $x \bmod{2^b}$
+    \State mask $\gets \Call{LeftShift}{1, b} - 1$
+    \State\Return $\Call{And}{x,\; \text{mask}}$
+\end{algorithmic}
+\end{algorithm}
+
+% For space around footnote
+\newpage

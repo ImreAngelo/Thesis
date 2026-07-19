@@ -4,3 +4,17 @@
     \item Once noise is controlled, many users can be handled due to the additive scaling of the RGSW products
     \item GHS improvement over BV even adjusted to same security parameter, but would require a solution to the internal product
 \end{itemize}
+
+\input{Chapters/04-Results/hybrid.tex}
+
+\begin{itemize}
+    \item Throughput
+    \item SIMD
+    \item AVX512 not tested
+    \item Porting library to BFV is easy
+\end{itemize}
+
+
+\begin{itemize}
+    \item \textbf{Discussions:} If write can use SIMD batching the write loop can be divided by up to $N \implies 4.675$ ms, $18.798$ ms, $74.69$ ms per round, respectively, but the other functions must also be scaled up.. % works in some scenarios
+\end{itemize}

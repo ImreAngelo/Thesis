@@ -1,51 +1,52 @@
 \section{Performance Benchmarks}
-\begin{itemize}
-    \item Run on AMD Ryzen 5 5600X CPU 6-core {@} 3.7 GHz with 32Gb RAM in WSL2 Ubuntu 24.04 LTS Linux
-    % \item Compare numbers with parity in the security parameter (according to the \href{https://github.com/malb/lattice-estimator#}{Lattice Estimator \cite{cryptoeprint:2015/046}})
-\end{itemize}
+The benchmarks were run on an AMD Ryzen 5 5600X CPU (6-core{@}3.7GHz) with 32Gb RAM in WSL2 Ubuntu 24.04 LTS Linux with the parameters listed in~\autoref{tab:bench:params}.
+%% TODO: Move compiler information elsewhere or include compiler and version!
+The code is compiled using all available compiler optimizations, including \texttt{-O3} and \texttt{-march=native}, except AVX512 (see~\autoref{avx512}).
+All benchmarks were repeated 10 times and the mean times were recorded and presented in the tables below. Coefficient of variation was strictly below $2.5\%$ for all the runs. 
 
 \subsection{Core Library}
-%% TODO: Include Hybrid results in same table!
+Recall the implementation allows efficient parallelization over $k\ell$ threads. Let $T$ denote the number of threads. Ideally, the benchmarks should be performed at $T \geq k\ell = 12$ threads with the current parameters. 
+
+%% TODO: Include Hybrid results in same table -> In discussions
+%% TODO: Read from JSON
 %% Encrypt RGSW, external product, internal product
 \begin{table}[H]
-    \caption{RGSW Operations \textcolor{red}{(todo: update numbers)}}
+    \caption{Mean CPU time in milliseconds spent per operation over $T$ threads}
     \label{tab:bench:bv}
     \centering
-    \begin{tabular}{lc}
+    \begin{tabular}{lcccccc}
         \toprule
-        \textbf{Operation}  & \textbf{Time} \\
+        \textbf{Operation}  & \textbf{$T = 1$} & \textbf{$T = 2$} & \textbf{$T = 3$} & \textbf{$T = 4$} & \textbf{$T = 5$} & \textbf{$T = 6$} \\
         \midrule
-        Encrypt RGSW        & \num{\jsonms{\rgswData}{benchmarks[0].cpu_time}}~ms \\
-        External Product    & \num{\jsonms{\rgswData}{benchmarks[1].cpu_time}}~ms \\
-        Internal Product    & \num{\jsonms{\rgswData}{benchmarks[2].cpu_time}}~ms \\
+        Encrypt RGSW        & \num{123}  & \num{64.8} & \num{52.9} & \num{41.4} & \num{31.8} & \num{32.5} \\
+        External Product    & \num{36.9} & \num{19.8} & \num{14.8} & \num{12.2} & \num{10.4} & \num{10.6} \\
+        Internal Product    & \num{741}  & \num{395}  & \num{281}  & \num{208}  & \num{168}  & \num{176}  \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-
-
-\begin{itemize}
-    \item The internal product scales exponentially as it performs $2k\ell$ external products, which in turn performs $2k\ell$ multiplications = $\mathcal{O}(4k^2\ell^2)$
-    \item Since GHS specifically only has only $2$ rows, the scaling is a set factor of approx. 2 instead of $2k\ell$
-\end{itemize}
-
+% Encrypt RGSW        & \num{\jsonms{\rgswData}{benchmarks[0].cpu_time}}~ms \\
+% External Product    & \num{\jsonms{\rgswData}{benchmarks[1].cpu_time}}~ms \\
+% Internal Product    & \num{\jsonms{\rgswData}{benchmarks[2].cpu_time}}~ms \\
 
 \subsection{sPAR}
-%%
+Each function in~\autoref{tab:bench:full} except \texttt{Server::Decrypt} is run $\eta$ times every round, once for each client. Below I list the mean average time of each function call. The \texttt{client} functions would in practice be run in perfect parallel, as each user performs their own partial decryption independently. %% TODO: <- Move to discussion? 
+%% TODO: Pointless? -> The total runtime is therefore $C_{enc} + \eta S_{W} + C_{dec} + S_{dec} + d$ where $d$ is the total delay in communication between parties.
+
+%%% TODO: Load from JSON
 %% Client::Encrypt, Server::Write, Client::Decrypt, Server::Decrypt
-% TODO: Load from JSON again
 \begin{table}[H]
-    \caption{One round of the full sPAR protocol, not adjusted to per user except Write, 6 threads}
+    \caption{Measured computation times of sPAR functions, 6 threads}
     \label{tab:bench:full}
     \centering
     \begin{tabular}{cccccc}
         \toprule
-        $\mathbf{\eta}$ & \textbf{Total} & \textbf{Encrypt} & \textbf{Write} & \textbf{Partial Dec.} & \textbf{Server Dec.} \\
+        $\mathbf{\eta}$ & \textbf{\texttt{Client::Encrypt}} & \textbf{\texttt{Write}} & \textbf{\texttt{Partial Dec.}} & \textbf{\texttt{Server Dec.}} \\
         \midrule
-        $2$  &   $8620$ ms &    $402.53$ ms &   $8.06798$ s &   $140.60$ ms &  $5.02677$ ms \\
-        $4$  &  $17984$ ms &   $1652.05$ ms &   $15.9965$ s &   $425.13$ ms &   $10.783$ ms \\
-        $8$  &  $41232$ ms &   $6745.00$ ms &   $33.0402$ s &  $1472.59$ ms &  $28.1619$ ms \\
-        $16$ &  $98332$ ms &  $26382.50$ ms &    $67.368$ s &  $5005.41$ ms &  $60.5488$ ms \\
+        $2$  &      $201.26$ ms &   $8.06798$ s &     $70.3$ ms &  $\num{5.02677}$ ms \\
+        $4$  &      $413.01$ ms &   $15.9965$ s &   $106.28$ ms &  $\num{10.783}$ ms \\
+        $8$  &      $843.13$ ms &   $33.0402$ s &   $184.07$ ms &  $\num{28.1619}$ ms \\
+        $16$ &     $1648.91$ ms &    $67.368$ s &   $312.84$ ms &  $\num{60.5488}$ ms \\
         % \JSONParseArrayMapInline{\fullData}{benchmarks}{
         %   $\nvalue{#1}$ &
         %   \num{\jsonms{\fullData}{benchmarks[#1].cpu_time}} & 
@@ -76,18 +77,13 @@
 %         \bottomrule
 %     \end{tabular}
 % \end{table}
-\begin{itemize}
-    \item \textbf{Discussions:} If write can use SIMD batching the write loop can be divided by up to $N \implies 4.675$ ms, $18.798$ ms, $74.69$ ms per round, respectively, but the other functions must also be scaled up.. % works in some scenarios
-    \item \textcolor{red}{TODO: run single-threaded, adjust to $\eta$ i.e. divide by $\eta$ for encrypt, write, partial decrypt}
-\end{itemize}
-
 % Check gain vs DC-net -> throughput
 
-\subsection{Multi-Threaded Performance}
-\begin{itemize}
-    \item Works now, but only some functions (EncryptRGSW, BV Decompose) are optimized to take advantage of multi-threading.
-    \item $\leq k\ell$ threads saturate, so $k = 2, \ell = 3$ has optimal performance at 6 threads.
-    \item Ideally more threads would used to perform multiple coefficients simultaneously, but this is not implemented.
-\end{itemize}
+% \subsection{Multi-Threaded Performance}
+% \begin{itemize}
+%     \item Works now, but only some functions (EncryptRGSW, BV Decompose) are optimized to take advantage of multi-threading.
+%     \item $\leq k\ell$ threads saturate, so $k = 2, \ell = 3$ has optimal performance at 6 threads.
+%     \item Ideally more threads would used to perform multiple coefficients simultaneously, but this is not implemented.
+% \end{itemize}
 
-\textbf{Table of improvements +X\% at 1 to 6 threads}
+% \textbf{Table of improvements +X\% at 1 to 6 threads}

@@ -21,8 +21,14 @@
 % \end{itemize}
 
 \subsubsection{SIMD Batching}
+The BV implementation inherits the \gls{simd} functionality of OpenFHE, meaning that if 
+
+Assuming the context is configured with parameters that support SIMD batching, the implementation inherits the \gls{simd} functionality of OpenFHE
+
 \begin{itemize}
-    \item Assuming parameters that support SIMD batching are set
+    \item 
     \item Requires using \texttt{MakePackedPlaintext} instead of \texttt{MakeCoefPackedPlaintext} in OpenFHE
     \item This allows up to $N$ RGSW/External/Internal prodcuts simultaneously at no additional cost compared to the same parameters with \Call{MakeCoefPackedPlaintext}.
 \end{itemize}
+
+%% TODO: Code example
