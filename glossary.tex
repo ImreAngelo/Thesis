@@ -5,54 +5,54 @@
 % interleave with Latin ones (\beta under B, \Delta under D, and so on).
 
 %% Scheme parameters
-\newglossaryentry{sym:N}{type=main,name={\ensuremath{N}},sort=N, description={Ring dimension, a power of two}}
-\newglossaryentry{sym:Q}{type=main,name={\ensuremath{Q}},sort=Q, description={Ciphertext modulus}}
-\newglossaryentry{sym:t}{type=main,name={\ensuremath{t}},sort=T, description={Plaintext modulus}}
+% \newglossaryentry{sym:N}{type=main,name={\ensuremath{N}},sort=N, description={Ring dimension, a power of two}}
+% \newglossaryentry{sym:Q}{type=main,name={\ensuremath{Q}},sort=Q, description={Ciphertext modulus}}
+% \newglossaryentry{sym:t}{type=main,name={\ensuremath{t}},sort=T, description={Plaintext modulus}}
 \newglossaryentry{sym:RQ}{type=main,name={\ensuremath{R_Q}},sort=Rq, description={Working ring $\mathbb{Z}_Q[X]/(X^N+1)$}}
-\newglossaryentry{sym:Rt}{type=main,name={\ensuremath{R_t}},sort=Rt, description={Plaintext ring}}
+% \newglossaryentry{sym:Rt}{type=main,name={\ensuremath{R_t}},sort=Rt, description={Plaintext ring}}
 \newglossaryentry{sym:ZQ}{type=main,name={\ensuremath{\mathbb{Z}_Q}},sort=Zq, description={Integers modulo $Q$, centered}}
-\newglossaryentry{sym:Delta}{type=main,name={\ensuremath{\Delta}},sort=Delta, description={Message scaling factor}}
+% \newglossaryentry{sym:Delta}{type=main,name={\ensuremath{\Delta}},sort=Delta, description={Message scaling factor}}
 \newglossaryentry{sym:lambda}{type=main,name={\ensuremath{\lambda}},sort=Lambda, description={Security parameter}}
 \newglossaryentry{sym:chi}{type=main,name={\ensuremath{\chi}},sort=Chi, description={Error distribution over $R_Q$}}
 \newglossaryentry{sym:sigma}{type=main,name={\ensuremath{\sigma}},sort=Sigma, description={Standard deviation of $\chi$}}
 
 %% Keys, messages and noise
-\newglossaryentry{sym:s}{type=main,name={\ensuremath{s}},sort=S, description={Secret key, ternary}}
-\newglossaryentry{sym:pk}{type=main,name={\ensuremath{pk}},sort=Pk, description={Public key, an encryption of zero}}
-\newglossaryentry{sym:m}{type=main,name={\ensuremath{m}},sort=M, description={Plaintext message in $R_t$}}
+% \newglossaryentry{sym:s}{type=main,name={\ensuremath{s}},sort=S, description={Secret key, ternary}}
+% \newglossaryentry{sym:pk}{type=main,name={\ensuremath{pk}},sort=Pk, description={Public key, an encryption of zero}}
+% \newglossaryentry{sym:m}{type=main,name={\ensuremath{m}},sort=M, description={Plaintext message in $R_t$}}
 \newglossaryentry{sym:mu}{type=main,name={\ensuremath{\mu}},sort=Mu, description={Message of an \gls{rgsw} ciphertext}}
 \newglossaryentry{sym:epsilon}{type=main,name={\ensuremath{\epsilon}},sort=Epsilon, description={Noise term of a ciphertext}}
-\newglossaryentry{sym:x}{type=main,name={\ensuremath{x = (b, a)}},sort=Xct, description={\gls{rlwe} ciphertext, with masked element $b$ and public element $a$}}
-\newglossaryentry{sym:C}{type=main,name={\ensuremath{C}},sort=C, description={\gls{rgsw} ciphertext}}
-\newglossaryentry{sym:Z}{type=main,name={\ensuremath{Z}},sort=Z, description={Matrix of fresh zero-encryptions inside an \gls{rgsw} ciphertext}}
+% \newglossaryentry{sym:x}{type=main,name={\ensuremath{x = (b, a)}},sort=Xct, description={\gls{rlwe} ciphertext, with masked element $b$ and public element $a$}}
+% \newglossaryentry{sym:C}{type=main,name={\ensuremath{C}},sort=C, description={\gls{rgsw} ciphertext}}
+% \newglossaryentry{sym:Z}{type=main,name={\ensuremath{Z}},sort=Z, description={Matrix of fresh zero-encryptions inside an \gls{rgsw} ciphertext}}
 
 %% RNS
-\newglossaryentry{sym:k}{type=main,name={\ensuremath{k}},sort=K, description={Number of \gls{rns} moduli}}
-\newglossaryentry{sym:qi}{type=main,name={\ensuremath{q_i}},sort=Qi, description={The $i$-th \gls{rns} modulus, a machine-word prime}}
+% \newglossaryentry{sym:k}{type=main,name={\ensuremath{k}},sort=K, description={Number of \gls{rns} moduli}}
+% \newglossaryentry{sym:qi}{type=main,name={\ensuremath{q_i}},sort=Qi, description={The $i$-th \gls{rns} modulus, a machine-word prime}}
 \newglossaryentry{sym:basis}{type=main,name={\ensuremath{\mathcal{B}_Q}},sort=Basis, description={\gls{rns} basis $\{q_0, \dots, q_{k-1}\}$ for $Q = \prod_i q_i$}}
 \newglossaryentry{sym:qhat}{type=main,name={\ensuremath{\hat{q}_i}},sort=Qhat, description={\gls{crt} factor $Q/q_i$}}
 \newglossaryentry{sym:P}{type=main,name={\ensuremath{P}},sort=P, description={Auxiliary modulus, with basis $\mathcal{B}_P$ of size $l$}}
-\newglossaryentry{sym:l}{type=main,name={\ensuremath{l}},sort=Laux, description={Number of auxiliary moduli in $\mathcal{B}_P$}}
+% \newglossaryentry{sym:l}{type=main,name={\ensuremath{l}},sort=Laux, description={Number of auxiliary moduli in $\mathcal{B}_P$}}
 \newglossaryentry{sym:omega}{type=main,name={\ensuremath{\omega_i}},sort=Omega, description={Primitive $2N$-th root of unity modulo $q_i$}}
 \newglossaryentry{sym:w}{type=main,name={\ensuremath{w}},sort=W, description={Bit-width of a machine word}}
 
 %% Gadget decomposition
-\newglossaryentry{sym:B}{type=main,name={\ensuremath{B}},sort=B, description={Decomposition base, a power of two}}
-\newglossaryentry{sym:b}{type=main,name={\ensuremath{b}},sort=Bbit, description={Bit-length of the decomposition base, $B = 2^b$}}
+% \newglossaryentry{sym:B}{type=main,name={\ensuremath{B}},sort=B, description={Decomposition base, a power of two}}
+% \newglossaryentry{sym:b}{type=main,name={\ensuremath{b}},sort=Bbit, description={Bit-length of the decomposition base, $B = 2^b$}}
 \newglossaryentry{ell}{type=main,name={\ensuremath{\ell}},sort=L, description={Decomposition parameter}}
-\newglossaryentry{sym:beta}{type=main,name={\ensuremath{\beta}},sort=Beta, description={Decomposition quality, a bound on the digits}}
-\newglossaryentry{sym:g}{type=main,name={\ensuremath{g}},sort=G, description={Gadget vector}}
-\newglossaryentry{sym:G}{type=main,name={\ensuremath{G}},sort=Gmat, description={Gadget matrix $I_k \otimes g$}}
-\newglossaryentry{sym:Ginv}{type=main,name={\ensuremath{G^{-1}(\cdot)}},sort=Ginv, description={Gadget decomposition of a ciphertext}}
-\newglossaryentry{sym:D}{type=main,name={\ensuremath{D(\cdot)}},sort=D, description={Decomposition, the small side of the gadget property}}
-\newglossaryentry{sym:Pfun}{type=main,name={\ensuremath{P(\cdot)}},sort=Pfun, description={Recomposition, the gadget-scaled side of the gadget property}}
+\newglossaryentry{sym:beta}{type=main,name={\ensuremath{\beta}},sort=Beta, description={Decomposition quality}}
+% \newglossaryentry{sym:g}{type=main,name={\ensuremath{g}},sort=G, description={Gadget vector}}
+% \newglossaryentry{sym:G}{type=main,name={\ensuremath{G}},sort=Gmat, description={Gadget matrix $I_k \otimes g$}}
+% \newglossaryentry{sym:Ginv}{type=main,name={\ensuremath{G^{-1}(\cdot)}},sort=Ginv, description={Gadget decomposition of a ciphertext}}
+% \newglossaryentry{sym:D}{type=main,name={\ensuremath{D(\cdot)}},sort=D, description={Decomposition, the small side of the gadget property}}
+% \newglossaryentry{sym:Pfun}{type=main,name={\ensuremath{P(\cdot)}},sort=Pfun, description={Recomposition, the gadget-scaled side of the gadget property}}
 \newglossaryentry{sym:Gamma}{type=main,name={\ensuremath{\varGamma}},sort=Gamma, description={Carry offset for parallel signed decomposition}}
 
 %% sPAR
 \newglossaryentry{sym:eta}{type=main,name={\ensuremath{\eta}},sort=Eta, description={Number of clients in a \gls{spar} round}}
-\newglossaryentry{sym:L}{type=main,name={\ensuremath{L}},sort=Lmat, description={Message matrix of $\eta\times3$ \gls{rlwe} slots}}
-\newglossaryentry{sym:I}{type=main,name={\ensuremath{I}},sort=Imat, description={Availability matrix of $\eta\times3$ encrypted flags}}
-\newglossaryentry{sym:z}{type=main,name={\ensuremath{z_{i,d}}},sort=Zvec, description={One-hot encrypted bucket index of a client}}
+% \newglossaryentry{sym:L}{type=main,name={\ensuremath{L}},sort=Lmat, description={Message matrix of $\eta\times3$ \gls{rlwe} slots}}
+% \newglossaryentry{sym:I}{type=main,name={\ensuremath{I}},sort=Imat, description={Availability matrix of $\eta\times3$ encrypted flags}}
+% \newglossaryentry{sym:z}{type=main,name={\ensuremath{z_{i,d}}},sort=Zvec, description={One-hot encrypted bucket index of a client}}
 
 %% Benchmarking
 \newglossaryentry{sym:T}{type=main,name={\ensuremath{T}},sort=Tthreads, description={Number of threads}}
@@ -63,9 +63,9 @@
 \newglossaryentry{boxdot}{type=main,name={\ensuremath{\boxdot}},sort=Extprod, description={External product}}
 \newglossaryentry{boxtimes}{type=main,name={\ensuremath{\boxtimes}},sort=Intprod, description={Internal product}}
 \newglossaryentry{[x]_Q}{type=main,name={\ensuremath{[x]_Q}},sort=Xmod, description={Centered modulo $x\in [-Q/2, Q/2)$}}
-\newglossaryentry{sym:norm}{type=main,name={\ensuremath{\|\cdot\|}},sort=Norm, description={Infinity norm $\|v\|_\infty = \max_i |v_i|$}}
-\newglossaryentry{sym:inner}{type=main,name={\ensuremath{\langle\cdot,\cdot\rangle}},sort=Inner, description={Inner product}}
-\newglossaryentry{sym:round}{type=main,name={\ensuremath{\lfloor\cdot\rceil}},sort=Round, description={Rounding to the nearest integer}}
+\newglossaryentry{sym:norm}{type=main,name={\ensuremath{\|\cdot\|}},sort=Norm, description={Max norm $\|v\|_\infty = \max_i |v_i|$}}
+% \newglossaryentry{sym:inner}{type=main,name={\ensuremath{\langle\cdot,\cdot\rangle}},sort=Inner, description={Inner product}}
+% \newglossaryentry{sym:round}{type=main,name={\ensuremath{\lfloor\cdot\rceil}},sort=Round, description={Rounding to the nearest integer}}
 \newglossaryentry{sym:kron}{type=main,name={\ensuremath{\otimes}},sort=Kron, description={Kronecker product}}
 \newglossaryentry{sym:log}{type=main,name={\ensuremath{\log}},sort=Log, description={Logarithm base $2$}}
 

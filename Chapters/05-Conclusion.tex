@@ -15,7 +15,7 @@ Introduction...
 
 \section{Future Work}
 \begin{itemize}
-    \item BGV SIMD capabilities \cite{cryptoeprint:2011/133} not utilized in write loop; \texttt{Server::Write} can perform $N$ rounds simultaneously, but does this translate into higher throughput? A constant polynomial is the same object in SIMD batching and as a regular polynomial, so if write is changed to output binary $\{0,1\}$ it should be possible with:
+    \item BGV SIMD capabilities \cite{cryptoeprint:2011/133} not utilized in write loop; \texttt{Server::Write} can perform $N$ rounds simultaneously, but does this translate into higher throughput? A constant polynomial is the same object in \gls{simd} batching and as a regular polynomial, so if write is changed to output binary $\{0,1\}$ it should be possible with:
     \begin{itemize}
         \item For each $i \in [0, N)$
         \item mask $\gets e_i = (0,0,\dots, 1, \dots, 0)$ where only the $i$-th element is 1
