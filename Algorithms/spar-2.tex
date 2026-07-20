@@ -4,10 +4,11 @@
 %%% "\cdot" as in the paper --- the typed instantiation is thesis material (Ch. 3).
 %%%
 \begin{algorithm}[ht!]
-\caption{Homomorphic placing $\mathsf{HomPlacing}^*$ for the choice of three slots~\cite{cryptoeprint:2025/860}}
+\caption{$\mathsf{HomPlacing}^*$ for the choice of three slots~\cite{cryptoeprint:2025/860}}
 \label{alg:spar:homplacing}
 \begin{algorithmic}[1]
-    \Require Encrypted value $V_r$; encrypted indices $A_0, A_1, A_2$, where $A_d$ is $\log\eta$ encrypted bits $\{c_{d,0}, \dots, c_{d,\log\eta - 1}\}$
+    \Require Encrypted value $V_r$
+    \Require Encrypted indices $A_0, A_1, A_2$, where $A_d$ is $\log\eta$ encrypted bits $\{c_{d,0}, \dots, c_{d,\log\eta - 1}\}$
     \Require Server state matrices $L_{\eta\times3}$ and $I_{\eta\times3}$
     \Ensure Encrypted boolean indicating whether the value was placed
     \State $z_{i,d} := 0$ for $i \in [0, \eta),\; d \in \{0, 1, 2\}$

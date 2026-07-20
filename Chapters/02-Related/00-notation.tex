@@ -1,20 +1,11 @@
 \section{Notation}
 \label{sec:notation}
-% TODO: §2.3 (formats.tex, baseconv.tex) is written in the first person ("I will consider", "I refer to"); this section and §2.2 use the impersonal voice --- unify.
 
-The following conventions hold throughout this thesis.
-\begin{itemize}
-    \item All logarithms are base 2, that is, $\log x$ denotes $\log_2 x$.
-    \item Ring elements, vectors and matrices are denoted by plain italic letters; their type is stated at first use.
-    \item For a vector $v$, both $v_i$ and $v[i]$ denote the $i$-th component. 
-    \item A sequence $(f(0), \dots, f(k-1))$ of $k$ elements is sometimes written as $\{f(i)\}_{i=0}^{k-1}$ for brevity.
-    \item $\|\cdot\|$ denotes the infinity norm $\|v\|_\infty = \max_i |v_i|$, the largest absolute value among the components of a vector or, for a polynomial, among its coefficients.
-    \item Big $\mathcal{O}$ notation...
-\end{itemize}
+The following conventions hold throughout this thesis. All logarithms are base $2$, so that $\log x$ abbreviates $\log_2 x$. Ring elements, vectors and matrices are denoted by plain italic letters, and their type is stated at first use. For a vector $v$, both $v_i$ and $v[i]$ denote the $i$-th component, and a sequence $(f(0), \dots, f(k-1))$ of $k$ elements is abbreviated $\{f(i)\}_{i=0}^{k-1}$. The norm $\|\cdot\|$ is always the infinity norm $\|v\|_\infty = \max_i |v_i|$, the largest absolute value among the components of a vector or, for a polynomial, among its coefficients. Asymptotic costs are given in the usual $\mathcal{O}(\cdot)$ notation and count homomorphic operations or transmitted ciphertexts rather than machine instructions; the unit is named wherever such a bound is stated.
 
 \begin{definition}[Centered Residues]
     \label{def:centered}
-    Let $\mathbb{Z}_Q = \mathbb{Z}/Q\mathbb{Z}$ denote the ring of integers modulo $Q \geq 2$. While any set of residue class representatives may stand for $\mathbb{Z}_Q$, this work canonically identifies $\mathbb{Z}_Q$ with the run of $Q$ consecutive integers centered at the origin, selected by the following map. %% Huh??? Run of what?
+    Let $\mathbb{Z}_Q = \mathbb{Z}/Q\mathbb{Z}$ denote the ring of integers modulo $Q \geq 2$. While any set of residue class representatives may stand for $\mathbb{Z}_Q$, this work canonically identifies $\mathbb{Z}_Q$ with the $Q$ consecutive integers centered at the origin, selected by the following map.
     \begin{equation}
         \label{eq:centered}
         [a]_Q = \big(\, (a + \lfloor Q/2 \rfloor) \bmod Q \,\big) - \lfloor Q/2 \rfloor

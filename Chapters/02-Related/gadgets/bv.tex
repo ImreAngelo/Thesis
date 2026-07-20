@@ -8,7 +8,7 @@ The idea has since been generalized into the idea of \emph{gadget decomposition}
 %% (R)GSW - Used in GSW (cryptoeprint:2013/340), FHEW (cryptoeprint:2014/816) and TFHE (cryptoeprint:2018/421)
 %% Presumably used in the other major schemes: BGV (cryptoeprint:2011/277), BFV (cryptoeprint:2012/078, cryptoeprint:2012/144), CKKS (cryptoeprint:2016/421)  %% TODO: Verify correct paper-scheme attribution
 
-%% TODO: Settle on a name for CRT/RNS decomposition
+%% TODO: Settle on a name for CRT/RNS decomposition (\firstForm{} macro used in some places, \gls{CRT} form used elsewhere)
 \begin{definition}[Digit Decomposition]
     Given an integer $\gamma\in\mathbb{Z}_q$ for a modulus $q\geq 2$, base $\beta$ and decomposition parameter $\ell$, the digit decomposition $\decomp{\gamma}{} = (\gamma_0, \gamma_1, \dots, \gamma_{\ell-1}) \in \mathbb{Z}_\beta^\ell$ outputs an ordered list of $\ell$ base-$\beta$ digits satisfying
     \begin{equation*}
@@ -22,28 +22,28 @@ Digit decomposition has two important properties. First, if the digits $\gamma_i
 
 %%
 %% Gadget Decomposition
-%% TODO: Settle for this definition OR the gadget property definition
+%% 
 \begin{definition}[(Abstract) Gadget Decomposition]
     \label{def:tfhe:gadget-decomposition}
-    An efficient algorithm $\decomp{v}{g,\beta,\epsilon}$ is a valid decomposition on the gadget $g\in \mathbb{Z}_q^\ell$ with quality $\beta \in \mathbb{Z}^{+}$ and precision $\epsilon \in \mathbb{Z}^+$ if and only if for any \gls{rlwe} sample $v\in R_Q$ it efficiently and publicly outputs a small vector $u \in \mathbb{Z}_q$ such that $\|u\|_\infty \leq \beta$ and $\langle u, g\rangle \leq v + \epsilon$.
+    An efficient algorithm $\decomp{v}{g,\beta,\epsilon}$ is a valid decomposition on the gadget $g\in \mathbb{Z}_q^\ell$ with quality $\beta \in \mathbb{Z}^{+}$ and precision $\epsilon \in \mathbb{Z}^+$ if and only if for any ring element $v\in R_Q$ it efficiently and publicly outputs a small vector $u \in \mathbb{Z}_q$ such that $\|u\|_\infty \leq \beta$ and $\langle u, g\rangle \leq v + \epsilon$.
 
     % Furthermore, the expectation of u · H − v must to be equal to 0 when v is uniformly distributed in M .
 \end{definition}
 
+%% TODO: There is no time to remove/merge the gadget property/abstract def. Instead bridge them with a single sentence or two.
 \begin{itemize}
     \item Other (equivalent) form more convenient to work with, where the output of $\decomp{v}{g,\beta,\epsilon} \to D(v)$ and $g\cdot u \to P(u)$ are considered.
 \end{itemize}
 
 \begin{definition}[Gadget Property]
-    Two vectors $P(x) \in \mathbb{Z}_Q^\ell$ and $D(y) \in \mathbb{Z}_\beta^\ell$ are said to have the \textit{gadget property} if and only if they satisfy \eqref{def:gadget-property} for any pair of \gls{rlwe} samples $(x,y)\in R_Q^2$ with precision $\epsilon \in \mathbb{Z}_q^+$ and quality $\beta$ where $\|D(y)\|_\infty \leq \beta$. If $\epsilon = 0$ then $P(x)$ and $D(y)$ are said to have the \textit{exact} gadget property.
+    Two vectors $P(x) \in \mathbb{Z}_Q^\ell$ and $D(y) \in \mathbb{Z}_\beta^\ell$ are said to have the \textit{gadget property} if and only if they satisfy \eqref{def:gadget-property} for any pair of ring elements $(x,y)\in R_Q^2$ with precision $\epsilon \in \mathbb{Z}_q^+$ and quality $\beta$ where $\|D(y)\|_\infty \leq \beta$. If $\epsilon = 0$ then $P(x)$ and $D(y)$ are said to have the \textit{exact} gadget property.
     \begin{equation}
         \label{def:gadget-property}
         \langle P(x), D(y)\rangle = x\cdot y + \epsilon \pmod{Q}
     \end{equation}
 \end{definition}
 
-% TODO: 
-% TODO: Clean up: 2\epsilon, establish P_1 \circ P_2 = P_1(P_2(u)) better
+% TODO: Clean up: 2\epsilon, establish P_1 \circ P_2 = P_1(P_2(u)) in a cleaner way
 \begin{lemma}%[Layered Gadget Decomposition]
     \label{thm:gadget-layers}
     The composition of two gadget decompositions is itself a valid gadget decomposition. %% TODO: With quality...?
@@ -101,6 +101,5 @@ Digit decomposition cannot be applied directly to \gls{rlwe} samples in an \gls{
     \end{gather*}
 \end{remark} 
 
-   
-%% TODO: The convention of calling the 'elements' of the decomp. output 'digits' is not introduced anywhere!
+%% TODO: The convention of calling the 'elements' of the decomp. output 'digits' is not introduced anywhere!?
 While the HPS gadget is cheap, the quality $\beta = \max_i{q_i/2}$ is too large for many applications. A second level of decomposition can be applied... Since every digit now fits inside a machine word (constraint of RNS), standard digit decomposition can be applied to each limb as permitted by~\autoref{thm:gadget-layers}. The resulting gadget has $k\ell$ digits bounded by $B/2$ and is exact if $B^\ell \geq \max_i{q_i}$ etc.

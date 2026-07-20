@@ -7,7 +7,6 @@ An instantiation is fixed by a small set of parameters. The working ring $R_Q$ o
 
 \begin{definition}[RLWE Distribution]
     \label{def:rlwe-dist}
-    % TODO: §2.4 (gadgets/bv.tex, abstract gadget decomposition) calls a single ring element $v \in R_Q$ an "RLWE sample"; here a sample is a pair in $R_Q^2$ --- align terminology.
     For a fixed secret $s \in R_Q$, the \gls{rlwe} distribution $A_{s,\chi}$ over $R_Q^2$ is sampled by drawing $a \overset{\$}{\leftarrow} R_Q$ uniformly at random and $\epsilon \overset{\$}{\leftarrow} \chi$, and outputting the pair $(a \cdot s + \epsilon,\; a)$.
 \end{definition}
 
@@ -16,9 +15,11 @@ An instantiation is fixed by a small set of parameters. The working ring $R_Q$ o
     Given arbitrarily many independent samples from $R_Q^2$, the decision \gls{rlwe} problem is to distinguish whether they were drawn from $A_{s,\chi}$ for a fixed secret $s$ or from the uniform distribution on $R_Q^2$. The \gls{rlwe} assumption states that no probabilistic polynomial-time adversary solves this problem with advantage better than negligible in $\lambda$ \cite{regev:2009, cryptoeprint:2012/230}.
 \end{definition}
 
+The assumption is stated for an arbitrary fixed secret, leaving the distribution of $s$ open. Implementations draw it from the ternary distribution over $\{-1, 0, 1\}^N$, which keeps $\|s\|$ minimal and thereby bounds every noise term in which the secret appears as a factor.
+
 \begin{definition}[RLWE Ciphertext]
     \label{def:rlwe}
-    An \gls{rlwe} ciphertext encrypting a plaintext $m \in R_t$ under a persistent ternary secret key $s \overset{\$}{\leftarrow} \{-1, 0, 1\}^N$ is a pair $x = (b, a) \in R_Q^2$, obtained by drawing a fresh sample from $A_{s,\chi}$ and adding the scaled message $\Delta m$ to its first component. The result consists of the \emph{masked element} $b$ and the \emph{public element} $a$.
+    An \gls{rlwe} ciphertext encrypting a plaintext $m \in R_t$ under a persistent secret key $s \overset{\$}{\leftarrow} \{-1, 0, 1\}^N$ is a pair $x = (b, a) \in R_Q^2$, obtained by drawing a fresh sample from $A_{s,\chi}$ and adding the scaled message $\Delta m$ to its first component. The result consists of the \emph{masked element} $b$ and the \emph{public element} $a$.
     \begin{equation}
         \label{eq:rlwe}
         x = (b, a) = (a \cdot s + \Delta m + \epsilon,\; a)
@@ -26,11 +27,10 @@ An instantiation is fixed by a small set of parameters. The working ring $R_Q$ o
     We write $\rlwe_s(m)$ for an encryption of $m$ under $s$, abbreviated $\rlwe(m)$ when the key is clear from context, and $\Call{Encrypt}{m} \mapsto \rlwe(m)$ for the procedure producing a fresh such ciphertext.
 \end{definition}
 
-Since fresh samples are computationally indistinguishable from uniform pairs by \autoref{def:rlwe-problem}, ciphertexts reveal nothing about their plaintexts; the formal IND-CPA reduction is given in \cite{cryptoeprint:2011/277}.
+% Since fresh samples are computationally indistinguishable from uniform pairs by \autoref{def:rlwe-problem}, ciphertexts reveal nothing about their plaintexts; the formal IND-CPA reduction is given in \cite{cryptoeprint:2011/277}.
 
 \begin{definition}[Decryption]
     \label{def:decrypt-generic}
-    % TODO: 04-Results/noise.tex recalls this definition with the bound $\max_i \epsilon_i < Q$; the correct condition is the centered $Q/2$ bound of \autoref{def:decrypt-bgv} --- align.
     The function $\Call{Decrypt}{\rlwe_s(m), s} \mapsto m$ recovers the plaintext from a ciphertext $(b, a)$ by computing $b - a \cdot s = \Delta m + \epsilon$ and removing the noise $\epsilon$. Recovery is correct only while $\|\epsilon\|$ remains below a scheme-dependent bound.
 \end{definition}
 
@@ -49,11 +49,10 @@ The sum is a well-formed encryption of $m_x + m_y$ with public element $a_x + a_
 
 \begin{definition}[Scalar Multiplication]
     \label{def:rlwe-scalar}
-    % TODO: §2.4 (products.tex) types RGSW messages as $\mu \in R$, a ring never defined; settle on $R_Q$ or define $R = \mathbb{Z}[X]/(X^N+1)$ once.
     The product of a ciphertext $\rlwe_s(m) = (b, a)$ with a scalar $c \in R_Q$ is the component-wise product $c \cdot (b, a) = (c \cdot b,\; c \cdot a)$, satisfying $c \cdot \rlwe_s(m) = \rlwe_s(c \cdot m)$ with noise $c \cdot \epsilon$.
 \end{definition}
 
-Message and noise are scaled together, so only multipliers with small coefficients keep the result decryptable. Multiplication of two \emph{ciphertexts}, by contrast, requires considerable additional machinery and amplifies the noise sharply; no construction in this thesis performs it, and it is not treated further.
+Message and noise are scaled together, so only multipliers with small coefficients keep the result decryptable. The product of two \emph{ciphertexts} is not obtained this way. It is quadratic in the secret and must be relinearized back to a pair under $s$ using dedicated evaluation keys, and it combines the two noise terms multiplicatively rather than additively~\cite{cryptoeprint:2011/277}.
 
 \begin{definition}[Public Key]
     \label{def:pk}
@@ -65,21 +64,20 @@ Message and noise are scaled together, so only multipliers with small coefficien
     By \autoref{def:rlwe-add} and \autoref{def:rlwe-scalar} the result is a well-formed ciphertext $\rlwe_s(m)$ with noise $u \cdot \epsilon_{pk} + e_0 - e_1 \cdot s$, a sum of products of small elements.
 \end{definition}
 
-Grounding security in \gls{rlwe} has a structural cost: every ciphertext must carry a random noise term, and every homomorphic operation enlarges it. A ciphertext decrypts correctly only while its noise remains beneath the bound of \autoref{def:decrypt-generic}; once that budget is spent, the plaintext is irrecoverable. The noise budget is therefore the resource that determines how much computation a ciphertext can withstand.
+Security comes at a price. Every ciphertext must carry a random noise term, and every homomorphic operation enlarges it. A ciphertext decrypts correctly only while its noise remains beneath the bound of \autoref{def:decrypt-generic}, and once that budget is spent the plaintext is irrecoverable. The noise budget is the resource that determines how much computation a ciphertext can withstand.
 
-Bootstrapping, due to Gentry \cite{gentry:2009}, lifts the restriction entirely: the decryption function is itself evaluated homomorphically, yielding a fresh encryption of the same plaintext in which the accumulated noise is replaced by the comparatively small noise of the bootstrapping procedure. The operation is expensive, and the leveled constructions in this thesis avoid it, instead choosing parameters large enough that the entire computation completes within a single budget. Within a budget, the standard instrument for shedding accumulated noise is the modulus switch.
+Two remedies exist. Bootstrapping, due to Gentry \cite{gentry:2009}, evaluates the decryption function homomorphically, returning a fresh encryption of the same plaintext whose noise is that of the bootstrapping procedure rather than of the computation preceding it. Circuits of unbounded depth become evaluable, at the cost of by far the most expensive operation in any \gls{fhe} scheme. The alternative is to fix parameters whose budget covers the whole computation in advance and to spend that budget as slowly as possible, for which the standard instrument is the modulus switch.
 
 \begin{definition}[Modulus Switching]
     \label{def:modswitch}
-    Modulus switching transforms a ciphertext $x \in R_Q^2$ under the modulus $Q$ into a ciphertext $x' = \lfloor x \cdot Q'/Q \rceil \in R_{Q'}^2$ under a smaller modulus $Q' < Q$ that decrypts to the same plaintext, by scaling each component by $Q'/Q$ and rounding to the nearest integer. The noise shrinks by the same factor, making the operation the primary noise-management tool of leveled schemes.
+    Modulus switching transforms a ciphertext $x \in R_Q^2$ under the modulus $Q$ into a ciphertext $x' = \lfloor x \cdot Q'/Q \rceil \in R_{Q'}^2$ under a smaller modulus $Q' < Q$ that decrypts to the same plaintext, by scaling each component by $Q'/Q$ and rounding to the nearest integer. The noise shrinks by the same factor, making the operation the primary means of controlling noise growth without bootstrapping.
 \end{definition}
 
 \subsection{The BGV Scheme}
 \label{sec:bgv}
-The implementation in this thesis is built on the BGV scheme \cite{cryptoeprint:2011/277}. %, chosen for its mature residue-based instantiation in OpenFHE \cite{cryptoeprint:2022/915}. 
-As such, we introduce the primary differences between this and the general \gls{rlwe} setting, as far as we are concerned. %% TODO: Rewrite
+BGV \cite{cryptoeprint:2011/277} is among the most mature of the \gls{rlwe}-based schemes. It computes exactly over the plaintext ring $R_t$, so a homomorphic evaluation returns the same value as the corresponding plaintext computation with no approximation error; it batches $N$ independent computations into the slots of a single ciphertext; and its \gls{rns} arithmetic is implemented and maintained in every major \gls{fhe} library~\cite{cryptoeprint:2021/204, cryptoeprint:2022/915}. Where it departs from the general \gls{rlwe} setting is in the placement of the message.
 
-BGV fixes the message scale to $\Delta = 1$ and scales every noise term by the plaintext modulus instead, so that the masked element of \autoref{def:rlwe} reads $b = a \cdot s + m + t\,\epsilon_{\mathsf{rlwe}}$ for a base noise term $\epsilon_{\mathsf{rlwe}} \overset{\$}{\leftarrow} \chi$. % \footnote{Some noise-management strategies, such as OpenFHE's \texttt{FLEXIBLEAUTO}, vary $\Delta$ in practice.} 
+BGV fixes the message scale to $\Delta = 1$ and scales every noise term by the plaintext modulus instead, so that the masked element of \autoref{def:rlwe} reads $b = a \cdot s + m + t\,\epsilon_{\mathsf{rlwe}}$ for a base noise term $\epsilon_{\mathsf{rlwe}} \overset{\$}{\leftarrow} \chi$.
 Ciphertexts are nevertheless written in the general form of \autoref{def:rlwe} throughout this thesis, with the substitution $\Delta = 1$, $\epsilon = t\,\epsilon_{\mathsf{rlwe}}$ left implicit.
 
 \begin{definition}[BGV Decryption]
@@ -88,7 +86,7 @@ Ciphertexts are nevertheless written in the general form of \autoref{def:rlwe} t
     \begin{equation}
         \Call{Decrypt}{(b, a), s} = \big[\, [b - a \cdot s]_Q \,\big]_t
     \end{equation}
-    The inner reduction recovers $m + t\,\epsilon_{\mathsf{rlwe}}$ exactly over the integers provided $\|m + t\,\epsilon_{\mathsf{rlwe}}\| \leq \lfloor Q/2 \rfloor$, and the outer reduction then strips the noise term and returns $m$. This is the concrete instance of the bound in \autoref{def:decrypt-generic}: decryption fails once the noise reaches $Q/2$.
+    The inner reduction recovers $m + t\,\epsilon_{\mathsf{rlwe}}$ exactly over the integers provided $\|m + t\,\epsilon_{\mathsf{rlwe}}\| \leq \lfloor Q/2 \rfloor$, and the outer reduction then strips the noise term and returns $m$. This is the concrete instance of the bound in \autoref{def:decrypt-generic}, which places decryption failure at $Q/2$.
 \end{definition}
 
 \begin{definition}[\gls{simd} Packing]
@@ -96,11 +94,12 @@ Ciphertexts are nevertheless written in the general form of \autoref{def:rlwe} t
     If the plaintext modulus is a prime satisfying $t \equiv 1 \pmod{2N}$, a plaintext may be reinterpreted as a vector of $N$ independent \emph{slots} $[c_i]_t$ on which homomorphic operations act element-wise \cite{cryptoeprint:2011/133}. For example, the slot-wise product gives $(1, 2) \cdot (2, 3) = (2, 6)$, in contrast to the polynomial product $(1 + 2X)(2 + 3X) = 2 + 7X + 6X^2$.
 \end{definition}
 
+The analogy to hardware \gls{simd} extends only to the semantics, not to the cost. A slot-wise operation is an ordinary ciphertext operation and takes the time of one, whether one slot is occupied or all $N$ are. Packing therefore buys throughput and never latency, and it improves an application only to the extent that the application has $N$ independent computations to offer.
+
 \subsection{Multi-Party FHE}
 \label{sec:mpfhe}
-% TODO: bib: add a canonical threshold-FHE citation (e.g. Asharov et al., EUROCRYPT 2012); currently only the OpenFHE implementation is cited.
-When mutually distrusting parties compute on shared data, no single party can be allowed to hold the secret key. Threshold variants of \gls{fhe} remove this single point of trust by distributing both key generation and decryption; this thesis uses the additive $n$-out-of-$n$ variant implemented in OpenFHE \cite{cryptoeprint:2022/915}.
+When mutually distrusting parties compute on shared data, no single party can be allowed to hold the secret key. Threshold variants of \gls{fhe} remove this single point of trust by distributing both key generation and decryption among the parties~\cite{cryptoeprint:2011/613}, at the cost of an interactive decryption round. The $n$-out-of-$n$ variant described below is the one implemented in OpenFHE~\cite{cryptoeprint:2022/915}, where the joint secret is the plain sum of the individual shares.
 
-During a one-time setup, each party $i$ samples its own secret share $s_i$ and contributes a corresponding public share, formed against a common public element $a$. By \autoref{def:rlwe-add} the shares aggregate into a single joint public key (\autoref{def:pk}) for the joint secret $s = \sum_i s_i$, under which every party encrypts. The joint secret itself is never reconstructed.
+During a one-time setup, each party $i$ samples its own secret share $s_i$ and publishes a public share formed against the common public element $a$ carried by the preceding party's key. By \autoref{def:rlwe-add} the shares accumulate into a single joint public key (\autoref{def:pk}) for the joint secret $s = \sum_i s_i$, under which every party encrypts. The joint secret is never reconstructed, and any single honest share suffices to keep it hidden.
 
-Decryption proceeds in two rounds. Each party first releases a \emph{partial decryption} $d_i = a \cdot s_i + \epsilon^{\mathsf{fl}}_i$ of the ciphertext $(b, a)$, computed from its own share and a fresh \emph{flooding} term. The flooding noise $\epsilon^{\mathsf{fl}}_i$ is drawn from a distribution much wider than $\chi$, so that $d_i$ statistically hides $s_i$. Because decryption is linear in the secret, the partial decryptions then combine into $b - \sum_i d_i = \Delta m + \epsilon - \sum_i \epsilon^{\mathsf{fl}}_i$ without any party learning the joint secret; correctness requires only that the flooding noise, like any other, stays within the noise budget of \autoref{def:decrypt-generic}. %% TODO: Cite
+Decryption proceeds in two rounds. Each party first releases a \emph{partial decryption} $d_i = a \cdot s_i + \epsilon^{\mathsf{fl}}_i$ of the ciphertext $(b, a)$, computed from its own share and a fresh \emph{flooding} term. The flooding noise $\epsilon^{\mathsf{fl}}_i$ is drawn from a distribution much wider than $\chi$, so that $d_i$ statistically hides $s_i$~\cite{cryptoeprint:2011/613}. Because decryption is linear in the secret, the partial decryptions then combine into $b - \sum_i d_i = \Delta m + \epsilon - \sum_i \epsilon^{\mathsf{fl}}_i$ without any party learning the joint secret. Correctness requires only that the flooding noise, like any other, stays within the noise budget of \autoref{def:decrypt-generic}, which is what makes the width of the flooding distribution a parameter of the scheme rather than a free choice.

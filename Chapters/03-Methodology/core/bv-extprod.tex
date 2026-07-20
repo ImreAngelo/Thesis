@@ -68,7 +68,7 @@ To decompose a positive integer $c \in \mathbb{Z}^{+}$ into signed digits $[d]_{
 \end{algorithmic}
 \end{algorithm}
 
-As with $\Call{GetPower}{i,j}$ in \autoref{} the offset $\varGamma$ is calculated exactly once, when the context is first created.\footnote{Specifically the bitwise $\varGamma = (1 \ll (b-1))\cdot((2 \ll (b \ell)) - 1)/((1\ll b) - 1)$ is used, but this is slightly less human readable than \eqref{eq:carry-offset}.} 
+As with $\Call{GetPower}{i,j}$ from \autoref{sec:getpower} the offset $\varGamma$ is calculated exactly once, when the context is first created.\footnote{Specifically the bitwise $\varGamma = (1 \ll (b-1))\cdot((2 \ll (b \ell)) - 1)/((1\ll b) - 1)$ is used, but this is slightly less human readable than \eqref{eq:carry-offset}.} 
 
 \newpage
 Once we have a working $\Call{Decompose}{}$ function, the external product can be written as \autoref{alg:external-product}. Our implementation is functionally the same, except that it has been split into three stages for better parallelization. First, all the $2k$ inverse \gls{ntt} evaluations required by the decompositions are calculated in parallel. Second, the decompose calls are merged into the external product function, and the two ciphertext elements are decomposed in parallel over $2k\ell$ threads. This stage includes the $2k\ell$ forward \gls{ntt} calls. Finally, the for loop calculating the inner product is parallelized over $\ell$ threads.
@@ -92,10 +92,3 @@ Once we have a working $\Call{Decompose}{}$ function, the external product can b
 \State \Return $acc$
 \end{algorithmic}
 \end{algorithm}
-
-% However, our implementation contains a series of optimizations aimed at . It can be divided into three distinct stages, each stage depending on the previous stage...
-
-% %%%
-% %%% Implemented (staged, parallel) external product
-% %%%
-% \input{Algorithms/new/extprod-bv}

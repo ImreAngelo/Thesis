@@ -51,5 +51,5 @@ Furthermore, every element of $\bv{P}(\mu)$ is independent, making half of the $
 %%%
 \input{Algorithms/new/encrypt-bv}
 
-%% TODO: Explain (crypto) context!
-In \autoref{alg:bv:encrypt}, $\mathcal{B}_Q$, $B$ and $\ell$ are parameters used to initialize to the cryptographic context, and are thus available to any functions that exist within the context. The values $B^i \bmod{q_j}$ are calcuated and stored ahead of time, when the context is first initialized, and are exposed through a helper function $\Call{GetPower}{i, j} \gets B^i \bmod{q_j}$. $\Call{TowerMul}{\mu, j, B^i}$ extracts the $j$-th limb from $\mu$, multiplies it by $\Call{GetPower}{i, j}$, and inserts the product modulo $q_j$ back into the $j$-th limb.
+\label{sec:getpower}
+In \autoref{alg:bv:encrypt}, $\mathcal{B}_Q$, $B$ and $\ell$ are parameters used to initialize to the cryptographic context, and are thus available to any functions that exist within said context. The values $B^i \bmod{q_j}$ are calcuated and stored ahead of time, when the context is first initialized, and are exposed through a helper function $\Call{GetPower}{i, j} \gets B^i \bmod{q_j}$. $\Call{TowerMul}{\mu, j, B^i}$ extracts the $j$-th limb from $\mu$, multiplies it by $\Call{GetPower}{i, j}$, and inserts the product modulo $q_j$ back into the $j$-th limb.

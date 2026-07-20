@@ -4,7 +4,7 @@
 \section{Noise Analysis}
 %% TODO: Keep or trash? Maybe methodologoy? The error $\epsilon$ in an \gls{rlwe} ciphertext is a vector of values sampled from a gaussian distribution with standard deviation $\omega$, so the expected value across the error samples $\epsilon_i \in \epsilon$ is $0$. 
 %% TODO: Move to methodology section? When analyzing the noise, the exact value of the error is not as interesting . 
-In this section I present the measured error resulting by their maximum error component $\max_i\epsilon_i$. Recall from~\autoref{def:decrypt-generic} that decryption is succesful if $\max_i\epsilon_i < Q$ I emphasize the plots in this section are base-2 logarithmic on the y-axis, to highlight the bits required to  
+In this section I present the measured error resulting by their maximum error component $\max_i\epsilon_i$. Recall from~\autoref{def:decrypt-bgv} that decryption is succesful while $\|\epsilon\| \leq \lfloor Q/2 \rfloor$, the centered bound of \autoref{def:centered}. I emphasize the plots in this section are base-2 logarithmic on the y-axis, to highlight the bits required to  
 
 \begin{itemize}
     \item I present the noise growth of various functions

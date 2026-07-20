@@ -1,43 +1,48 @@
+%% TODO: Weave into intro
+%% SCOPE (closing, unnumbered --- one short prose paragraph in the final version)
+% \begin{itemize}
+%     \item This thesis implements and evaluates the core passive-adversary protocol: setup, encryption, write, partial and final decryption
+%     \item Out of scope: the defenses against active adversaries (paper \S6: equivocation protection via hash-chained keys, verifiable FHE, reactive verification), the extensions (paper \S7: threshold decryption and client churn, IND-CPA$^{D}$ countermeasures), and the recipient-anonymity layer (classical encryption, orthogonal to the \gls{fhe} pipeline)
+%     \item The modifications made in this thesis's instantiation are detailed in \autoref{sec:impl:spar}
+% \end{itemize}
+
+
+
 %%
 %% Implementation Details (sPAR)
 %% Specifics to the library, if any?
 %%
 \section{Implementation Details of sPAR}
 \label{sec:impl:spar}
-Our instantiation of \gls{spar} can be considered the \emph{minimal} version of the original specification~\cite{cryptoeprint:2025/860}. We do not consider the active attack threats. Bucket sorting is also not implemented, though this should have a negligible effect as we estimate each bucket can be sorte din parallel in around $100$~ms \cite{}. %% TODO: FIND SOURCE
-
-% Only implements the core functions; does not consider 
-\begin{itemize}
-    \item Some functions are missing: bucket sorting, all extras such as equivocation protection etc.
-    \item Sorting is negligible, estimated $< 100$ ms according to \cite{} and highly parallelizable.
-    \item Write step has been separated into two steps
-\end{itemize}
+Our instantiation of \gls{spar} can be considered the \emph{minimal} version of the original specification~\cite{cryptoeprint:2025/860}. We do not consider the active threat model(s) of sections 6 and 7. Bucket sorting is also not implemented, though this should have a negligible effect as we estimate each bucket can be sorted in parallel in around $100$~ms~\cite{cryptoeprint:2025/860, cryptoeprint:2023/852, cryptoeprint:2024/1894}.
 
 \begin{itemize}
     \item Uses a procedural programming paradigm, meaning the library implements the required functions but does not provide a full state-maintaining implementation of the server nor client. 
     \item The benchmarks and testing framework is what actually composes the protocol, using the functions from this library.
-    \item This was done so that the functionality is not tightly coupled to the benchmarking without spending time implementing actual communication which would require additional work: serializing data, error handling, and coordinating multiple machines.
+    \item This was done so that the functionality is not tightly coupled to the benchmarking without spending time implementing actual communication which would require additional work: serializing data, error handling, and coordinating multiple machines. % Basically: justify not having a compiled executable "server" and "client"
 \end{itemize}
 
 \subsection{Server Write Step}
-The \texttt{Server::Write} function contains several important changes from~\cite[Algorithm 2]{cryptoeprint:2025/860}. 
+The \texttt{Server::Write} deviates slightly from~\cite[Algorithm 2]{cryptoeprint:2025/860}. 
 
+%% TODO: Explain the namespace::function naming convention, i.e. server::Write instead of "Server: Write" maybe even adopt this in the sPAR prelims.
 \begin{itemize}
     \item Most important algorithm; does the actual homomorphic sorting
-    \item Some changes compared to \cite{cryptoeprint:2025/860}
+    \item Changes:
     \begin{itemize}
-        \item Splits the write step and pre-processing step
-        \item HasWrite is inverted i.e. ``notHasWrite''
-        \item Uses external products to handle deep circuits as \cite{cryptoeprint:2025/860} recommends.
-        \item Not implementable using only external products: must use internal products
-        \item As the sever does not care about the privacy of its users, and we can assume it is actively attempting to break privacy, to manage noise \textbf{the server does not actually encrypt the initial entries of $L$, $I$ and $hasNotWritten$}. They are in the correct form but generated using $\epsilon = 0, a = 0$. This has a very minor impact on noise but worth noting, major impact on setup phase as it does not spend any time on encrypting or generating random values.
+        \item Splits the write step and pre-processing step, the clients perform the pre-processing (making client::encryption slower) since we do not consider bandwidth optimizations
+        \item HasWrite is inverted i.e. ``notHasWrite'' -> Saves one operation
+        \item Uses external products to handle deep circuits as \cite{cryptoeprint:2025/860} recommends. In fact, their algorithm is general and ours is not; explicit external products.
+        \item Not implementable using only external products per se: must use internal products
+        \item To minimize noise and make initialization of the state matrices faster, the server can opt to init with "noiseless" encryptions. These provide no security on their own (which is fine since the initial state is known to all), but become regular encryptions after 1 iteration of the inner loop.
         \item Variables:
         \begin{itemize}
             \item $z_{i,d},\; I_{i,k},\;\mathsf{hasNotWritten}$ are $ \Call{RGSW}{m}, m \in \{0, 1\}^{N}$
             \item $L_{i,k} = \Call{RLWE}{m}, m \in R_t$
         \end{itemize}
     \end{itemize}
-    \item Swapping order so $h = (\mathsf{hasNotWritten} \boxtimes I_{i,k}) \boxtimes z_{i,d})$ saw a 30 to 40 bit improvement in the noise of \Call{Server::Write}{}
+    %% TODO: Do not frame it as a mistake but rather as them using homomorphic multiplication in alg 2 and we using external products
+    \item Order matters: swapping order so $h = (\mathsf{hasNotWritten} \boxtimes I_{i,k}) \boxtimes z_{i,d})$ saw a 30 to 40 bit improvement in the noise of \Call{Server::Write}{}
 \end{itemize}
 
 
@@ -50,7 +55,7 @@ The \texttt{Server::Write} function contains several important changes from~\cit
 \begin{algorithmic}[1]
 \Require Reference to state matrices $I$ and $L$
 \Require Encrypted RLWE value $V_r$
-\Require Vectors $z_0$, $z_1$ and $z_2$ where $z_j$ is a vector of $\eta$ encrypted RGSW ciphertexts (one-hot encoding) % $\{c_{j,0}, \dots, c_{j,\eta -1}\}$ for $j \in [0, 3)$ (one-hot encoding)
+\Require Vectors $z_0$, $z_1$ and $z_2$ where $z_j$ is a vector of $\eta$ encrypted RGSW ciphertexts (TODO: explain one-hot encoding; only one of them, the elements of $z_i$ are 1 and the rest are 0) % $\{c_{j,0}, \dots, c_{j,\eta -1}\}$ for $j \in [0, 3)$ (one-hot encoding)
 \Ensure Updates the state matrices $I$ and $L$
 \Ensure Encrypted boolean indicating wether the operation was successful
 \State $\mathsf{hasNotWritten} \gets \Call{EncryptRGSW}{1}$
@@ -60,7 +65,7 @@ The \texttt{Server::Write} function contains several important changes from~\cit
             \State $h \gets (\mathsf{hasNotWritten} \boxtimes I_{i,k}) \boxtimes z_{i,d})$
             \State $L_{i,k} \gets L_{i,k} + V_r \boxdot h$
             \State $I_{i,k} \gets I_{i,k} - h$
-            \State $\mathsf{hasNotWritten} \gets \mathsf{hasNotWritten} + h$
+            \State $\mathsf{hasNotWritten} \gets \mathsf{hasNotWritten} - h$
         \EndFor
     \EndFor
 \EndFor
