@@ -242,6 +242,7 @@
 \RequirePackage{amsmath}
 \RequirePackage{amscd}
 \RequirePackage{amsthm}
+\RequirePackage{aliascnt} % share the theorem counter while keeping per-environment \autoref names
 \RequirePackage{amssymb}
 \RequirePackage{mathtools}
 \RequirePackage{needspace}
@@ -270,20 +271,62 @@
 \theoremstyle{atheorem} 
 \numberwithin{equation}{chapter}
 
+% All theorem-like environments share the theorem counter. Declaring them with
+% [theorem] would make \autoref call every one "Theorem N.M". Instead each gets
+% its own counter aliased to theorem (shared numbering) plus an \autoref name.
 \newtheorem{theorem}{Theorem}[chapter]
-\newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{conjecture}[theorem]{Conjecture}
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{proposition}[theorem]{Proposition}
+
+\newaliascnt{corollary}{theorem}
+\newtheorem{corollary}[corollary]{Corollary}
+\aliascntresetthe{corollary}
+\newcommand*{\corollaryautorefname}{Corollary}
+
+\newaliascnt{conjecture}{theorem}
+\newtheorem{conjecture}[conjecture]{Conjecture}
+\aliascntresetthe{conjecture}
+\newcommand*{\conjectureautorefname}{Conjecture}
+
+\newaliascnt{lemma}{theorem}
+\newtheorem{lemma}[lemma]{Lemma}
+\aliascntresetthe{lemma}
+\newcommand*{\lemmaautorefname}{Lemma}
+
+\newaliascnt{proposition}{theorem}
+\newtheorem{proposition}[proposition]{Proposition}
+\aliascntresetthe{proposition}
+\newcommand*{\propositionautorefname}{Proposition}
 
 \theoremstyle{adefinition}
-\newtheorem{definition}[theorem]{Definition}
-\newtheorem{finalremark}[theorem]{Final Remark}
-\newtheorem{remark}[theorem]{Remark}
-\newtheorem{observation}[theorem]{Observation}
-\newtheorem{example}[theorem]{Example}
+\newaliascnt{definition}{theorem}
+\newtheorem{definition}[definition]{Definition}
+\aliascntresetthe{definition}
+\newcommand*{\definitionautorefname}{Definition}
+
+\newaliascnt{finalremark}{theorem}
+\newtheorem{finalremark}[finalremark]{Final Remark}
+\aliascntresetthe{finalremark}
+\newcommand*{\finalremarkautorefname}{Final Remark}
+
+\newaliascnt{remark}{theorem}
+\newtheorem{remark}[remark]{Remark}
+\aliascntresetthe{remark}
+\newcommand*{\remarkautorefname}{Remark}
+
+\newaliascnt{observation}{theorem}
+\newtheorem{observation}[observation]{Observation}
+\aliascntresetthe{observation}
+\newcommand*{\observationautorefname}{Observation}
+
+\newaliascnt{example}{theorem}
+\newtheorem{example}[example]{Example}
+\aliascntresetthe{example}
+\newcommand*{\exampleautorefname}{Example}
+
+% Independent counters (not tied to theorem); still need \autoref names.
 \newtheorem{recommendation}{Recommendation}
+\newcommand*{\recommendationautorefname}{Recommendation}
 \newtheorem{question}{Question}
+\newcommand*{\questionautorefname}{Question}
 
 \newcommand\xqed[1]{%
   \leavevmode\unskip\penalty9999 \hbox{}\nobreak\hfill

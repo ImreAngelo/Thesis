@@ -22,6 +22,20 @@
 % Autoref
 \newcommand{\algorithmautorefname}{Algorithm}
 
+% \autoref for a *section-level* appendix reference (e.g. A.1) prints
+% "section A.1" because hyperref binds the type name at the call site, and
+% the appendix references live in the main body (before \appendix). Renaming
+% \sectionautorefname after \appendix therefore has no effect on them.
+% This helper sets the structural autoref names to "appendix" in a local
+% group so \appref{app:foo} prints "appendix A.1" while plain \autoref is
+% unaffected. (hyperref already prints appendix *chapters* as "Appendix A".)
+\newcommand{\appref}[1]{\begingroup
+  \def\chapterautorefname{appendix}%
+  \def\sectionautorefname{appendix}%
+  \def\subsectionautorefname{appendix}%
+  \def\subsubsectionautorefname{appendix}%
+  \autoref{#1}\endgroup}
+
 % Code
 \usepackage{minted}
 

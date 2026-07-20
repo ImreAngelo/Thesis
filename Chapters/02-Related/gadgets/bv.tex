@@ -1,8 +1,8 @@
 % \subsection{Brakerski-Vaikuntanathan}
 %% TODO: Verify claim "first" and what about cryptoeprint:2012/078 (Bra12)?
 %% TODO: Compare against list: [BGV14, MP12, Bra12, GSW13, AP14, DM15, GINX16, CKKS17, CGGI20, BIP+22] % For example: why CGGI20 not 18 or 16? Why CKKS17 not 16?
-Brakerski and Vaikuntanathan~\cite{cryptoeprint:2011/344} first proposed decomposing ciphertext elements into small digits as a means of controlling the noise in \textcolor{red}{the scalar multiplication of ciphertexts}. %% TODO: Verify 'scalar multiplication' claim
-The idea has since been generalized into the idea of \emph{gadget decomposition} and been employed in the design of many \gls{fhe} schemes % as an auxiliary tool for certain procedures, such as key-switching, or as the basis for entire scheme. 
+Brakerski and Vaikuntanathan~\cite{cryptoeprint:2011/344} first proposed decomposing ciphertext elements into small digits as a means of controlling the noise in the scalar multiplication of ciphertexts. %% TODO: Verify 'scalar multiplication' claim
+The idea has since been generalized into the idea of \emph{gadget decomposition} and been employed in the design of numerous \gls{fhe} schemes % as an auxiliary tool for certain procedures, such as key-switching, or as the basis for entire scheme. 
 \cite{cryptoeprint:2011/277, cryptoeprint:2012/078, cryptoeprint:2012/144, cryptoeprint:2013/340, cryptoeprint:2014/816, cryptoeprint:2016/421, cryptoeprint:2018/421}.
 
 %% (R)GSW - Used in GSW (cryptoeprint:2013/340), FHEW (cryptoeprint:2014/816) and TFHE (cryptoeprint:2018/421)
@@ -61,40 +61,46 @@ Digit decomposition has two important properties. First, if the digits $\gamma_i
 \end{lemma}
 
 \subsubsection{RNS Instantiation}
-Digit decomposition cannot be applied directly to \gls{rlwe} samples in an \gls{rns} scheme where the system only has access to the residues. When Bajard et. al. implemented the first \gls{rns} version of the BV scheme \cite{cryptoeprint:2016/510} they exchanged digit decomposition for \gls{crt} decomposition, exploiting the fact that this decomposition is already required by the \gls{rns}.
+\label{sec:hps}
+Digit decomposition cannot be applied directly to \gls{rlwe} samples in an \gls{rns} scheme where the system only has access to the residues. When Bajard et al. implemented the first \gls{rns} version of the BV scheme \cite{cryptoeprint:2016/510} they exchanged digit decomposition for \gls{crt} decomposition, exploiting the fact that this decomposition is already required by the \gls{rns}. %% TODO: This ... was later optimized by Halevi, Polyakov and Shoup \cite{cryptoeprint:2018/117} to the form introduced below.
 
-%% TODO: Clean up, make sure \hat{q} notation is known and well-defined --- have it listed as notation somewhere or refer back to base conversion e.g. recall \hat{q} from {ref}, also the inverse notation is a bit hand-wavy, isn't it just q_i/Q and mod doesn't matter?
-Recall from~\autoref{sec:rns-base-conversion} the \gls{crt} factors $\hat{q}_i = Q/q_i$ and their inverses $[\hat{q}_i^{-1}]_{q_i}$ modulo $q_i$. By formulating the \gls{crt} as an inner product \eqref{eq:crt-gadget}, it is immediately clear that \gls{crt} with moduli $q_i$ is an exact decomposition on $g = (\hat{q}_0\cdot[\hat{q}_0^{-1}]_{q_0}, \dots, \hat{q}_{k-1}\cdot[\hat{q}_{k-1}^{-1}]_{q_{k-1}})$ with $\beta = \max_i\{q_i\}/2$ (assuming centered residues). This leads to precisely the... % somehow include HPS 
-%
-%% TODO: We can skip this, but we need to correct attribution so that the bridge from BEHZ -> HPS is clear
-% \begin{align}
-%     \behz{P}(u) = () \\
-%     \behz{D}(v) = ()
-% \end{align}
-%
-%% TODO: Define R^{k} \cong R_{q_0} \times \dots \R_{q_{k-1}} or maybe use \mathcal{B}_Q
-\begin{align}
-    \label{def:hps:P}
-    \hps{P}(a) &= (a\cdot[\hat{q}^{-1}_0]_{q_0}\cdot \hat{q}_0, \dots, a\cdot[\hat{q}^{-1}_{k-1}]_{q_0}\cdot [\hat{q}_{k-1}]_Q) \in R^{k} \\
-    \label{def:hps:D}
-    \hps{D}(a) &= ([a]_{q_0}, [a]_{q_1}, \dots, [a]_{q_{k-1}}) \in R_Q^{k}
-\end{align}
+\begin{definition}[HPS Gadget] %% TODO: Maybe definition block is ugly and wierd here?
+    %% TODO: Clean up, make sure \hat{q} notation is known and well-defined --- have it listed as notation somewhere or refer back to base conversion e.g. recall \hat{q} from {ref}, also the inverse notation is a bit hand-wavy, isn't it just q_i/Q and mod doesn't matter?
+    Recall from~\autoref{sec:rns-base-conversion} the \gls{crt} factors $\hat{q}_i = Q/q_i$ and their inverses $[\hat{q}_i^{-1}]_{q_i}$ modulo $q_i$. By formulating the \gls{crt} as an inner product \eqref{eq:crt-gadget}, it is immediately clear that \gls{crt} with moduli $q_i$ is an exact decomposition on $g = (\hat{q}_0\cdot[\hat{q}_0^{-1}]_{q_0}, \dots, \hat{q}_{k-1}\cdot[\hat{q}_{k-1}^{-1}]_{q_{k-1}})$ with $\beta = \max_i\{q_i\}/2$ (assuming centered residues). This leads to precisely the gadget from \cite{cryptoeprint:2018/117}. 
+    %
+    %% TODO: We can skip this, but we need to correct attribution so that the bridge from BEHZ -> HPS is clear
+    % \begin{align}
+    %     \behz{P}(u) = () \\
+    %     \behz{D}(v) = ()
+    % \end{align}
+    %
+    \begin{align}
+        \label{def:hps:P}
+        \hps{P}(a) &= (a\cdot[\hat{q}^{-1}_0]_{q_0}\cdot \hat{q}_0, \dots, a\cdot[\hat{q}^{-1}_{k-1}]_{q_0}\cdot [\hat{q}_{k-1}]_Q) \\
+        \label{def:hps:D}
+        \hps{D}(a) &= ([a]_{q_0}, [a]_{q_1}, \dots, [a]_{q_{k-1}})
+    \end{align}
+\end{definition}
 
-\gls{rns} stores the polynomial $a\in R_Q$ as the set of residues $([a]_{q_0}, \dots, [a]_{q_{k-1}})$. Therefore \eqref{def:hps:D} becomes free in the sense that calculating $\hps{D}(a) \cong a$ requires no arithmetic. In fact, neither does \eqref{def:hps:P} since $\hat{q}_i = Q/q_i = (\prod_{l=0}^{k-1}q_l)/q_i$ contains $q_j$ as a factor unless $i=j$, in which case $\hat{q}_i\cdot[\hat{q}_i^{-1}]_{q_i} = 1$ by definition!
-\begin{gather*}
-    a\cdot[\hat{q}^{-1}_i]_{q_i}\cdot\hat{q}_i = \{(a\cdot[\hat{q}_i^{-1}]_{q_i}\cdot\hat{q}_i) \bmod{q_j} \}_{j = 0}^{k-1} 
-    \\
-    % \text{note that } \hat{q}_i = \frac{1}{q_i}\cdot\prod_{l=0}^{k-1}q_l \text{ contains } q_j \text{ as a factor} 
-    % \\
-    % \text{ unless } i = j \text{, in which case } \hat{q}_i\cdot\hat{q}_i^{-1} = 1 \text{ by definition}
-    % \\
-    % \therefore\; 
-    (a\cdot[\hat{q}^{-1}_i]_{q_i}\cdot\hat{q}_i) \bmod q_j = 
-    \begin{cases}
-        0, & i \not= j\\
-        [a]_{q_j}, & i = j
-    \end{cases}
-\end{gather*}
+\begin{remark}
+    \label{rem:hps-optimization}
+    As \gls{rns} stores the polynomial $a\in R_Q$ as the set of residues $[a]_{q_i}$ for all $q_i \in \mathcal{B}_{Q}$, the $\hps{D}(\cdot)$ vector \eqref{def:hps:D} is \emph{free} in the sense that calculating $\hps{D}(a) \cong a$ requires no arithmetic. In fact, neither does \eqref{def:hps:P} since $\hat{q}_i = Q/q_i = (\prod_{l=0}^{k-1}q_l)/q_i$ contains $q_j$ as a factor unless $i=j$, in which case $\hat{q}_i\cdot[\hat{q}_i^{-1}]_{q_i} = 1$ by definition! \\
+    \begin{gather*}
+        a\cdot[\hat{q}^{-1}_i]_{q_i}\cdot\hat{q}_i = \{(a\cdot[\hat{q}_i^{-1}]_{q_i}\cdot\hat{q}_i) \bmod{q_j} \}_{j = 0}^{k-1} 
+        \\
+        % \text{note that } \hat{q}_i = \frac{1}{q_i}\cdot\prod_{l=0}^{k-1}q_l \text{ contains } q_j \text{ as a factor} 
+        % \\
+        % \text{ unless } i = j \text{, in which case } \hat{q}_i\cdot\hat{q}_i^{-1} = 1 \text{ by definition}
+        % \\
+        % \therefore\; 
+        (a\cdot[\hat{q}^{-1}_i]_{q_i}\cdot\hat{q}_i) \bmod q_j = 
+        \begin{cases}
+            0, & i \not= j\\
+            [a]_{q_j}, & i = j
+        \end{cases}
+    \end{gather*}
+\end{remark} 
 
+   
 %% TODO: The convention of calling the 'elements' of the decomp. output 'digits' is not introduced anywhere!
 While the HPS gadget is cheap, the quality $\beta = \max_i{q_i/2}$ is too large for many applications. A second level of decomposition can be applied... Since every digit now fits inside a machine word (constraint of RNS), standard digit decomposition can be applied to each limb as permitted by~\autoref{thm:gadget-layers}. The resulting gadget has $k\ell$ digits bounded by $B/2$ and is exact if $B^\ell \geq \max_i{q_i}$ etc.

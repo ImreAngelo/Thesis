@@ -1,9 +1,14 @@
 \chapter{Number Theory}
 
-\section{Chinese Remaineder Theorem}
+%%
+%% CRT
+%%
+\section{The Chinese Remaineder Theorem}
+\label{app:crt}
+
 \begin{definition}[Chinese Remainder Theorem]
     \label{def:crt}
-    co-prime moduli etc.
+    coprime moduli etc.
     \begin{align*}
         x &\equiv x_0 \pmod{q_0} \\
         \vdots \\
@@ -20,8 +25,44 @@
     \end{gather}
 \end{definition}
 
-\section{Number Theoretic Transform}
-\begin{itemize}
-    \item Turns a convolution into a nega/cyclic 
-    \item Same as FFT but over different ring
-\end{itemize}
+
+
+%%
+%% NTT
+%%
+\section{The Number Theoretic Transform}
+\label{app:ntt}
+
+The efficiency of modern ring-based homomorphic encryption relies strictly on substituting high-complexity polynomial arithmetic with low-complexity scalar operations. This appendix formalizes the algebraic mechanics of the Number Theoretic Transform (NTT) over the negacyclic polynomial ring $R_{q_i} = \mathbb{Z}_{q_i}[X]/(X^N+1)$, which dictates the behavior of a single RNS tower.
+
+\begin{definition}[Principal Roots of Unity]
+    Let $N$ be a power of two and $q$ be an $N$-transformable modulus such that $q \equiv 1 \pmod{2N}$. The algebraic field $\mathbb{Z}_q$ is guaranteed to contain a \emph{primitive $2N$-th root of unity}, denoted $\psi$, which strictly satisfies $\psi^{2N} \equiv 1 \pmod q$ and $\psi^k \not\equiv 1 \pmod q$ for all $0 < k < 2N$. Consequently, it holds that $\psi^N \equiv -1 \pmod q$.
+\end{definition}
+
+\begin{definition}[Forward Negacyclic NTT]
+    Let $a \in R_q$ be a polynomial defined by its coefficient vector $(c_0, c_1, \dots, c_{N-1})$. The roots of the cyclotomic polynomial $X^N+1 = 0$ in $\mathbb{Z}_q$ are explicitly the odd powers of $\psi$: $\{\psi^1, \psi^3, \dots, \psi^{2N-1}\}$. 
+    
+    The \emph{Forward NTT} is the linear evaluation mapping of $a(X)$ exclusively at these specific roots. The transformed vector $\hat{a} = \text{NTT}(a)$ is defined component-wise for $j \in \{0, 1, \dots, N-1\}$ as:
+    \begin{equation}
+        \label{eq:forward-ntt}
+        \hat{a}_j = a(\psi^{2j+1}) = \sum_{i=0}^{N-1} c_i \psi^{(2j+1)i} \pmod q
+    \end{equation}
+\end{definition}
+
+\begin{definition}[Inverse Negacyclic NTT]
+    Because the evaluation points are distinct roots of unity, the forward mapping is a strict algebraic isomorphism and is thereby unconditionally invertible. Given the transformed vector $\hat{a}$, the \emph{Inverse NTT} (INTT) reconstructs the original polynomial coefficients $c_i$ for $i \in \{0, 1, \dots, N-1\}$ via the orthogonal properties of these roots. The inverse mapping is formulated as:
+    \begin{equation}
+        \label{eq:inverse-ntt}
+        c_i = \text{INTT}(\hat{a})_i = N^{-1} \psi^{-i} \sum_{j=0}^{N-1} \hat{a}_j \psi^{-2ij} \pmod q
+    \end{equation}
+    where $N^{-1}$ denotes the modular multiplicative inverse of $N$ in $\mathbb{Z}_q$.
+\end{definition}
+
+\begin{theorem}[Negacyclic Convolution Theorem]
+    Let $a, b \in R_q$. The coefficient vector of their polynomial product $c = a \cdot b \pmod{X^N+1}$ is canonically isomorphic to the Hadamard (element-wise) product of their respective NTT forms. Specifically:
+    \begin{equation}
+        c = \text{INTT}(\text{NTT}(a) \odot \text{NTT}(b))
+    \end{equation}
+    
+    By exploiting the symmetry of roots of unity via fast decimation algorithms---functionally identical to the Fast Fourier Transform (FFT) utilizing the Cooley-Tukey butterfly structure---the computational evaluation of both the forward and inverse NTT is mathematically reduced from a standard complexity of $\mathcal{O}(N^2)$ to $\mathcal{O}(N \log N)$. This precise algorithmic reduction forms the absolute baseline requirement for practical latency in RNS-variant homomorphic cryptography.
+\end{theorem}

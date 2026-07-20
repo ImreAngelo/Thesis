@@ -1,40 +1,34 @@
+\section{Notation}
+\label{sec:notation}
+% TODO: §2.3 (formats.tex, baseconv.tex) is written in the first person ("I will consider", "I refer to"); this section and §2.2 use the impersonal voice --- unify.
 
-%% TODO: Centralize control over notations
-% \renewcommand{\vec}[1]{\overrightarrow{\mathbf{#1}}}
-
-%% TODO: Move notation here:
-\section{Notations}
-
-%% General mathematical notation
+The following conventions hold throughout this thesis.
 \begin{itemize}
-    \item All logarithms are base 2, that is $\log x$ denotes $\log_2 x$.
-    \item Vectors versus scalars etc.
-    \item Vectors or sequences of elements are sometimes denoted using bracket notation. For example, a sequence of $k$ elements is written as $\{f(i)\}_{i=0}^{k-1}$.
-    \item Both $\vec{v}[i]$ and $\vec{v}_i$ denotes the $i$-th element of $v$.
-    \item For a vector $\vec{x}$ we use the max norm $\|\vec{x}\|_\infty$ to refer the largest element in the vector: $\max_i\{\vec{x}_i\}$ % Throughout, $\|\cdot\|$ denotes the infinity norm $\|\cdot\|_\infty$, that is, the largest absolute value among the coefficients of a polynomial (equivalently, among its residues in the representation of \autoref{sec:rns}).
+    \item All logarithms are base 2, that is, $\log x$ denotes $\log_2 x$.
+    \item Ring elements, vectors and matrices are denoted by plain italic letters; their type is stated at first use.
+    \item For a vector $v$, both $v_i$ and $v[i]$ denote the $i$-th component. 
+    \item A sequence $(f(0), \dots, f(k-1))$ of $k$ elements is sometimes written as $\{f(i)\}_{i=0}^{k-1}$ for brevity.
+    \item $\|\cdot\|$ denotes the infinity norm $\|v\|_\infty = \max_i |v_i|$, the largest absolute value among the components of a vector or, for a polynomial, among its coefficients.
+    \item Big $\mathcal{O}$ notation...
 \end{itemize}
 
-%% Specialized notations
-\begin{definition}[Centered Residue Representation] % TODO: Shorten
+\begin{definition}[Centered Residues]
     \label{def:centered}
-    Let $\mathbb{Z}_Q$ denote the quotient ring $\mathbb{Z}/Q\mathbb{Z}$. While $\mathbb{Z}_Q$ can be represented by any set of residue classes, in this work we canonically identify $\mathbb{Z}_Q$ with the set of centered residues in the interval $[-Q/2, Q/2)$. 
-    
-    We use the notation $[x]_Q$ to denote the unique representative of $x$ modulo $Q$ in this centered interval. When measuring the size of an element $a \in \mathbb{Z}_Q$ or a polynomial in $R_Q$, we inherently refer to the norm of its centered representative lifted to $\mathbb{Z}$ or $\mathbb{Z}[X]$.
-
-    % From ealier
-    For a modulus $q$, an element of $\mathbb{Z}_q$ is identified with its balanced representative through the map
+    Let $\mathbb{Z}_Q = \mathbb{Z}/Q\mathbb{Z}$ denote the ring of integers modulo $Q \geq 2$. While any set of residue class representatives may stand for $\mathbb{Z}_Q$, this work canonically identifies $\mathbb{Z}_Q$ with the run of $Q$ consecutive integers centered at the origin, selected by the following map. %% Huh??? Run of what?
     \begin{equation}
-        [a]_q = \big( a + \lfloor q/2 \rfloor \bmod q \big) - \lfloor q/2 \rfloor .
+        \label{eq:centered}
+        [a]_Q = \big(\, (a + \lfloor Q/2 \rfloor) \bmod Q \,\big) - \lfloor Q/2 \rfloor
     \end{equation}
-    The flooring makes the map well defined for every $q$, and its image is the run of $q$ consecutive integers centered at the origin, so that $|[a]_q| \leq \lfloor q/2 \rfloor$. Working with balanced representatives is what allows every noise term to be bounded by $\|\epsilon\| \leq \lfloor q/2 \rfloor$ rather than by $q$.
-
-    The notation extends to rings. If $S$ is a set of elements $\mathbb{Z}_Q^{N}$ and $a\in \mathbb{Z}_{Q}^{N}$ then $[a]_S = ([a_0]_{S_0}, \dots, [a_{N-1}]_{S_{N-1}})$, or if $a$ is a vector and $q$ is a scalar then $[a]_q$ applies to each coefficient.
+    The flooring makes the map well defined for every modulus, and every representative satisfies $|[a]_Q| \leq \lfloor Q/2 \rfloor$. For example, $\mathbb{Z}_5 = \{-2, -1, 0, 1, 2\}$. Applied to a vector or polynomial, $[\cdot]_Q$ acts on each component or coefficient. The size of an element modulo $Q$ always refers to the norm of its centered representative lifted to $\mathbb{Z}$ or $\mathbb{Z}[X]$; it is this convention that bounds quantities by $Q/2$ rather than by $Q$.
 \end{definition}
 
 \begin{definition}[Working Ring]
-    All plaintexts and ciphertexts are elements of the cyclotomic ring $R_Q = \mathbb{Z}_Q[X]/(X^N + 1)$, where $N$ is a power of two and $Q$ is the ciphertext modulus. Elements are polynomials of degree at most $N - 1$ whose coefficients are reduced into a centered range about zero.
-    \begin{equation}
+    \label{def:ring}
+    All plaintext and ciphertext spaces in this work are cyclotomic quotient rings of the form $R_Q = \mathbb{Z}_Q[X]/(X^N + 1)$, where the dimension $N$ is a power of two and $Q$ is a modulus. An element $a \in R_Q$ is a polynomial of degree at most $N - 1$ with centered coefficients, written in the \emph{canonical form} \eqref{form:canonical} or the equivalent \emph{coefficient form} \eqref{form:coefficient}.
+    \begin{align}
         \label{form:canonical}
-        a = c_0 + c_1X + \cdots + c_{N-1}X^{N-1} = \sum_{i=0}^{N-1} c_iX^i
-    \end{equation}
+        a &= c_0 + c_1X + \cdots + c_{N-1}X^{N-1} = \sum_{i=0}^{N-1} c_iX^i \\
+        \label{form:coefficient}
+        a &= (c_0, c_1, \dots, c_{N-1}) = \{c_i\}_{i=0}^{k-1}
+    \end{align}
 \end{definition}

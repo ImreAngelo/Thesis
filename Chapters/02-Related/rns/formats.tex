@@ -1,89 +1,75 @@
-In BGV, BFV and CKKS the ciphertext modulus $Q$ is large, much larger than a computer word/register (typically 64 bits on modern computers). Numbers that do not fit inside a register must be handled with multi-precision arithmetic, which is known to be slow due to its serial nature. % that does not allow parallelization. 
-High-performance instantiations remedy this by using a \gls{rns} where large numbers are represented as a set of smaller, independent residues via the \gls{crt}. RNS variants of BGV, BFV and CKKS are the standard in practice; OpenFHE, for example, only supports the RNS versions of these schemes~\cite{cryptoeprint:2022/915}.
+In BGV, BFV and CKKS the ciphertext modulus $Q$ is typically large, much larger than a machine word or register (64 bits on modern computers). Numbers that do not fit inside a register must be handled with multi-precision arithmetic, which is known to be slow due to its serial nature. % that does not allow parallelization. 
+High-performance instantiations remedy this by using a \gls{rns} where large numbers are represented as a set of smaller, independent residues via the \gls{crt} (detailed in \appref{app:crt}). \gls{rns} variants of BGV, BFV and CKKS are the standard in practice; OpenFHE, for example, only supports the RNS versions of these schemes~\cite{cryptoeprint:2022/915}.
 
-\begin{definition}[Coefficient Form]
-    As polynomials have a well-known/predictable structure, we can omit the redundant $X$ variable and represent $a\in R_Q$ uniquely by its coefficients. In this thesis I will consider these forms functionally equivalent, and refer to both \eqref{form:canonical} and \eqref{form:coefficient} as \textit{canonical}.
-    % I will refer to (only) this representation \eqref{form:coefficient} as the \emph{coefficient} form.  
-    \begin{equation}
-        \label{form:coefficient}
-        a  = (c_0, c_1, \dots, c_{N-1})
-    \end{equation}
+\begin{definition}[RNS Basis]
+    Let $w$ denote the bit-width of a standard machine word. A positive integer $q$ is termed \emph{small} if it fits entirely within this word, such that $0 < q < 2^w$. A set of $k$ moduli $\mathcal{B}_Q = \{q_0, q_1, \dots, q_{k-1}\}$ is considered an \emph{RNS basis} for $Q = \prod_{i=0}^{k-1} q_i$ if its $k$ elements are all small and pairwise coprime ($\gcd(q_i, q_j) = 1$ for all $i \neq j$).
 \end{definition}
 
-Let $Q = q_0\dots q_{k-1}$ with $\gcd(q_i, q_j) = 1 \;\forall\; i\not= j$, so that \gls{crt} allows decomposition into smaller residues. If $\max_i\{q_i\}$ fits in a computer word then we can use \gls{crt} on the coefficients of a polynomial to work exclusively with integers that fit inside a computer word.
+\begin{definition}[RNS Polynomial]
+    \label{def:rns-poly}
+    A polynomial $a\in R_Q$ with coefficients $c_j$ is an \emph{RNS polynomial} if it is decomposed into $k$ polynomial \emph{limbs} with coefficients in the basis $\mathcal{B}_Q$ via \gls{crt}, satisfying the explicit ring isomorphism:
+    \begin{equation}
+        \label{eq:rns-poly}
+        R_{Q} \cong R_{q_0} \times R_{q_1} \times \dots \times R_{q_{k-1}}
+    \end{equation}
 
-%%
-%% COEFFICIENT FORMAT
-\begin{definition}[First RNS Form (CRT Form)]
-    Given a polynomial $a \in R_Q$ where $Q = q_0q_1\dots q_{k-1}$ is chosen as a product of $k$ small primes (small meaning they each fit inside a computer register), each coefficient $c_i$ is uniquely represented by its $k$ residues via the Chinese Remainder Theorem. Then the \emph{CRT form} of $a$ \eqref{form:crt} is a collection of smaller polynomials called \textit{towers}, \textit{residues} or \textit{limbs}.
+    The limbs are also colloquially termed \emph{towers} or \emph{residues}. We use the notation $[a]_{\mathcal{B}_Q}$ to denote an RNS polynomial $a\in R_Q$ represented entirely by its limbs.
+\end{definition}
+
+\newcommand{\firstForm}{\gls{rns} form}
+\begin{definition}[First RNS form]
+    We define the \emph{\firstForm} of $a$ as the $k \times N$ matrix \eqref{form:crt}, where the $i$-th row contains the coefficients $[c_j]_{q_i}$ of the $i$-th limb.
 
     \begin{equation}
-    \label{form:crt}
-    % \ifnotes
+        \label{form:crt}
         \begin{pmatrix}
-            a\mod q_0 \\
-            a\mod q_1 \\
+            a \bmod q_0 \\
+            a \bmod q_1 \\
             \vdots \\
-            a\mod q_{k-1}
+            a \bmod q_{k-1}
         \end{pmatrix}
         =
-    % \fi
-    \begin{pmatrix}
-        c_0 \bmod{q_0} & c_1 \bmod{q_0} & \dots & c_{N-1}\bmod{q_0} \\
-        c_0 \bmod{q_1} & c_1 \bmod{q_1} & \dots & c_{N-1}\bmod{q_1} \\
-        \vdots & \vdots & \ddots & \vdots \\
-        c_0 \bmod{q_{k-1}} & c_1 \bmod{q_{k-1}} & \dots & c_{N-1}\bmod{q_{k-1}}
-    \end{pmatrix}
+        \begin{pmatrix}
+            c_0 \bmod{q_0} & c_1 \bmod{q_0} & \dots & c_{N-1}\bmod{q_0} \\
+            c_0 \bmod{q_1} & c_1 \bmod{q_1} & \dots & c_{N-1}\bmod{q_1} \\
+            \vdots & \vdots & \ddots & \vdots \\
+            c_0 \bmod{q_{k-1}} & c_1 \bmod{q_{k-1}} & \dots & c_{N-1}\bmod{q_{k-1}}
+        \end{pmatrix}
     \end{equation}
 \end{definition}
 
-% TODO: Be more rigorous and formal, cite or show
-\textcolor{purple}{Addition and subtraction of two polynomials in $R_Q$ is equivalent to element-wise addition/subtraction of their CRT forms (modulo $q_i$). As each element fits within a computer word, no carries propagate between them, and all pairs of elements can be added or subtracted in parallel.}
+Because the RNS moduli are small, every coefficient in \eqref{form:crt} fits within a single machine word. Furthermore, the coprimality of the basis ensures this representation is an isomorphism \eqref{eq:rns-poly}, allowing global reconstruction back to $R_Q$ via \gls{crt}. Consequently, additition and subtraction of two \gls{rns} polynomials in the same basis is functionally equivalent to the element-wise addition and subtraction of their \firstForm{s} modulo $q_i$. No carries propagate between the towers, allowing all $k$ residues to be processed in parallel utilizing fast, native hardware instructions.
 
-%%
-%% EVALUATION FORMAT
-\subsection{Number Theoretic Transform} % Maybe more details in appendix?
-The \gls{ntt}~\autoref{appendix:ntt} converts a negacyclic convolution in the coefficient domain into point-wise multiplication in the NTT domain, and multiplication in $R_{q_i}$ is exactly such a convolution of the coefficient vectors. Applying the \gls{ntt} to each residue of the CRT form \eqref{form:crt} therefore makes polynomial multiplication element-wise as well. The negacyclic \gls{ntt} of size $N$ requires each modulus to satisfy $q_i \equiv 1 \pmod{2N}$, which constrains the choice of RNS primes.
+\subsection{Double CRT Polynomial}
+While the \firstForm{} perfectly isolates polynomial addition into word-sized registers, standard polynomial multiplication in $R_Q$ operating directly on coefficients scales poorly at $\mathcal{O}(N^2)$. To achieve practical performance, high-speed implementations map these polynomials into an evaluation domain using the \gls{ntt} described in more detail in \appref{app:ntt}.
 
-\begin{definition}[Second RNS form (Double CRT/NTT/Evaluation)]
-    By applying the \gls{ntt} to the CRT form \eqref{form:crt} we gain the ability to perform polynomial multiplication in parallel, without losing the ability to perform addition/subtraction in parallel.
+\begin{definition}[NTT-Friendly RNS Basis]
+    \label{def:ntt-friendly}
+    Let $N$ denote the dimension of the polynomial ring $R_Q$, where $N$ is a power of two. A small modulus $q_i$ is termed \emph{NTT-friendly} if $q_i \equiv 1 \pmod{2N}$, guaranteeing the existence of a primitive $2N$-th root of unity $\omega_i \in \mathbb{Z}_{q_i}$. An RNS basis $\mathcal{B}_Q$ is \gls{ntt}-friendly if it consists entirely of \gls{ntt}-friendly moduli.
+\end{definition}
+
+\newcommand{\secondForm}{evaluation form}
+\begin{definition}[Second RNS Form (Evaluation Form)]
+    \label{def:ntt-form}
+    Let $a \in R_Q$ be an RNS polynomial over an NTT-friendly basis $\mathcal{B}_Q$. The \gls{ntt} is an invertible mapping that transitions a polynomial from its coefficient representation into a point-value representation (see \appref{app:ntt}).
+    
+    The \emph{\secondForm} (or \emph{NTT form}) of $a$, denoted $\text{NTT}(a)$, is the $k \times N$ matrix obtained by independently applying the $N$-point NTT to each of its $k$ limbs:
     
     \begin{equation}
-        \label{form:eval}
+        \label{form:ntt}
+        \Call{NTT}{a}
+        \equiv
         \begin{pmatrix}
-            \ntt{a\bmod q_0} \\
-            \ntt{a\bmod q_1} \\
+            \text{NTT}_{q_0}(a \bmod{q_0}) \\
+            \text{NTT}_{q_1}(a \bmod{q_1}) \\
             \vdots \\
-            \ntt{a\bmod q_{k-1}}
-        \end{pmatrix}
-        =
-        \begin{pmatrix}
-            \hat{a}_{0,0} & \hat{a}_{0,1} & \dots & \hat{a}_{0,N-1} \\
-            \hat{a}_{1,0} & \hat{a}_{1,1} & \dots & \hat{a}_{1,N-1} \\
-            \vdots & \vdots & \ddots & \vdots \\
-            \hat{a}_{k-1,0} & \hat{a}_{k-1,1} & \dots & \hat{a}_{k-1,N-1}
+            \text{NTT}_{q_{k-1}}(a \bmod{q_{k-1}})
         \end{pmatrix}
     \end{equation}
 \end{definition}
 
-% \begin{remark}
-%     \textcolor{red}{Rather confusingly, OpenFHE calls this form \emph{Coefficient} format. Both RNS forms are represented by an \texttt{DCRTPoly} object, so a polynomial in CRT form is represented by a \texttt{DCRTPoly} object in \texttt{Format::Coefficient} mode.}
-%     \begin{figure}[ht!]
-%         \centering
-%         \includegraphics[width=0.4\linewidth]{Figures/representations.png}
-%     \end{figure}
-% \end{remark}
+The \secondForm reduces polynomial multiplication in $R_Q$ to the element-wise product of their respective matrices. The \secondForm{} also inherits the element-wise addition and subtraction from the \firstForm, meaning an entire sequence of arithmetic operations can be executed entirely in parallel using native hardware instructions, without ever leaving the \gls{ntt} domain.
 
 %%
 %% CLOSING REMARKS
-{ %% TODO: Rewrite much better -> The dominant cost in RNS is switching between formats
-\color{red}
-The evaluation form \eqref{form:eval} is the preferred form, as it supports parallel addition, subtraction and multiplication, but it still does not natively support \textit{all} necessary operations. Because switching between canonical/vector, CRT and NTT mode is relatively expensive --- requiring (inverse) CRTs and NTTs --- much of the relevant literature \cite{cryptoeprint:2012/099, cryptoeprint:2016/510, cryptoeprint:2018/117, cryptoeprint:2021/204} improves upon existing functions by finding new approaches and approximations that limit the number of conversions required. 
-}
-% \begin{equation*}
-%     \raisebox{0.3ex}{\text{ Coefficient }}
-%     \overset{\text{\tiny CRT}}{\underset{\text{\tiny iCRT}}{\overset{\longrightarrow}{\longleftarrow}}}
-%     \raisebox{0.3ex}{\text{ CRT }}
-%     \overset{\text{\tiny NTT}}{\underset{\text{\tiny iNTT}}{\overset{\longrightarrow}{\longleftarrow}}}
-%     \raisebox{0.3ex}{\text{ Evaluation (DCRT) }}
-% \end{equation*}
+However, this efficiency dictates a strict computational trade-off. Certain arithmetic operations fundamentally cannot be performed in the \secondForm{} and require the polynomial's coefficients. The transition between representations necessitates a Forward or Inverse NTT, which is a computationally expensive $\mathcal{O}(N \log N)$ procedure. Consequently, a primary objective in the implementation of \gls{rns}-variants of homomorphic encryption schemes is the strategic minimization of transitions between the \firstForm{} and \secondForm{}.
