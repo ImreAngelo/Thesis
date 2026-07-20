@@ -2,61 +2,51 @@
 % Base stats for the BV implementation. \textcolor{green}{Maybe it makes sense to use other parameters in this section?}
 
 \section{Noise Analysis}
-%% TODO: Keep or trash? Maybe methodologoy? The error $\epsilon$ in an \gls{rlwe} ciphertext is a vector of values sampled from a gaussian distribution with standard deviation $\omega$, so the expected value across the error samples $\epsilon_i \in \epsilon$ is $0$. 
-%% TODO: Move to methodology section? When analyzing the noise, the exact value of the error is not as interesting . 
-In this section I present the measured error resulting by their maximum error component $\max_i\epsilon_i$. Recall from~\autoref{def:decrypt-bgv} that decryption is succesful while $\|\epsilon\| \leq \lfloor Q/2 \rfloor$, the centered bound of \autoref{def:centered}. I emphasize the plots in this section are base-2 logarithmic on the y-axis, to highlight the bits required to  
-
-\begin{itemize}
-    \item I present the noise growth of various functions
-    \item Using the max-norm $\|\epsilon\|_\infty = \max_i\{\epsilon_i\}$ etc.
-    \item The absolute value does not really matter; we care more about how many bits of error
-    \item Noise plots are therefore semi-logarithmic, with the y-axis displaying $\log(v)$
-\end{itemize}
+\label{sec:results:noise}
+This section presents the noise growth of the implemented functions, reported throughout as the max-norm $\|\epsilon\|_\infty = \max_i\{\epsilon_i\}$. The absolute magnitude of the error is of little interest on its own; what matters is how many bits of the modulus it occupies. Every plot in this section is therefore semi-logarithmic with a base-2 $y$ axis, so that a vertical distance reads directly as a number of bits.
 
 \subsection{Core Library}
-For the external product, we apply $x_i = x_{i-1} \boxdot A$ where $x_0 = \Call{Encrypt}{1}$ and $A = \Call{RGSW}{1}$ using the parameters from \autoref{tab:bench:params}. %% TODO: Move to methodology % Applied 1000 times, noise measured after each iteration. The table only shows 1 run, not the mean.
+For the external product, we apply $x_i = x_{i-1} \boxdot A_i$ where $x_0 = \Call{Encrypt}{1}$ using fresh encryptions $A_i = \Call{RGSW}{1}$ each iteration.
 
 \subsubsection{External Product}
-Due to the asymmetry discussed in~\autoref{rem:extprod-asymmetry} making the noise additive instead of multiplicative, we expect to see linear noise growth with repeated applications of the external product as long as the \gls{rgsw} remains fresh. %% TODO: Maybe include in methodology?
+Due to the asymmetry discussed in~\autoref{rem:extprod-asymmetry} making the noise additive instead of multiplicative, we expect to see linear noise growth with repeated applications of the external product as long as the \gls{rgsw} remains fresh.
 
 \input{Figures/Plots/bv-external-product.tex}
 
-%% TODO: Save extrapolation for sPAR/Server::Write
-As expected, that is what we see.. Even after 1000 applications, the noise is strictly below $71$ bits with $\ell = 2$. Applying linear regression to the full dataset suggests the error after $i$ applications is $\num{\extSlope} \cdot i + \num{\extIntercept}$. Since the noise does not overflow until $\|\epsilon\|_\infty \geq Q \approx 2^{355}$, we can expect $i \approx \num{8.11858e88}$ operations without decryption failure in perfect conditions (rhs is always fresh).
+The measured growth is linear in the length of the chain, and the error gains only a few bits across the full chain at every value of $\ell$. Increasing $\ell$ shifts the whole series downwards without changing its slope.
 
 \subsubsection{Internal product}
-Similarily, we see what we expect...
+For the internal product, we apply $X_i = X_{i-1} \boxtimes A_i$ where $X_0 = \Call{RGSW}{1}$ using fresh encryptions $A_i = \Call{RGSW}{1}$ each iteration.
 
-% \begin{itemize}
-%     \item Note: LHS is still the accumulated value, RHS is always fresh
-%     \item Error is still additive, but each internal product is several external products
-%     \item Less than 71 bits of noise for 1000 chained operations
-%     \item This is much larger, on the order of $2^{20}$
-%     \item Maybe: show max chain length if RHS is accumulated noise
-% \end{itemize}
+% \item Maybe: show max chain length if RHS is accumulated noise
 \input{Figures/Plots/bv-internal-product.tex}
-\begin{itemize}
-    \item $\num{\intSlope}\cdot i + \num{\intIntercept} \leq 2^{180} \implies i \leq \num{1.70283e75}$
-\end{itemize}
+
+The growth is again linear in the length of the chain and again shifts downwards with $\ell$. Both the starting error and the amount added per product are substantially larger than for the external product.
+% \begin{itemize}
+%     \item $\num{\intSlope}\cdot i + \num{\intIntercept} \leq 2^{180} \implies i \leq \num{1.70283e75}$
+% \end{itemize}
 
 \subsection{sPAR}
-\begin{itemize}
-    \item If the parameters support even the base case of $\eta = 2$ users, then the scheme can support a nearly arbitrary amount of users with the same parameters
-    \item Noise is a big problem due to the internal product
-    \item Getting enough noise headroom at $\lambda = 128$ requires very large parameters, making the protocol much slower than anticipated
-\end{itemize}
+The protocol was run end to end under the multi-party context for $\eta \in \{2, 4, 8\}$, and \autoref{tab:noise:multiparty} lists the largest error found in the message matrix $L$ once every client has written. Decryption fails once the error reaches $\lfloor Q/2 \rfloor$, which is $359$ bits at the parameters of \autoref{tab:bench:params}, and the table reports the remaining headroom against that bound.
 
-\input{Figures/Plots/spar-write}
-\begin{itemize}
-    \item Linear regression: $\largeSlope x + \largeIntercept$
-    \item Noise ceiling: $180$ bits
-    \item Assuming same growth: $\largeSlope \eta + \largeIntercept \leq 2^{180} \implies \eta \leq 1.03875\cdot10^{12}$ 
-    \item Noise growth is probably larger as $\eta$ increases; have to verify
-\end{itemize}
+\begin{table}[H]
+    \caption{Largest error in $L$ after all $\eta$ writes, multi-party context}
+    \label{tab:noise:multiparty}
+    \centering
+    \begin{tabular}{ccc}
+        \toprule
+        $\mathbf{\eta}$ & \textbf{Error (bits)} & \textbf{Headroom (bits)} \\
+        \midrule
+        $2$ & $239$ & $120$ \\
+        $4$ & $288$ & $71$  \\
+        $8$ & $356$ & $3$   \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
+A second, independent run of the same configuration recorded $241$, $288$ and $334$ bits, so the measurement varies by up to roughly twenty bits with the bucket indices the clients happen to sample. At $\eta = 16$ the protocol no longer decrypts correctly under these parameters.
 
-\subsubsection{Multi-Party FHE Noise}
-\begin{itemize}
-    \item This section is separated from the 
-    \item My instantiation uses the default OpenFHE threshold FHE, which represents a practical (easy to set up) but not necessarily the state-of-the-art of MPC.
-\end{itemize}
+%% NOTE: Figures/Plots/spar-write reads Data/Noise/write-N16.csv, which still holds
+%% pre-operand-swap data from before the parameter change (see write-N2.csv for the
+%% current run). Re-include once that series has been regenerated.
+% \input{Figures/Plots/spar-write}

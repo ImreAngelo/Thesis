@@ -17,7 +17,7 @@
 
 \begin{figure}[H]
     \centering
-    \caption{RNS-BV noise growth in chained internal products \textcolor{red}{TODO: Overlay graph of using accumulated result on rhs}}
+    \caption{RNS-BV noise growth in chained internal products}
     \label{fig:bv:plot-2}
     \begin{tikzpicture}
     \begin{semilogyaxis}[
@@ -34,8 +34,8 @@
         % ---------- Scatter plots ----------
         % \addplot[only marks, mark=*, mark size=1pt, color=gaussblue]
         %     table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv_small.csv};
-        \addplot[only marks, mark=*, mark size=1pt, color=gaussblue]
-            table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv_1.csv};
+        % \addplot[only marks, mark=*, mark size=1pt, color=gaussblue]
+        %     table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv_1.csv};
         \addplot[only marks, mark=*, mark size=1pt, color=hpsgreen]
             table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv_2.csv};
         \addplot[only marks, mark=*, mark size=1pt, color=plotblue]
@@ -52,7 +52,7 @@
         % ---------- Decryption failure ---------
         % \addplot[color=maxred, domain=1:1000]{2^120};
             
-        \legend{Small Parameters, Large Parameters, Noise ceiling}
+        \legend{$\ell = 2$ (baseline), $\ell = 3$, $\ell = 4$}
     \end{semilogyaxis}
     \end{tikzpicture}
 \end{figure}

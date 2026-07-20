@@ -1,38 +1,15 @@
-% TODO: Write bullet points into prose
 \newpage
 \section{Experimental Setup}
 
 \subsubsection{sPAR}
-The design ...
-To simulate communication between parties, a single ``all-knowing'' orchestrator with access to the (joint) secret key. Emphasize multi-party FHE is still employed. 
+Communication between parties is not simulated. In its place a single ``all-knowing'' orchestrator, holding the joint secret key, performs the setup and one full round. Multi-party \gls{fhe} is still employed throughout: every user generates its own private key share and a corresponding public share, and the public shares are synthesized into one joint public key.
 
-\begin{itemize}
-    \item An ``all-knowing'' orchestrator performs the setup and 1 full round
-    \item In \texttt{benchmark} dir
-    \begin{itemize}
-        \item Takes the number of users $\eta$ as an input
-        \item Every ``user'' generates a private key share, and corresponding public key share
-        \item The public key shares are all synthesized to make one large public key
-        \item For keeping track, each user has a unique ID 
-        \item Each user encodes their ID in an RGSW using the public key, and sends that message to the server
-        \item Each user also sends 3 random indices 
-        \item After receiving all messages, the server performs the write operation on each message
-    \end{itemize}
-    \item Setup phase is considered ``free'' i.e. it is static, no communication happens in the simulation
-\end{itemize}
+The orchestrator takes the number of users $\eta$ as input and gives each user a unique identifier. Every user encrypts its identifier under the joint key and sends it to the server together with three random indices, and once all messages have been received the server performs the write operation on each of them. The setup phase is considered free, as it is static and involves no communication in the simulation.
 
-%% TODO: This should probably not be called "Unit Tests + Benchmarks"
-\subsubsection{Unit Tests + Benchmarks}
-\begin{itemize}
-    \item Run with google benchmark + gTest. The benchmarks run 10 iterations, where each iteration continually repeats the operation within a span of 1 second; resulting in at least 10 iterations for the operations that take $> 1$ second (and hundreds for the faster functions), and a low coefficient of variance.
-    \item To empirically evaluate correctness and catch bugs early, the functionality of the program is unit tested
-    \item Difference between benchmarks and unit tests: 
-    \begin{itemize}
-        \item Benchmarks are optimized for speed, and do not perform any correctness checks (which could affect performance). Functions only need to run once and total time can be extrapolated: for the client encryption/decryption which can be run in parallel over/independently by each user, and the server/final decryption, the one-shot runtime \textit{is} the correct runtime. For the server write, we only care about the per-user runtime anyway.
-        \item Unit tests are not optimized for speed (in the compilation etc.) and does perform very slow correctness checks multiple times, at different levels; that way, the library provides reasonable diagnostics. Not just that an operation failed, but also \textit{why}/where it failed. 
-        \item Unit tests and benchmarks match in parameter and other code, so a successful unit test empirically validates correctness while the benchmarks provides real performance numbers in a production setting.
-    \end{itemize}
-\end{itemize}
+\subsubsection{Measurement and Validation}
+Timings are collected with Google Benchmark and correctness is checked with GoogleTest. Each benchmark runs $10$ repetitions, and every repetition continually repeats the operation within a span of one second. Operations taking longer than a second therefore yield at least $10$ samples and the faster functions yield hundreds, in both cases with a low coefficient of variation.
+
+The two serve different purposes. Benchmarks are optimized for speed and perform no correctness checks, which could otherwise affect the measurement. Each function only needs to run once, since the total time can be extrapolated: client encryption and decryption are run independently by each user and the final decryption is a single aggregation, so the one-shot runtime \textit{is} the runtime, and for the server write only the per-user runtime is of interest. Unit tests are not optimized for speed and instead repeat slow correctness checks at several levels, so that a failure reports not only that an operation failed but \textit{where} and why. Because both share the same parameters and code, a passing test empirically validates the correctness of what the benchmarks measure.
 
 % \subsubsection{Choice of Parameters}
 % \begin{itemize}
@@ -55,26 +32,17 @@ To simulate communication between parties, a single ``all-knowing'' orchestrator
 %     \item \textcolor{red}{Three sets of parameters: 2 for security parity and shared for SIMD capable}
 % \end{itemize}
 
-%% TODO: This section is basically complete, just needs prose-ification
 \subsubsection{Noise Analysis}
-
-\begin{itemize}
-    \item For testing RGSW products, error is checked directly
-    \item Simulation/benchmark/testing environment always has access to the secret key
-    \begin{gather}
-        x = (c_0, c_1) = (c_1s + \Delta m + \epsilon, c_1) \\
-        \implies \epsilon = c_0 - c_1s - \Delta m, \quad m = \Call{Decrypt}{x, s}
-    \end{gather}
-    \item RGSW is an 'intermediate' object used in calculations, in some cases (when the result is an RGSW e.g., the internal product, notHasWritten in the server) two methods exist to evaluate noise:
-    \begin{enumerate}
-        \item The first (or $\ell$-th) row encodes $\mu \cdot 1$, so we can extract only this row and check it's error
-        \item We calculate the external product with $\Call{RLWE}{1}$, and this ciphertext can be noiseless as to not add any noise.
-    \end{enumerate}
-    \item I use the latter method because the first method relies on the fact that a gadget $g = (1, \dots)$ containing $1$ is used, which is not necessarily always the case, even though this is traditionally the case.
-\end{itemize}
+The testing environment always has access to the secret key, so the error of an \gls{rlwe} ciphertext is checked directly rather than inferred.
+\begin{gather}
+    x = (c_0, c_1) = (c_1s + \Delta m + \epsilon, c_1) \\
+    \implies \epsilon = c_0 - c_1s - \Delta m, \quad m = \Call{Decrypt}{x, s}
+\end{gather}
+An \gls{rgsw} ciphertext is an intermediate object, so where a result is itself \gls{rgsw}, as with the internal product or $\mathsf{notHasWritten}$, two methods are available. The first row encodes $\mu\cdot 1$, so that row can be extracted on its own and its error checked. Alternatively the external product with $\Call{RLWE}{1}$ can be computed, where that ciphertext is made noiseless so as not to contribute any error of its own. We use the latter, because the first relies on the gadget containing $1$, which is traditionally but not necessarily the case.
 
 %% TODO: Do not touch this section
 \subsubsection{Multi-Threaded Performance}
+\label{sec:amdahl}
 The main advantage \gls{rns} holds over classical single-precision representations is its multi-threading capability. As described above, our implementation allows efficient parallelization over $k\ell$ threads. However, if fewer than $k\ell$ threads are available during benchmarking, we extrapolate the expected performance at $k\ell$ processors by modeling theoretical scaling behavior using Amdahl's Law~\cite{Gustafson:2011}.
 
 \begin{definition}[Amdahl's Law]
