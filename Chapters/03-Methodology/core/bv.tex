@@ -1,6 +1,4 @@
-%% TODO: Consider including automatic B selection if there is time
-% The base $B = \lfloor \max q_i \rfloor$ is chosen automatically so to be the smallest $B$ that covers the largest RNS prime with $\ell$ digits when the program starts. This makes the gadget exact, even if the $q_i$ are generated at different orders (in OpenFHE the first prime is typically larger than the other primes for some reason).
-% Takes only $\ell$ as an input parameter and computes $\log{B} = \left\lfloor \max\{\log(q_i)\}/\ell \right\rfloor + 1$
+%% TODO: Validate algorithms in this section actual match context-bv.cpp and the explanation is correct!
 
 \subsection{RGSW Encryption}
 \input{Chapters/03-Methodology/core/bv-encrypt}
@@ -11,4 +9,19 @@
 \subsection{Internal Product}
 The internal product is trivially implemented as repeated external products as per the definition~\autoref{def:prod:internal}.
 
-%% TODO: Include algorithmic literal line-by-line as impl
+%%%
+%%% Internal Product
+%%%
+\begin{algorithm}
+\caption{Internal Product}
+\label{alg:internal-product}
+\begin{algorithmic}[1]
+\Require RGSW ciphertexts $L \in R_Q^{2k\ell}$ and $R \in R_Q^{2k\ell}$
+\Ensure RLWE ciphertext of product
+\State Initialize an empty list of $2k\ell$ \gls{rlwe} ciphertexts
+\For{$i \gets [0, 2k\ell)$ \textbf{in parallel}}
+    \State $\Call{EvalExternalProduct}{}$
+\EndFor
+\State \Return $acc$
+\end{algorithmic}
+\end{algorithm}

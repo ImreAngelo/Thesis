@@ -1,10 +1,6 @@
 \section{Implementation Details of the Core Library}
 \label{sec:impl:core}
-The core library, located in the \texttt{libs/core} directory of the git repository \cite{gitrepo}, extends OpenFHE~\cite{cryptoeprint:2022/915} with \gls{rgsw} functionality that the framework does not itself expose. % Its centerpiece is the abstract interface \texttt{IExtendedContext}, which augments an OpenFHE \texttt{CryptoContext} with the essential \gls{rgsw} operations: encryption, the external product, and the internal product.
-This functionality is specified by an abstract interface, \texttt{IExtendedContext}, that any project can consume independently of the underlying implementation; of which the essential operations are listed in \autoref{tab:main-functions}. The default implementation realizes the interface through gadget decomposition of the RNS primes, as described in \autoref{sec:gadget-decomposition}.
-
-%% TODO: Call it BV-impl instead of default impl
-% Either here or in gadget decomposition somewhere: Following the convention of~\cite{cryptoeprint:2021/204, cryptoeprint:2022/915}, we refer to this family of decomposition-based techniques collectively as \emph{BV}. 
+The core library, located in the \texttt{libs/core} directory of the repository \cite{gitrepo}, extends OpenFHE~\cite{cryptoeprint:2022/915} with \gls{rgsw} functionality that the framework does not itself expose; of which the most important functions are listed in \autoref{tab:main-functions}. These are declared by an abstract interface, \texttt{IExtendedContext}, allowing alternative implementations to serve as drop-in replacements without requiring user modifications in the future. We also provide a concrete implementation using gadget decomposition of the RNS moduli, as described in \autoref{sec:gadget-decomposition}. Following the convention of~\cite{cryptoeprint:2021/204, cryptoeprint:2022/915}, we use \emph{BV} to refer to this technique, after Brakerski and Vaikuntanathan~\cite{cryptoeprint:2011/344}, and by extension to the implementation built on it.
 
 \begin{table}[H]
     \centering
@@ -21,9 +17,19 @@ This functionality is specified by an abstract interface, \texttt{IExtendedConte
     \end{tabular}
 \end{table}
 
-Following standard software engineering practice, the interface fixes \emph{what} each operation computes but not \emph{how}, so code written against it runs unchanged under any conforming implementation.
+%%
+%% OpenFHE API
+The core library is designed to seamlessly extend OpenFHE, with the aim of making it easy for developers already familiar with OpenFHE to include and use in their own projects. Specifically, OpenFHE works by initializing a \emph{cryptographic context} that holds static parameters, such as the RNS moduli $q_i$. All homomorphic operations are called through the context object. Our library preserves this pattern: the functions of \autoref{tab:main-functions} are methods on the same context object and operate directly on OpenFHE's native ciphertext types, so standard and extended operations can be freely interleaved.
 
-%% TODO: Explain context -> Takes crypto context parameters that are considered global/known by all the algorithms without specifying them!
-%% TODO: Implementation is hard-coupled to the BGV-RNS scheme. Maybe: As OpenFHE provides a unified interface for both BGV and BFV --- and the TFHE products are defined independent of scheme --- it would not require much work to add support for BFV to the core library.
+\begin{example}[Simple Library Usage] 
+\begin{minted}{c++}
 
-\input{Chapters/03-Methodology/core/bitwise}
+// Using standard OpenFHE functions 
+auto ct = cc->Encrypt(publicKey, m);
+auto ct_sqr = cc->EvalMult(ct, ct); // Result is RLWE(m*m)
+
+// Using functions provided by the IExtendedContext interface
+auto rgsw_one = cc->EncryptRGSW(publicKey, m); // RGSW(m)
+auto ct_ext = cc->EvalExternalProduct(ct, rgsw_one); // RLWE(m*m)
+\end{minted}
+\end{example}

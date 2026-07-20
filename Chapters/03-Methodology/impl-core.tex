@@ -2,24 +2,11 @@
 %% Implementation Details (RGSW)
 %% The specifics of the program that are not necessarily important for the math, and other (novel) optimizations
 %%
+\newpage\input{Chapters/03-Methodology/core/api}
+\newpage\input{Chapters/03-Methodology/core/bitwise}
+\newpage\input{Chapters/03-Methodology/core/bv}
 
-\input{Chapters/03-Methodology/core/api}
-\input{Chapters/03-Methodology/core/bv}
-% \input{Chapters/03-Methodology/core/hybrid}
-
-% \textcolor{red}{\textbf{TODO:} Organize pre-computed Values}
-% \begin{itemize}
-%     \item For BV:
-%     \begin{itemize}
-%         \item $B^i \bmod{q_j}$ for all $i, j$
-%         \item Get $B = \lceil \max_j\|q_j\|/\hat{\ell}\rceil$ from $\ell$
-%     \end{itemize}
-%     \item For GHS/Hybrid:
-%     \begin{itemize}
-%         \item $\hat{q}_j$ 
-%     \end{itemize}
-% \end{itemize}
-
+%% TODO: Finish subsection
 \subsection{SIMD Batching}
 The BV implementation inherits the \gls{simd}-like functionality of OpenFHE, meaning that if 
 
@@ -30,5 +17,3 @@ Assuming the context is configured with parameters that support SIMD batching, t
     \item Requires using \texttt{MakePackedPlaintext} instead of \texttt{MakeCoefPackedPlaintext} in OpenFHE
     \item This allows up to $N$ RGSW/External/Internal prodcuts simultaneously at no additional cost compared to the same parameters with \Call{MakeCoefPackedPlaintext}.
 \end{itemize}
-
-%% TODO: Code example

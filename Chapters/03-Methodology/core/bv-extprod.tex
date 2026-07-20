@@ -1,9 +1,11 @@
 %% TODO: Write about power-of-B gadget in earlier section!?
 %% TODO: Unify terminology with other section
-The decomposition on the power-of-$B$ gadget $g = (1, B, \dots, B^{\ell-1})$ is essentially digit extraction. The classical approach is to compute standard unsigned base-$B$ digits, producing a decomposition vector where each digit $d_i \in [0, B)$. Under our abstract gadget decomposition definition~\autoref{sec:gadget-decomposition}, the quality of this decomposition is $\beta = B - 1$.
+The decomposition on the gadget $g = (1, B, \dots, B^{\ell-1})$ is essentially digit extraction. The classical approach is to compute standard unsigned base-$B$ digits, producing a decomposition vector where each digit $d_i \in [0, B)$. Under our abstract gadget decomposition definition~\autoref{sec:gadget-decomposition}, the quality of this decomposition is $\beta = B - 1$.
 
 %% TODO: Explain way better and more compact! The problem is negative digits give a carry? Is that it? Explain why the integer is not already encoded as signed.
-From~\autoref{rem:extprod-asymmetry} we know the noise in the external product is a function of $\beta$. To exert tighter control over noise growth during external products, we naturally prefer to minimize this magnitude. By centering the digits into a signed representation where $d_i \in [-B/2, B/2)$, we halve the maximum absolute value, improving the overall decomposition quality to $\beta = B/2$. However, achieving this centered representation classically complicates parallelization. Standard signed recoding algorithms evaluate digits sequentially from least significant to most significant because shifting a positive digit $d_i \ge B/2$ into the negative range requires adding a $+1$ carry to the subsequent digit $d_{i+1}$. This ripple-carry dependency prevents us from slicing the integer into independent bit-windows, creating a computational bottleneck.
+From~\autoref{rem:extprod-asymmetry} we know the noise in the external product is a function of $\beta$. To exert tighter control over noise growth during external products, we naturally prefer to minimize this magnitude. By centering the digits into a signed representation where $d_i \in [-B/2, B/2)$, we halve the maximum absolute value, improving the overall decomposition quality to $\beta = B/2$. 
+
+However, this centered representation requires some work to make parallelizable. Standard signed recoding algorithms evaluate digits sequentially from least significant to most significant because shifting a positive digit $d_i \ge B/2$ into the negative range requires adding a $+1$ carry to the subsequent digit $d_{i+1}$. This ripple-carry dependency prevents us from slicing the integer into independent bit-windows, creating a computational bottleneck.
 
 To avoid sequential carry propagation, we apply a well-known offset trick by adding the constant $\varGamma$~\eqref{eq:carry-offset}.
 \begin{equation}
@@ -68,26 +70,22 @@ To decompose a positive integer $c \in \mathbb{Z}^{+}$ into signed digits $[d]_{
 
 As with $\Call{GetPower}{i,j}$ in \autoref{} the offset $\varGamma$ is calculated exactly once, when the context is first created.\footnote{Specifically the bitwise $\varGamma = (1 \ll (b-1))\cdot((2 \ll (b \ell)) - 1)/((1\ll b) - 1)$ is used, but this is slightly less human readable than \eqref{eq:carry-offset}.} 
 
-Once we have a 
-
-\begin{itemize}
-    \item Uses the standard external product function \autoref{alg:external-product}
-    \item Or a slightly parallelized version: the decompose function runs in parallel, not much gain from parallizing further, the additions are already cheap/fast-ish.
-\end{itemize}
+\newpage
+Once we have a working $\Call{Decompose}{}$ function, the external product can be written as \autoref{alg:external-product}. Our implementation is functionally the same, except that it has been split into three stages for better parallelization. First, all the $2k$ inverse \gls{ntt} evaluations required by the decompositions are calculated in parallel. Second, the decompose calls are merged into the external product function, and the two ciphertext elements are decomposed in parallel over $2k\ell$ threads. This stage includes the $2k\ell$ forward \gls{ntt} calls. Finally, the for loop calculating the inner product is parallelized over $\ell$ threads.
 
 %%%
 %%% External Product
 %%%
 \begin{algorithm}
-\caption{External Product $\rlwe \boxdot \rgsw$ (Naive)}
+\caption{External Product}
 \label{alg:external-product}
 \begin{algorithmic}[1]
-\Require RLWE ciphertext $(c_0, c_1) \in R_Q^2$, RGSW ciphertext $C \in R_Q^{2\ell}$
+\Require RLWE ciphertext $(c_0, c_1) \in R_Q^2$, RGSW ciphertext $C \in R_Q^{2k\ell}$
 \Ensure RLWE ciphertext of product
 \State $acc \gets (0, 0)$
 \State $d_0 \gets \Call{Decompose}{c_0}$
 \State $d_1 \gets \Call{Decompose}{c_1}$
-\For{$r \gets [0, \ell)$}
+\For{$r \gets [0, k)$}
     \State $acc[0] \gets acc[0] + d_0[r] \cdot C[r][0] + d_1[r]\cdot C[r+\ell][0]$
     \State $acc[1] \gets acc[1] + d_0[r] \cdot C[r][1] + d_1[r]\cdot C[r+\ell][1]$
 \EndFor
@@ -95,9 +93,9 @@ Once we have a
 \end{algorithmic}
 \end{algorithm}
 
-However, our implementation contains a series of optimizations aimed at . It can be divided into three distinct stages, each stage depending on the previous stage...
+% However, our implementation contains a series of optimizations aimed at . It can be divided into three distinct stages, each stage depending on the previous stage...
 
-%%%
-%%% Implemented (staged, parallel) external product
-%%%
-\input{Algorithms/new/extprod-bv}
+% %%%
+% %%% Implemented (staged, parallel) external product
+% %%%
+% \input{Algorithms/new/extprod-bv}

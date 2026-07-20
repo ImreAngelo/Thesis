@@ -64,5 +64,5 @@ The efficiency of modern ring-based homomorphic encryption relies strictly on su
         c = \text{INTT}(\text{NTT}(a) \odot \text{NTT}(b))
     \end{equation}
     
-    By exploiting the symmetry of roots of unity via fast decimation algorithms---functionally identical to the Fast Fourier Transform (FFT) utilizing the Cooley-Tukey butterfly structure---the computational evaluation of both the forward and inverse NTT is mathematically reduced from a standard complexity of $\mathcal{O}(N^2)$ to $\mathcal{O}(N \log N)$. This precise algorithmic reduction forms the absolute baseline requirement for practical latency in RNS-variant homomorphic cryptography.
+    By exploiting the symmetry of roots of unity via fast decimation algorithms, functionally identical to the Fast Fourier Transform utilizing the Cooley-Tukey butterfly structure, the computational evaluation of both the forward and inverse NTT is mathematically reduced from a standard complexity of $\mathcal{O}(N^2)$ to $\mathcal{O}(N \log N)$~\cite{liang:2022}. This precise algorithmic reduction forms the absolute baseline requirement for practical latency in RNS-variant homomorphic cryptography.
 \end{theorem}

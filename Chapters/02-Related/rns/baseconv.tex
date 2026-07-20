@@ -30,9 +30,8 @@ Introduced by Bajard et al. in \cite[Equation 2]{cryptoeprint:2016/510}, \emph{f
     \Call{FastBConv}{x, \mathcal{B}_Q, \mathcal{B}} = \left\{\left[\sum_{i=0}^{k-1}\left[x_i\, \hat{q}_i^{-1}\right]_{q_i} \cdot \hat{q}_i\right]_b\right\}_{b\in \mathcal{B}}
 \end{equation}
 
-%% TODO: I don't think "idempotents" is used in the appendix
 \begin{remark}
-    The coefficients $\hat{q}_i$ and $\hat{q}_i^{-1}$ are the \gls{crt} idempotents from \appref{app:crt} and \autoref{rem:hps-optimization}, and can be pre-calculated to maximize the runtime performance of \eqref{eq:fastbconv}.
+    The coefficients $\hat{q}_i$ and $\hat{q}_i^{-1}$ are the \gls{crt} factors from \appref{app:crt} and \autoref{rem:hps-optimization}, and can be pre-calculated to maximize the runtime performance of \eqref{eq:fastbconv}.
 \end{remark}
 
 \subsubsection{Fast Base Extension}

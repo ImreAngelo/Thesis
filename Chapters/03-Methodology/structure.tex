@@ -1,12 +1,8 @@
 
 \section{Code Structure}
-The two libraries are provided in a git repository~\cite{gitrepo}
+The source code is published in a git repository~\cite{gitrepo} as three C++ libraries under \texttt{libs/}, each a separate build target with its own public header directory. The \corelib{} library extends OpenFHE with \gls{rgsw} ciphertexts and related products. The \gls{spar} protocol is split into separate \clientlib{} and \serverlib{} libraries, so that client and server binaries can be compiled independently.
 
-\begin{itemize}
-    \item I provide the two libraries in a git repository \cite{gitrepo}
-    \item Results should be replicable with a single command, provided the environment is set up with the appropraite build tools
-    \item Libraries are modular/reusable; not tightly coupled
-\end{itemize}
+We highlight that the \corelib{} is entirely independent of \gls{spar}, making it reusable in any OpenFHE project that needs RGSW arithmetic. The \clientlib{} and \serverlib{} consume the \corelib{} library through an abstract interface.
 
 \begin{figure}[!htb]
     \centering
@@ -14,3 +10,5 @@ The two libraries are provided in a git repository~\cite{gitrepo}
     \caption{Each component depends only on what lies directly beneath it. The sPAR libraries consume the core library solely through the \texttt{IExtendedContext} interface.}
     \label{fig:lib-structure}
 \end{figure}
+
+To ensure our results are replicable, a \texttt{make test} command runs the full test suite and noise measurements, while \texttt{make bench} runs the benchmarks that produced the measurements reported in \autoref{chp:results}.
