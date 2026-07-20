@@ -14,7 +14,7 @@
 %%
 \section{Implementation Details of sPAR}
 \label{sec:impl:spar}
-Our instantiation of \gls{spar} can be considered the \emph{minimal} version of the original specification~\cite{cryptoeprint:2025/860}. We do not consider the active threat model(s) of sections 6 and 7. Bucket sorting is also not implemented, though this should have a negligible effect as we estimate each bucket can be sorted in parallel in around $100$~ms~\cite{cryptoeprint:2025/860, cryptoeprint:2023/852, cryptoeprint:2024/1894}.
+Our instantiation of \gls{spar} can be considered the \emph{minimal} version of the original specification~\cite{cryptoeprint:2025/860}. We do not consider the active threat model(s) of sections 6 and 7. Bucket sorting is also not implemented, though this should have a negligible effect as we estimate each bucket can be sorted in parallel in around $100$~ms~\cite{cryptoeprint:2025/860}. % , cryptoeprint:2024/1894
 
 \begin{itemize}
     \item Uses a procedural programming paradigm, meaning the library implements the required functions but does not provide a full state-maintaining implementation of the server nor client. 

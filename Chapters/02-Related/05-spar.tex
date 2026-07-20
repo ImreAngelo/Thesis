@@ -1,108 +1,44 @@
 \section{(Somewhat) Practical Anonymous Router}
 \label{sec:spar}
-\gls{spar} is an anonymous router built from homomorphic encryption~\cite{cryptoeprint:2025/860}. A single untrusted server collects one encrypted message from each of $\eta$ clients and returns the batch permuted, without learning the permutation it applied. This is the functionality proposed by \gls{niar}~\cite{cryptoeprint:2021/435}, and the qualifier in the name marks the difference in how it is reached. Every component is an operation that established \gls{rlwe}-based schemes already provide, so the construction can be compiled and run rather than only shown to exist.
-
-The three obstacles of \autoref{chp:background} fall away in turn. Routing is performed with the external product (\autoref{def:prod:external}) instead of function-hiding \gls{mcfe}. Recipient anonymity comes from encrypting each message under its recipient's ordinary public key before it enters the system, replacing the appeal to indistinguishability obfuscation with a classical encryption layer. The permutation is not an input to the setup at all, but is produced afresh in every round from randomness the clients sample locally, so a single setup serves polynomially many rounds without making a sender's messages linkable across them.
-
-What is given up is non-interactivity. A round costs two client--server round trips rather than a single upload, because the decryption key is shared among the clients and the batch cannot be opened without them. Clients still never talk to one another, so the client-to-client communication that limits \gls{mpc}-based systems does not reappear.
+\gls{spar} realizes the anonymous router of \autoref{chp:background} from the primitives of the preceding sections~\cite{cryptoeprint:2025/860}. Each of the $\eta$ clients encrypts its message together with a randomly chosen destination index, and the server writes every message into an encrypted list at the position its sender picked. Both the list and the indices remain encrypted throughout the write.
 
 %%
 %% SYSTEM MODEL
 \subsection{System Model}
 \label{sec:spar:model}
-The system consists of $\eta$ clients and one server, and it proceeds in rounds. Every client submits exactly one message per round, sending a random message when it has nothing to say, and a round completes before the next begins. All traffic passes through the server, which is untrusted for privacy but trusted for availability.
+The protocol runs in rounds between $\eta$ clients and a single server. Every client submits exactly one message per round, sending a random message if it has nothing to say, and all traffic passes through the server. The server is untrusted for privacy but trusted for availability, and may collude with any number of corrupted clients. Sender anonymity follows from the IND-CPA security of the underlying scheme, with definitions and proofs given in the original paper~\cite{cryptoeprint:2025/860}.
 
-The adversary statically corrupts the server, all recipients and all but two senders, observes the network globally, and follows the protocol while inspecting everything it sees. Under this model \gls{spar} provides sender anonymity from the IND-CPA security of the underlying \gls{fhe} scheme alone, and recipient anonymity from the security of the classical encryption layer. Both games and their proofs are given in the original paper~\cite{cryptoeprint:2025/860}.
-
-Two assumptions carry more weight than their brevity suggests, as mechanisms of the protocol exist solely to serve them. Messages are assumed to be uniformly distributed, which is what lets a sort by an encrypted random key stand in for a shuffle. Messages landing in the same bucket must additionally be sorted obliviously before the batch is opened, since their relative order would otherwise reveal which of the two senders wrote first.
+Two further assumptions are what the protocol takes explicit measures to satisfy. Messages are assumed to be uniformly distributed, which is what lets placement at a random encrypted index stand in for a shuffle. Messages sharing a bucket must additionally be sorted obliviously before the list is opened, since their relative order would otherwise reveal which sender wrote first.
 
 %%
 %% THE PROTOCOL
 \subsection{The Protocol}
 \label{sec:spar:protocol}
-A one-time setup is followed by polynomially many rounds under the same keys. A round consists of the four computations listed in \autoref{tab:spar:phases}, separated by two round trips. The client phases are performed independently by every client, while the server phases process the batch as a whole.
-
-\begin{table}[H]
-    \caption{One round of the \gls{spar} protocol}
-    \label{tab:spar:phases}
-    \centering
-    \begin{tabular}{llll}
-        \toprule
-        \textbf{Phase} & \textbf{Party} & \textbf{Sends} & \textbf{Cost profile} \\
-        \midrule
-        Encryption          & each client & message and indices & parallel across clients \\
-        Write               & server      & state matrix $L$    & sequential per message \\
-        Partial decryption  & each client & $3\eta$ decryptions & parallel across clients \\
-        Final decryption    & server      & plaintext batch     & single aggregation \\
-        \bottomrule
-    \end{tabular}
-\end{table}
+A one-time setup is followed by polynomially many rounds under the same keys, each consisting of four computations separated by two client--server round trips.
 
 \subsubsection{Setup}
-The clients run the multi-party key generation of \autoref{sec:mpfhe}. Each client samples a secret share $s_i$ and publishes a public share, and the shares accumulate into the joint public key under which every round is encrypted. Neither a permutation nor a trusted dealer enters the setup.
+The clients agree on a set of \gls{FHE} parameters and run the multi-party key generation of \autoref{sec:mpfhe}, producing a joint public key under which every round is encrypted. % In contrast to existing protocols, neither a permutation nor any trusted party enters the setup.
 
 \subsubsection{Client: Encryption}
-Client $i$ encrypts its message as $\Call{RLWE}{m_i}$ under the joint key and samples three bucket indices $a_0, a_1, a_2 \overset{\$}{\leftarrow} [0, \eta)$ independently and uniformly. Each of the $\log\eta$ bits of each index is encrypted separately, and the client uploads its message together with the $3\log\eta$ bit encryptions.
-
-\subsubsection{Server: Expansion}
-The write step consumes the index bits as \gls{rgsw} ciphertexts, which are $2\ell$ times the size of the \gls{rlwe} ciphertexts the client uploaded. Rather than transmit them, the server expands each received bit encryption from \gls{rlwe} to \gls{rgsw} homomorphically~\cite{chillotti:onionring:2019, park:sortinghat:2022}, so that clients only ever put \gls{rlwe} material on the wire.
+Client $i$ encrypts its message under the joint key and samples three bucket indices $a_0, a_1, a_2 \overset{\$}{\leftarrow} [0, \eta)$ uniformly, encrypting the $\log\eta$ bits of each index separately. A single index per client would collide too often, whereas with $\eta$ buckets of three slots the probability that all nine candidate slots are taken falls below $10^{-11}$, and on that event the message is dropped and retransmitted in a later round~\cite{cryptoeprint:2025/860}.
 
 \subsubsection{Server: Write}
-The server holds $\eta$ buckets of three slots. A message matrix $L$ of $\eta\times3$ \gls{rlwe} ciphertexts stores what has been written and is initialized to encryptions of zero, while an availability matrix $I$ of $\eta\times3$ \gls{rgsw} encryptions of one marks every slot as free.
+The server keeps a message matrix $L$ of $\eta\times3$ \gls{rlwe} slots and an availability matrix $I$ of $\eta\times3$ encrypted flags marking which slots are free. For each client it evaluates \autoref{alg:spar:homplacing}, where a binary tree of depth $\log\eta$ turns each encrypted index into an indicator vector over the buckets, and the write loop then places the message in the first free slot among the three chosen buckets, tracked by the encrypted flag $\mathsf{hasWritten}$. Clients upload \gls{rlwe} ciphertexts only, as the index bits are expanded to \gls{rgsw} by the server~\cite{chillotti:onionring:2019, park:sortinghat:2022}.
 
-Writing a message means placing it in the first free slot among the three buckets its sender chose, without the server learning which slot that is. Each encrypted index is first turned into an indicator vector over the $\eta$ buckets by a multiplexer tree of depth $\log\eta$ (\autoref{fig:spar:tree}), where every level consumes one encrypted index bit and splits each node into the branch agreeing with that bit and the branch that does not. The leaves carry an encryption of one at the chosen bucket and encryptions of zero everywhere else. The write loop of \autoref{alg:spar:homplacing} then sweeps the three chosen buckets in order, carrying an encrypted flag $\mathsf{hasWritten}$ that suppresses every placement after the first.
-
-\begin{figure}[H]
-    \centering
-    \resizebox{0.8\textwidth}{!}{\input{Figures/homplacing-tree}}
-    \caption{The multiplexer tree for $\eta = 8$. Every level consumes one encrypted index bit, and the highlighted path is the one selected by the encrypted index $110$. The server evaluates all branches and learns nothing about which leaf was reached.}
-    \label{fig:spar:tree}
-\end{figure}
-
-Three choices rather than one are what keep the state small. With a single bucket per client, collisions would be frequent enough to force a far larger table; three independent choices instead bound the maximum bucket load by $\log\log\eta/\log 3 + \mathcal{O}(1)$~\cite{azar:1999:balanced}, and at $3\eta$ slots the probability that a client finds all of its candidate slots occupied falls below $10^{-11}$~\cite{cryptoeprint:2025/860}. On that event the message is silently dropped and the client retransmits in a later round. The event depends only on the sampled indices and never on the message, so anonymity is unaffected.
+Once all $\eta$ messages are written, the slots of each bucket are sorted obliviously and $L$ is broadcast to the clients.
 
 \input{Algorithms/spar-2} % paper Alg. 2: choice-of-three (new float)
 
-Once all $\eta$ messages are written, the three slots of every bucket are sorted obliviously, removing the intra-bucket ordering leak noted in \autoref{sec:spar:model}. The buckets are independent and hold three elements each, so the sort is both cheap and parallel across buckets~\cite{cryptoeprint:2023/852, cryptoeprint:2024/1894}. The server then broadcasts $L$ to the clients.
-
 \subsubsection{Client: Partial Decryption}
-Each client partially decrypts all $3\eta$ slots of the broadcast state with its own share and returns the result (\autoref{sec:mpfhe}), which moves $\mathcal{O}(\eta^2)$ ciphertexts per round. When $N > 3\eta$, the partial decryptions of one client pack into a single ciphertext through \gls{lwe}-to-\gls{rlwe} conversion~\cite{cryptoeprint:2020/015}, reducing that traffic to $\mathcal{O}(\eta^2/N)$ ciphertexts.
+Each client partially decrypts all $3\eta$ slots with its own share (\autoref{sec:mpfhe}) and sends the result back to the server. % When $N > 3\eta$, the partial decryptions of one client pack into a single ciphertext~\cite{cryptoeprint:2020/015}.
 
 \subsubsection{Server: Final Decryption}
-The server aggregates the $\eta$ partial decryptions of each slot and recovers the plaintext batch (\autoref{sec:mpfhe}). Slots that were never written decrypt to zero and are discarded, and the surviving entries are the $\eta$ messages in an order that is a fresh uniform permutation of the senders. The server broadcasts the batch, whose entries remain encrypted under the recipients' classical keys.
-
-The published proof-of-concept implements the protocol over TFHE and reports a few seconds per message for up to $128$ clients~\cite{cryptoeprint:2025/860}. \emph{Practical} is therefore a claim about instantiability rather than about scale, bounded by hundreds of users and seconds of latency.
-
-%%
-%% THE CIRCUIT
-\subsection{One Round as a Homomorphic Circuit}
-\label{sec:spar:circuit}
-\autoref{alg:spar:homplacing} writes every homomorphic product with a single operator, which leaves the shape of the computation implicit. Typing its operands against \autoref{def:prod:external} and \autoref{def:prod:internal} recovers that shape and separates the round into two stages with opposite characteristics, summarized in \autoref{tab:spar:circuit}.
-
-The indicator trees are shallow and wide. A tree node holds an \gls{rgsw} ciphertext, since its value is later multiplied into another ciphertext, so each edge of a tree is an internal product of the parent node with an encrypted index bit. One tree of depth $\log\eta$ costs $\eta - 1$ internal products and every message needs three of them, but the nodes of a level depend only on the level above, so the stage collapses to a critical path of $\log\eta$ products.
-
-The write loop is deep and narrow. Its three nested loops give $9\eta$ iterations per message, and every iteration forms the flag $h$ with two internal products before applying it to the state with one external product. Each iteration both reads and writes $\mathsf{hasWritten}$, so no two iterations may be reordered or overlapped, leaving the loop a strictly sequential chain of $18\eta$ internal products. Clients are serialized for the same reason, as they update the same matrices $I$ and $L$. A round therefore places $18\eta^2$ internal products on a single dependency chain, and the only parallelism that remains is the parallelism inside one product.
-
-\begin{table}[H]
-    \caption{The two stages of a round, per message}
-    \label{tab:spar:circuit}
-    \centering
-    \begin{tabular}{lccl}
-        \toprule
-        \textbf{Stage} & \textbf{Internal products} & \textbf{Critical path} & \textbf{Right-hand operand} \\
-        \midrule
-        Indicator trees & $3(\eta - 1)$ & $\log\eta$ & fresh index bit \\
-        Write loop      & $18\eta$      & $18\eta$   & accumulated state \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-The stages differ just as sharply in what the noise does. A tree multiplies an accumulated node by a freshly received index bit, the situation \autoref{rem:extprod-asymmetry} describes as favourable. The write loop multiplies $\mathsf{hasWritten}$ by an entry of $I$, and both operands carry the history of the loop that produced them. A chain of length $18\eta^2$ survives only if the noise of a product grows additively along it, which makes the ordering of the operands a condition for correctness rather than an optimization.
+The server aggregates the partial decryptions of each slot (\autoref{sec:mpfhe}) and recovers the list. Empty slots decrypt to zero and are discarded, leaving the $\eta$ messages in an order that is a fresh uniform permutation of the senders.
 
 %%
 %% REQUIREMENTS
-\subsection{Requirements on the Underlying Scheme}
+\subsection{Requirements}
 \label{sec:spar:requirements}
-The circuit is indifferent to the scheme beneath it, provided that scheme supplies four things. It must multiply encrypted bits with noise that grows additively along a long chain, which is the defining property of the \gls{gsw}-style products of \autoref{sec:gadget-decomposition}. It must offer a product of two \emph{accumulated} operands, since the flag chain multiplies two ciphertexts that both carry the history of the loop, and an external product against a fresh operand does not cover that case. It must distribute key generation and decryption across the clients in the sense of \autoref{sec:mpfhe}. Finally, it must complete $18\eta^2$ chained products inside a single noise budget, as a scheme that bootstraps to extend that budget would spend more on the bootstrapping than on the protocol itself.
+\autoref{alg:spar:homplacing} is stated for a generic homomorphic multiplication, but the circuit it describes is deep. Every level of the binary tree multiplies the running node by a further encrypted bit, and the write loop chains $9\eta$ multiplications through $\mathsf{hasWritten}$ for each message. Ciphertext multiplication in the sense of \autoref{sec:bgv} would exhaust the noise budget long before a round completed, so the authors propose evaluating the tree with the external product of \autoref{def:prod:external}, whose noise grows additively along such a chain (\autoref{rem:extprod-asymmetry}).
 
-Every requirement is native to TFHE, where \gls{rgsw} ciphertexts and both products are first-class objects and the gadget is a digit decomposition of ciphertext coefficients. None of them is native to a BGV-\gls{rns} implementation. Ciphertexts there exist only as residues modulo the \gls{rns} primes, their coefficients are never materialized, and the libraries expose neither \gls{rgsw} ciphertexts nor the products defined over them, even where the gadget machinery of \autoref{sec:hps} is already present internally.
+The scheme underneath must therefore supply \gls{rgsw} ciphertexts and the external product, multi-party key generation and decryption, and a noise budget large enough to finish a round without bootstrapping. All three are native to TFHE, where the gadget is a digit decomposition of ciphertext coefficients. None are exposed by a BGV-\gls{rns} implementation, whose ciphertexts exist only as residues.
