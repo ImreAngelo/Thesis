@@ -33,7 +33,7 @@ The \texttt{Server::Write} deviates slightly from~\cite[Algorithm 2]{cryptoeprin
         \item Splits the write step and pre-processing step, the clients perform the pre-processing (making client::encryption slower) since we do not consider bandwidth optimizations
         \item HasWrite is inverted i.e. ``notHasWrite'' -> Saves one operation
         \item Uses external products to handle deep circuits as \cite{cryptoeprint:2025/860} recommends. In fact, their algorithm is general and ours is not; explicit external products.
-        \item Not implementable using only external products per se: must use internal products
+        \item Not implementable using \emph{only} external products per se: must use internal products
         \item To minimize noise and make initialization of the state matrices faster, the server can opt to init with "noiseless" encryptions. These provide no security on their own (which is fine since the initial state is known to all), but become regular encryptions after 1 iteration of the inner loop.
         \item Variables:
         \begin{itemize}
@@ -74,5 +74,5 @@ The \texttt{Server::Write} deviates slightly from~\cite[Algorithm 2]{cryptoeprin
 \end{algorithm}
 
 \begin{remark}
-    From a programming perspective, the choice of $K = 3$ and $D = 3$ is arbitrary. The library allows a developer to configure different values for $K$ and $D$ as compile-time constants, with no impact on the size of the compiled binary/program. They are implemented as C++ generics, also known as template specialization.
+    From a programming perspective, the choice of $K = 3$ and $D = 3$ is arbitrary. The library allows a developer to configure different values for $K$ and $D$ as compile-time constants, with no impact on the size of the compiled binary/program. They are implemented as C++ generics, also known as template specializations.
 \end{remark}

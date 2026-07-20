@@ -4,7 +4,7 @@
 
 \subsubsection{sPAR}
 The design 
-To simulate communication between parties, a single ``all-knowing'' orchestrator with access to the secret key. 
+To simulate communication between parties, a single ``all-knowing'' orchestrator with access to the (joint) secret key. Emphasize multi-party FHE is still employed. 
 
 \begin{itemize}
     \item An ``all-knowing'' orchestrator performs the setup and 1 full round
@@ -18,11 +18,7 @@ To simulate communication between parties, a single ``all-knowing'' orchestrator
         \item Each user also sends 3 random indices 
         \item After receiving all messages, the server performs the write operation on each message
     \end{itemize}
-    \item Setup phase (considered ``free'')
-    \begin{itemize}
-        \item Generate public key shares and attributes them to $\eta$ virtual users
-        \item Hybrid setup phase is more complicated; requires additional MPC to generate a joint public key in QP used to encrypt \gls{rgsw} ciphertexts 
-    \end{itemize}
+    \item Setup phase is considered ``free'' i.e. it is static, no communication happens in the simulation
 \end{itemize}
 
 \subsubsection{Unit Tests + Benchmarks}
@@ -81,14 +77,25 @@ To simulate communication between parties, a single ``all-knowing'' orchestrator
 \end{itemize}
 
 \subsubsection{Multi-Threaded Performance}
-The main advantage \gls{rns} holds over ... is multi-threading. As described above, our implementation allows efficient parallelization over $k\ell$ threads. However, if less than $k\ell$ threads are available in benchmarking we wish to extrapolate the expected performance at $k\ell$ processors.
-
-using Amdahl's law \cite{Gustafson:2011}
+The main advantage \gls{rns} holds over classical single-precision representations is its multi-threading capability. As described above, our implementation allows efficient parallelization over $k\ell$ threads. However, if fewer than $k\ell$ threads are available during benchmarking, we extrapolate the expected performance at $k\ell$ processors by modeling theoretical scaling behavior using Amdahl's Law~\cite{Gustafson:2011}.
 
 \begin{definition}[Amdahl's Law]
-    A task .. over $T$ processors
+    A task whose execution is divided into a strictly serial fraction $f$ and a broadly parallelizable fraction $1-f$ will experience a theoretical speedup over $T$ processors given by:
     \begin{equation}
         \label{eq:amdahl}
         \text{Speedup} = \frac{1}{f + \frac{1-f}{T}}
     \end{equation}
 \end{definition}
+
+Let $t(T)$ denote the total execution time of the algorithm on $T$ threads. Because speedup is defined as $\text{Speedup} = \frac{t(1)}{t(T)}$, we can substitute this ratio into~\eqref{eq:amdahl} and isolate $t(T)$ to form a linear equation:
+
+\begin{equation}
+    \label{eq:amdahl:regression}
+    t(T) = t(1)f + \frac{t(1)(1-f)}{T}
+\end{equation}
+
+By mapping this to the variables $y = t(T)$ and $x = \frac{1}{T}$, the relationship resolves into a standard linear model $y = \beta_0 + \beta_1 x$. The intercept $\beta_0 = t(1)f$ represents the fixed serial execution time, while the slope $\beta_1 = t(1)(1-f)$ captures the parallelizable workload scaled by the inverse thread count.
+
+By measuring empirical execution times across a limited set of processor counts ($T = 1, 2, 3, \dots, T_{max}$), we can perform an Ordinary Least Squares (OLS) linear regression on the variable pairs $(\frac{1}{T}, t(T))$. This regression identifies $\beta_0$ and $\beta_1$, mathematically separating the serial and parallel workloads. We can then substitute $T = k\ell$ into the fitted model to accurately extrapolate the expected execution time $t(k\ell)$ for a target architecture where $k\ell \gg T_{max}$.
+
+When fitting this regression model, it is critical to exclude measurements taken at complete hardware saturation (i.e., the benchmarking system's absolute maximum thread count $T_{max}$). At full capacity, execution time is artificially inflated by external systemic overheads, such as OS thread scheduling, memory bandwidth contention, and thermal throttling. Including this saturated data point warps the linear fit, systematically overestimating the serial fraction $f$ and severely degrading the accuracy of the large-scale extrapolation.

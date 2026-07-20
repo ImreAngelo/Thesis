@@ -1,15 +1,13 @@
 \section{Discussions}
 \begin{itemize}
-    \item The results show that number of users is not a problem; noise is
-    \item Once noise is controlled, many users can be handled due to the additive scaling of the RGSW products
-    \item GHS improvement over BV even adjusted to same security parameter, but would require a solution to the internal product
+    \item The results are slower than anticipated. Even though we are using larger parameters than the small TFHE parameters suggested in~\cite{cryptoeprint:2025/860}, it stands to reason that 
 \end{itemize}
 
 \begin{itemize}
+    \item Some possible avenues:
+    \item AVX512 not tested due to hardware incompatability
     \item Throughput
     \item SIMD
-    \item AVX512 not tested
-    \item Porting library to BFV is easy
 \end{itemize}
 
 \begin{itemize}
