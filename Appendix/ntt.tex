@@ -3,12 +3,12 @@
 %%
 %% CRT
 %%
-\section{The Chinese Remaineder Theorem}
+\section{The Chinese Remainder Theorem}
 \label{app:crt}
 
 \begin{definition}[Chinese Remainder Theorem]
     \label{def:crt}
-    coprime moduli etc.
+    Let $q_0, q_1, \dots, q_{k-1}$ be a set of $k$ pairwise coprime positive integers, meaning $\gcd(q_i, q_j) = 1$ for all $i \neq j$. For any given sequence of arbitrary integers $x_0, x_1, \dots, x_{k-1}$, there exists a unique solution $x$ modulo the product of these moduli that satisfies the following system of simultaneous congruences:
     \begin{align*}
         x &\equiv x_0 \pmod{q_0} \\
         \vdots \\
@@ -24,6 +24,8 @@
         x = \langle \{ x_i \}_{i=0}^{k-1}, \{ \hat{q}_i\cdot\hat{q}_i^{-1} \}_{i=0}^{k-1} \rangle \pmod{Q}
     \end{gather}
 \end{definition}
+
+% Within the context of a Residue Number System (RNS), the \gls{crt} provides the mathematical foundation for representing large integers as arrays of smaller, independent residues. By choosing word-sized coprime moduli $q_i$, operations on a large integer modulo $Q$ can be executed component-wise in parallel across the individual moduli, completely bypassing multi-precision carry propagation. Equation~\eqref{eq:crt-gadget} explicitly formulates this reconstruction as an inner product, which maps naturally to the gadget reconstruction structures utilized in homomorphic encryption.
 
 
 
