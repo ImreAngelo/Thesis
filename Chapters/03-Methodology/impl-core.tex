@@ -6,14 +6,7 @@
 \newpage\input{Chapters/03-Methodology/core/bitwise}
 \newpage\input{Chapters/03-Methodology/core/bv}
 
-%% TODO: Write this subsection
 \subsection{SIMD Batching}
-The BV implementation inherits the \gls{simd}-like functionality of OpenFHE, meaning that if 
+Nothing in the gadget or in either product depends on how the plaintext ring is interpreted, so the implementation inherits the slot packing of \autoref{def:simd} from OpenFHE unchanged. A caller that builds its plaintexts with \texttt{MakePackedPlaintext} rather than \texttt{MakeCoefPackedPlaintext} obtains \gls{rgsw} ciphertexts whose message is a vector of $N$ independent slots, and every external and internal product then acts on all $N$ slots at once. The library selects the matching zero plaintext automatically, so no other change is required.
 
-Assuming the context is configured with parameters that support SIMD batching, the implementation inherits the \gls{simd} functionality of OpenFHE
-
-\begin{itemize}
-    \item 
-    \item Requires using \texttt{MakePackedPlaintext} instead of \texttt{MakeCoefPackedPlaintext} in OpenFHE
-    \item This allows up to $N$ RGSW/External/Internal prodcuts simultaneously at no additional cost compared to the same parameters with \Call{MakeCoefPackedPlaintext}.
-\end{itemize}
+% The cost of a product is unchanged by this. A packed ciphertext is the same object of the same size, and the $2k\ell$ rows are decomposed and accumulated exactly as before, which is what makes the packing worthwhile. An application holding $N$ independent instances of the same binary computation can place one in each slot and evaluate all of them for the price of one, reducing the amortized cost per instance by a factor of $N$. The gain is in throughput and never in latency, and it is available only to applications whose work decomposes into independent instances in this way.

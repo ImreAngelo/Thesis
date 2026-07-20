@@ -1,5 +1,5 @@
 % An \gls{rgsw} encryption \eqref{def:rgsw} embeds the gadget matrix $G = I_2\otimes P(1)$ \eqref{def:Gmat} directly into the ciphertext, and with it the larger, in max-norm, of the two vectors of the gadget property \eqref{def:gadget-property}: the entries of $P$ are full-size ring elements, while the small vector $D$ is first produced when a product is evaluated. Encryption is therefore determined entirely by the choice of $P$, a choice \autoref{sec:gadget-decomposition} deliberately left open. 
-Our implementation instantiates the gadget matrix $G = I_2\otimes P(1)$ with a double-layered gadget as permitted by \autoref{thm:gadget-layers}: the HPS gadget from \eqref{def:hps:P} supplies the \gls{rns} layer by mapping $R_Q \to R_{q_0}\times\dots\times R_{q_{k-1}}$, and the power-of-$B$ gadget $P_g(v) = v\cdot g$ with $g = (1, B, \dots, B^{\ell-1})$ is applied to each limb. %% TODO: Write about the power-of-B gadget instead/in relation to digit decomposition in gadgets section!!!!
+Our implementation instantiates the gadget matrix $G = I_2\otimes P(1)$ with the double-layered gadget of \autoref{sec:gadget-decomposition}, where the HPS gadget from \eqref{def:hps:P} supplies the \gls{rns} layer by mapping $R_Q \to R_{q_0}\times\dots\times R_{q_{k-1}}$ and the power-of-$B$ gadget $P_g(v) = v\cdot g$ with $g = (1, B, \dots, B^{\ell-1})$ is applied to each limb.
 \begin{equation}
     \label{def:bv:P}
     \bv{P}\colon R_Q \to R_Q^{k\ell}, \qquad \bv{P}(v) = (P_g \circ \hps{P})(v) = \hps{P}(v) \otimes g
@@ -23,7 +23,7 @@ Recall from \autoref{sec:gadget-decomposition} that the $j$-th component of $\hp
     \end{array} \right]%^{\intercal}
 \end{gather*}
 
-We exploit the sparsity of this structure by discarding the zero residues. Since their contribution to any product is $0$, we can simply skip any calculations that would have involved a zero residue. Conveniently, the structure resulting from discarding these elements is exactly the \gls{crt} form of $(\mu, \mu B, \dots, \mu B^{\ell}) \in R_Q^{\ell}$. Multiplying $\mu$ by a scalar $B^i$ can be done natively in \gls{ntt}, and the previous derivation does not change if $\mu$ is in \gls{ntt} form, meaning we do not need to perform any \Call{NTT}{} or \Call{InverseNTT}{} operations as a result of this gadget.
+We exploit the sparsity of this structure by discarding the zero residues. Since their contribution to any product is $0$, we can simply skip any calculations that would have involved a zero residue. Conveniently, the structure resulting from discarding these elements is exactly the \firstForm{} of $(\mu, \mu B, \dots, \mu B^{\ell}) \in R_Q^{\ell}$. Multiplying $\mu$ by a scalar $B^i$ can be done natively in \gls{ntt}, and the previous derivation does not change if $\mu$ is in \gls{ntt} form, meaning we do not need to perform any \Call{NTT}{} or \Call{InverseNTT}{} operations as a result of this gadget.
 
 \begin{equation*} %% Don't edit this
     {P}_{\mathsf{BV}}(\mu)^{\intercal} \;\overset{\tiny\text{flatten}}{\longmapsto}\;
@@ -36,20 +36,13 @@ We exploit the sparsity of this structure by discarding the zero residues. Since
     = (\textcolor{hpsgreen}{[\mu]_{\mathcal{B}_Q}}, \dots, [\mu B^{\ell - 1}]_{\mathcal{B}_Q})
 \end{equation*}
 
-%% TODO: Clarify benefits
-% \begin{itemize}
-%     \item Note: the \gls{rgsw} ciphertext still contains $2k\ell$ rows, each one encoding one combination of $[\mu B^{i}]_{q_j}$.
-%     \item In practice we 
-%     \item No inverse/NTT penalty; we do not require a conversion!
-%     \item Smaller memory footprint during the EncryptRGSW function
-% \end{itemize}
-
-Furthermore, every element of $\bv{P}(\mu)$ is independent, making half of the $2k\ell$ rows in~\eqref{eq:hps:ciphertext} easily parallelizable over $k\ell$ threads.
+The ciphertext still contains $2k\ell$ rows, each encoding one combination $[\mu B^i]_{q_j}$, but the gadget itself costs nothing to apply. Two benefits follow. There is no transform penalty, since the scaling is a native \gls{ntt} operation and no conversion is required, and the memory footprint of $\Call{EncryptRGSW}{}$ is reduced to the $k\ell$ non-zero residues rather than the $k^2\ell$ of the dense vector. Furthermore, every element of $\bv{P}(\mu)$ is independent, making half of the $2k\ell$ rows in~\eqref{eq:hps:ciphertext} easily parallelizable over $k\ell$ threads.
 
 %%%
 %%% Encrypt RGSW-BV
 %%%
 \input{Algorithms/new/encrypt-bv}
 
+\subsubsection{Precomputed Gadget Powers}
 \label{sec:getpower}
 In \autoref{alg:bv:encrypt}, $\mathcal{B}_Q$, $B$ and $\ell$ are parameters used to initialize to the cryptographic context, and are thus available to any functions that exist within said context. The values $B^i \bmod{q_j}$ are calcuated and stored ahead of time, when the context is first initialized, and are exposed through a helper function $\Call{GetPower}{i, j} \gets B^i \bmod{q_j}$. $\Call{TowerMul}{\mu, j, B^i}$ extracts the $j$-th limb from $\mu$, multiplies it by $\Call{GetPower}{i, j}$, and inserts the product modulo $q_j$ back into the $j$-th limb.

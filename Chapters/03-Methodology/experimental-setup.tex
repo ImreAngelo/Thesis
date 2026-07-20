@@ -1,9 +1,9 @@
-%
+% TODO: Write bullet points into prose
 \newpage
 \section{Experimental Setup}
 
 \subsubsection{sPAR}
-The design 
+The design ...
 To simulate communication between parties, a single ``all-knowing'' orchestrator with access to the (joint) secret key. Emphasize multi-party FHE is still employed. 
 
 \begin{itemize}
@@ -21,18 +21,15 @@ To simulate communication between parties, a single ``all-knowing'' orchestrator
     \item Setup phase is considered ``free'' i.e. it is static, no communication happens in the simulation
 \end{itemize}
 
+%% TODO: This should probably not be called "Unit Tests + Benchmarks"
 \subsubsection{Unit Tests + Benchmarks}
 \begin{itemize}
+    \item Run with google benchmark + gTest. The benchmarks run 10 iterations, where each iteration continually repeats the operation within a span of 1 second; resulting in at least 10 iterations for the operations that take $> 1$ second (and hundreds for the faster functions), and a low coefficient of variance.
     \item To empirically evaluate correctness and catch bugs early, the functionality of the program is unit tested
-    \item The RGSW encryption + TFHE operations are tested for plaintext 0 and 1, and a larger message
-    \item SIMD and regular variants are tested
-    \item For sPAR protocol, the number of users is parameterized over $\eta$
-    \item \texttt{test} checks for correctness at every stage, no failures means the protocol can handle $\eta$ users
-    \item Even though $q_i$ are randomly generated each time, its empirically clear there is no difference between runs, no matter what $q_i$ are (as long as $\|Q\|$ is at the same bit size)
     \item Difference between benchmarks and unit tests: 
     \begin{itemize}
         \item Benchmarks are optimized for speed, and do not perform any correctness checks (which could affect performance). Functions only need to run once and total time can be extrapolated: for the client encryption/decryption which can be run in parallel over/independently by each user, and the server/final decryption, the one-shot runtime \textit{is} the correct runtime. For the server write, we only care about the per-user runtime anyway.
-        \item Unit tests are not optimized for speed (in the compilation etc.) and does perform correctness checks multiple times, at different levels; that way, the library provides reasonable diagnostics. Not just that an operation failed, but also \textit{why}/where it failed. 
+        \item Unit tests are not optimized for speed (in the compilation etc.) and does perform very slow correctness checks multiple times, at different levels; that way, the library provides reasonable diagnostics. Not just that an operation failed, but also \textit{why}/where it failed. 
         \item Unit tests and benchmarks match in parameter and other code, so a successful unit test empirically validates correctness while the benchmarks provides real performance numbers in a production setting.
     \end{itemize}
 \end{itemize}
@@ -58,8 +55,8 @@ To simulate communication between parties, a single ``all-knowing'' orchestrator
 %     \item \textcolor{red}{Three sets of parameters: 2 for security parity and shared for SIMD capable}
 % \end{itemize}
 
+%% TODO: This section is basically complete, just needs prose-ification
 \subsubsection{Noise Analysis}
-
 
 \begin{itemize}
     \item For testing RGSW products, error is checked directly
@@ -76,6 +73,7 @@ To simulate communication between parties, a single ``all-knowing'' orchestrator
     \item I use the latter method because the first method relies on the fact that a gadget $g = (1, \dots)$ containing $1$ is used, which is not necessarily always the case, even though this is traditionally the case.
 \end{itemize}
 
+%% TODO: Do not touch this section
 \subsubsection{Multi-Threaded Performance}
 The main advantage \gls{rns} holds over classical single-precision representations is its multi-threading capability. As described above, our implementation allows efficient parallelization over $k\ell$ threads. However, if fewer than $k\ell$ threads are available during benchmarking, we extrapolate the expected performance at $k\ell$ processors by modeling theoretical scaling behavior using Amdahl's Law~\cite{Gustafson:2011}.
 
@@ -87,15 +85,12 @@ The main advantage \gls{rns} holds over classical single-precision representatio
     \end{equation}
 \end{definition}
 
-Let $t(T)$ denote the total execution time of the algorithm on $T$ threads. Because speedup is defined as $\text{Speedup} = \frac{t(1)}{t(T)}$, we can substitute this ratio into~\eqref{eq:amdahl} and isolate $t(T)$ to form a linear equation:
+Let $E(T)$ denote the total execution time of the algorithm on $T$ threads. Because speedup is defined as $\text{Speedup} = \frac{E(1)}{E(T)}$, we can substitute this ratio into~\eqref{eq:amdahl} and isolate $E(T)$ to form a linear equation:
 
-\begin{equation}
-    \label{eq:amdahl:regression}
-    t(T) = t(1)f + \frac{t(1)(1-f)}{T}
-\end{equation}
+$$ E(T) = E(1)f + \frac{E(1)(1-f)}{T} $$
 
-By mapping this to the variables $y = t(T)$ and $x = \frac{1}{T}$, the relationship resolves into a standard linear model $y = \beta_0 + \beta_1 x$. The intercept $\beta_0 = t(1)f$ represents the fixed serial execution time, while the slope $\beta_1 = t(1)(1-f)$ captures the parallelizable workload scaled by the inverse thread count.
+By mapping this to the variables $y = E(T)$ and $x = \frac{1}{T}$, the relationship resolves into a standard linear model $y = \beta_0 + \beta_1 x$. The intercept $\beta_0 = E(1)f$ represents the fixed serial execution time, while the slope $\beta_1 = E(1)(1-f)$ captures the parallelizable workload scaled by the inverse thread count.
 
-By measuring empirical execution times across a limited set of processor counts ($T = 1, 2, 3, \dots, T_{max}$), we can perform an Ordinary Least Squares (OLS) linear regression on the variable pairs $(\frac{1}{T}, t(T))$. This regression identifies $\beta_0$ and $\beta_1$, mathematically separating the serial and parallel workloads. We can then substitute $T = k\ell$ into the fitted model to accurately extrapolate the expected execution time $t(k\ell)$ for a target architecture where $k\ell \gg T_{max}$.
+By measuring empirical execution times across a limited set of processor counts ($T = 1, 2, 3, \dots, T_{max}$), we can perform an Ordinary Least Squares (OLS) linear regression on the variable pairs $(\frac{1}{T}, E(T))$. This regression identifies $\beta_0$ and $\beta_1$, mathematically separating the serial and parallel workloads. We can then substitute $T = k\ell$ into the fitted model to accurately extrapolate the expected execution time $E(k\ell)$ for a target architecture where $k\ell \gg T_{max}$.
 
 When fitting this regression model, it is critical to exclude measurements taken at complete hardware saturation (i.e., the benchmarking system's absolute maximum thread count $T_{max}$). At full capacity, execution time is artificially inflated by external systemic overheads, such as OS thread scheduling, memory bandwidth contention, and thermal throttling. Including this saturated data point warps the linear fit, systematically overestimating the serial fraction $f$ and severely degrading the accuracy of the large-scale extrapolation.

@@ -18,7 +18,7 @@ Our implementation takes the bit-length $b = \log{B}$ as a parameter rather than
     \end{tabular}
 \end{table}
 
-% This leads to some minor optimizations that appear throughout the implementation.
+Two of these compositions recur often enough to be worth naming. Reduction modulo $2^b$ is a single mask, and centering a residue into $[-2^{b-1}, 2^{b-1})$ is a mask around an offset; both appear inside the decomposition of the following section.
 
 %%%
 %%% Center residue
@@ -37,7 +37,7 @@ Our implementation takes the bit-length $b = \log{B}$ as a parameter rather than
 
 %%%
 %%% Modulo
-%%% TODO: Maybe this adds nothing to the text?
+%%%
 \begin{algorithm}[ht!]
 \caption[Modulo]{\protect\Call{Modulo}{$x,b$}}
 \label{alg:bit:modulo}

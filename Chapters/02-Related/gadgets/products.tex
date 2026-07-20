@@ -25,8 +25,7 @@ Two \gls{rgsw} ciphertexts add homomorphically, just as \gls{rlwe} ciphertexts d
     \label{eq:gadget-matrix-property}
     G^{-1}(x)\cdot G = x + e \pmod{Q}
 \end{equation}
-%% TODO: Explain we do not need to use the "canonical gadget decomposition" described in CGGI18 and typically used etc.
-with quality $\|G^{-1}(x)\| \leq \beta$. No particular decomposition is prescribed; any $G^{-1}(x)$ satisfying \eqref{eq:gadget-matrix-property} yields a valid product. % a generality that later chapters exploit by instantiating $G^{-1}$ with different gadgets. %% DO NOT FORWARD REFERENCE!
+with quality $\|G^{-1}(x)\| \leq \beta$. No particular decomposition is prescribed. The canonical choice is the base-$B$ digit decomposition of the ciphertext coefficients~\cite{cryptoeprint:2018/421}, and it is the one usually meant when the external product is written down, but nothing in the definition depends on it. Any $G^{-1}(x)$ meeting \eqref{eq:gadget-matrix-property} at quality $\beta$ yields a valid product, and the noise bounds below are stated in terms of $\beta$ alone. % a generality that later chapters exploit by instantiating $G^{-1}$ with different gadgets. %% DO NOT FORWARD REFERENCE!
 
 \begin{definition}[External Product]
     \label{def:prod:external}
@@ -74,11 +73,9 @@ with quality $\|G^{-1}(x)\| \leq \beta$. No particular decomposition is prescrib
     The two noise terms of \eqref{eq:extprod-expansion} behave very differently, as detailed in \autoref{appendix:asymmetry}. The term $G^{-1}(x)\cdot Z \leq (a\cdot s + \beta\sum_{i=0}^{2\ell-1} \epsilon_i,\; a)$ amplifies the masking errors of the \gls{rgsw} operand by the decomposition quality. The precision term $e$ is scaled by $\mu$, which is why $\mu$ is typically constrained to $\{0,1\}$ when an inexact gadget is used. The error of the \gls{rlwe} operand, by contrast, is never amplified: it is carried into the result scaled only by $\mu$. This asymmetry was observed early on~\cite{cryptoeprint:2013/541, cryptoeprint:2014/094, cryptoeprint:2014/816}, and makes \gls{gsw}-style ciphertexts particularly suited to evaluating long chains of products. The noise stays low as long as the right operand is fresh, or at least has a small $\|\epsilon\|_\infty$, regardless of the error already accumulated on the left.
 \end{remark}
 
-%% TODO: Rewrite, this sucks.
 \newpage
-The original \gls{gsw} construction defined its homomorphic product directly between two of its ciphertexts~\cite{cryptoeprint:2013/340}. Since every row of an \gls{rgsw} ciphertext is itself an \gls{rlwe} ciphertext, this \emph{internal product} is recovered by applying the external product row by row.
+The external product leaves the \gls{rgsw} operand untouched and returns an \gls{rlwe} ciphertext, so it cannot be chained: its output is not of the right type to serve as either operand again. The original \gls{gsw} construction therefore defined its product directly between two of its own ciphertexts~\cite{cryptoeprint:2013/340}. That product needs no separate machinery here. Every row of an \gls{rgsw} ciphertext is an \gls{rlwe} ciphertext, so applying the external product row by row multiplies the whole matrix by the same message and returns an \gls{rgsw} ciphertext again.
 
-%% NOTE: TFHE uses RLWE on RHS in external product! Too late to swap.
 \begin{definition}[Internal Product]
     \label{def:prod:internal}
     Let $A, C \in R_Q^{2\ell\times 2}$ be \gls{rgsw} encryptions of $\mu_A, \mu_C \in R_Q$ under the same secret key and gadget, and let $A_i$ denote the $i$-th row of $A$. The \emph{internal product}~\cite{cryptoeprint:2018/421} applies the external product to each row of the left operand:
@@ -96,4 +93,9 @@ The original \gls{gsw} construction defined its homomorphic product directly bet
 
 One internal product amounts to $2\ell$ external products, and correctness follows row by row: each external product multiplies the content of $A_i$ by $\mu_C$, so the stacked result is again of the form \eqref{def:rgsw} with message $\mu_A\cdot\mu_C$.
 
-The asymmetry of \autoref{rem:extprod-asymmetry} applies to each of the $2\ell$ rows, and dictates the order in which a chain of products should be evaluated: the noise of the right-hand operand is amplified by the decomposition in every row of the result, while the noise of the left-hand operand is only carried through. When accumulating a running product, the accumulator must therefore be kept on the left with each fresh ciphertext supplied on the right, so that the noise grows additively rather than multiplicatively.
+The asymmetry of \autoref{rem:extprod-asymmetry} applies to each of the $2\ell$ rows, and dictates the order in which a chain of products should be evaluated. The noise of the right-hand operand is amplified by the decomposition in every row of the result, while the noise of the left-hand operand is only carried through. When accumulating a running product, the accumulator must therefore be kept on the left with each fresh ciphertext supplied on the right, so that the noise grows additively rather than multiplicatively.
+
+\begin{remark}[Operand Order]
+    \label{rem:operand-order}
+    The convention above places the \gls{rlwe} operand of the external product on the left and the \gls{rgsw} operand on the right, so that both products read left to right with the accumulator first. TFHE writes the external product the other way round~\cite{cryptoeprint:2018/421}, with the \gls{rgsw} ciphertext on the left. The operation is the same, but any expression carried over from that literature must be transposed before it is read against \eqref{def:extprod}.
+\end{remark}

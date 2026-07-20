@@ -16,11 +16,12 @@
 \label{sec:impl:spar}
 Our instantiation of \gls{spar} can be considered the \emph{minimal} version of the original specification~\cite{cryptoeprint:2025/860}. We do not consider the active threat model(s) of sections 6 and 7. Bucket sorting is also not implemented, though this should have a negligible effect as we estimate each bucket can be sorted in parallel in around $100$~ms~\cite{cryptoeprint:2025/860}. % , cryptoeprint:2024/1894
 
-\begin{itemize}
-    \item Uses a procedural programming paradigm, meaning the library implements the required functions but does not provide a full state-maintaining implementation of the server nor client. 
-    \item The benchmarks and testing framework is what actually composes the protocol, using the functions from this library.
-    \item This was done so that the functionality is not tightly coupled to the benchmarking without spending time implementing actual communication which would require additional work: serializing data, error handling, and coordinating multiple machines. % Basically: justify not having a compiled executable "server" and "client"
-\end{itemize}
+%% TODO: Skip for now, it is not that interresting and takes spaces
+% \begin{itemize}
+%     \item Uses a procedural programming paradigm, meaning the library implements the required functions but does not provide a full state-maintaining implementation of the server nor client. 
+%     \item The benchmarks and testing framework is what actually composes the protocol, using the functions from this library.
+%     \item This was done so that the functionality is not tightly coupled to the benchmarking without spending time implementing actual communication which would require additional work: serializing data, error handling, and coordinating multiple machines. % Basically: justify not having a compiled executable "server" and "client"
+% \end{itemize}
 
 \subsection{Server Write Step}
 The \texttt{Server::Write} deviates slightly from~\cite[Algorithm 2]{cryptoeprint:2025/860}. 
@@ -34,7 +35,7 @@ The \texttt{Server::Write} deviates slightly from~\cite[Algorithm 2]{cryptoeprin
         \item HasWrite is inverted i.e. ``notHasWrite'' -> Saves one operation
         \item Uses external products to handle deep circuits as \cite{cryptoeprint:2025/860} recommends. In fact, their algorithm is general and ours is not; explicit external products.
         \item Not implementable using \emph{only} external products per se: must use internal products
-        \item To minimize noise and make initialization of the state matrices faster, the server can opt to init with "noiseless" encryptions. These provide no security on their own (which is fine since the initial state is known to all), but become regular encryptions after 1 iteration of the inner loop.
+        \item To minimize noise and make initialization of the state matrices faster, the server can opt to init $L$ and $I$ with "noiseless" encryptions. These provide no security on their own (which is fine since the initial state is known to all), but become regular encryptions after 1 iteration of the inner loop.
         \item Variables:
         \begin{itemize}
             \item $z_{i,d},\; I_{i,k},\;\mathsf{hasNotWritten}$ are $ \Call{RGSW}{m}, m \in \{0, 1\}^{N}$
@@ -76,3 +77,7 @@ The \texttt{Server::Write} deviates slightly from~\cite[Algorithm 2]{cryptoeprin
 \begin{remark}
     From a programming perspective, the choice of $K = 3$ and $D = 3$ is arbitrary. The library allows a developer to configure different values for $K$ and $D$ as compile-time constants, with no impact on the size of the compiled binary/program. They are implemented as C++ generics, also known as template specializations.
 \end{remark}
+
+%% TODO: Since the server does not do the placing, the clients encrypt the full z arrays not the \log \eta bits. This is the one-hot encoding which must be resolved gracefully in the alogrithmic block. The impact should be negliglible, since this step can run in parallel on the server and mainly serves to minimize the bandwidth (which we consider out-of-scope).
+
+%% TODO: The client::Decrypt and server::Decrypt are mainly just wrappers around OpenFHE's multi-party stuff

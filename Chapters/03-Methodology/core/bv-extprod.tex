@@ -1,11 +1,6 @@
-%% TODO: Write about power-of-B gadget in earlier section!?
-%% TODO: Unify terminology with other section
-The decomposition on the gadget $g = (1, B, \dots, B^{\ell-1})$ is essentially digit extraction. The classical approach is to compute standard unsigned base-$B$ digits, producing a decomposition vector where each digit $d_i \in [0, B)$. Under our abstract gadget decomposition definition~\autoref{sec:gadget-decomposition}, the quality of this decomposition is $\beta = B - 1$.
+The second layer of the gadget from \autoref{sec:gadget-decomposition} is a decomposition on $g = (1, B, \dots, B^{\ell-1})$, which is essentially digit extraction. Computing the digits as unsigned base-$B$ values puts each $d_i$ in $[0, B)$ and gives quality $\beta = B - 1$.
 
-%% TODO: Explain way better and more compact! The problem is negative digits give a carry? Is that it? Explain why the integer is not already encoded as signed.
-From~\autoref{rem:extprod-asymmetry} we know the noise in the external product is a function of $\beta$. To exert tighter control over noise growth during external products, we naturally prefer to minimize this magnitude. By centering the digits into a signed representation where $d_i \in [-B/2, B/2)$, we halve the maximum absolute value, improving the overall decomposition quality to $\beta = B/2$. 
-
-However, this centered representation requires some work to make parallelizable. Standard signed recoding algorithms evaluate digits sequentially from least significant to most significant because shifting a positive digit $d_i \ge B/2$ into the negative range requires adding a $+1$ carry to the subsequent digit $d_{i+1}$. This ripple-carry dependency prevents us from slicing the integer into independent bit-windows, creating a computational bottleneck.
+By \autoref{rem:extprod-asymmetry} the noise of an external product grows with $\beta$, so it is worth halving. Centering the digits to $d_i \in [-B/2, B/2)$ does exactly that, at $\beta = B/2$. The residues are stored unsigned, so centering is not free: mapping a digit $d_i \geq B/2$ into the negative range subtracts $B$ from it, which must be compensated by a $+1$ carry into $d_{i+1}$. Standard recoding therefore walks the digits from least to most significant, and that dependency is what prevents the integer from being sliced into independent bit-windows.
 
 To avoid sequential carry propagation, we apply a well-known offset trick by adding the constant $\varGamma$~\eqref{eq:carry-offset}.
 \begin{equation}
@@ -22,8 +17,8 @@ The second fraction is the standard mathematical identity for the sum of a finit
 To decompose a positive integer $c \in \mathbb{Z}^{+}$ into signed digits $[d]_{B}$, we first apply the global offset to compute a shifted, non-negative integer $c' = c + \varGamma$. We then slice $c'$ into intermediate unsigned base-$B$ digits $u_i$. Because $B=2^b$ is a power of two, this extraction is performed purely via the independent bitwise \autoref{alg:bit:center}, completely bypassing sequential dependencies.
 
 %%%
-%%% Unsigned digit decomposition (optimized for B = 2^b)
-%%% TODO: Move this to gadgets/BV section and have signed digit decomposition here? (Optional)
+%%% Unsigned digit decomposition (optimized for B = 2^b) --- superseded by the
+%%% parallel signed variant below; kept for reference only.
 % \begin{algorithm}
 % \caption{Decompose wrt. $B$ (\textcolor{red}{TODO: Signed digit decomposition})}
 % \label{alg:bv:decompose}
@@ -71,7 +66,9 @@ To decompose a positive integer $c \in \mathbb{Z}^{+}$ into signed digits $[d]_{
 As with $\Call{GetPower}{i,j}$ from \autoref{sec:getpower} the offset $\varGamma$ is calculated exactly once, when the context is first created.\footnote{Specifically the bitwise $\varGamma = (1 \ll (b-1))\cdot((2 \ll (b \ell)) - 1)/((1\ll b) - 1)$ is used, but this is slightly less human readable than \eqref{eq:carry-offset}.} 
 
 \newpage
-Once we have a working $\Call{Decompose}{}$ function, the external product can be written as \autoref{alg:external-product}. Our implementation is functionally the same, except that it has been split into three stages for better parallelization. First, all the $2k$ inverse \gls{ntt} evaluations required by the decompositions are calculated in parallel. Second, the decompose calls are merged into the external product function, and the two ciphertext elements are decomposed in parallel over $2k\ell$ threads. This stage includes the $2k\ell$ forward \gls{ntt} calls. Finally, the for loop calculating the inner product is parallelized over $\ell$ threads.
+Once we have a working $\Call{Decompose}{}$ function, the external product can be written as \autoref{alg:external-product}. Our implementation is functionally the same, except that it has been split into three stages for better parallelization. First, the $2k$ inverse \gls{ntt} evaluations required by the decompositions are calculated in parallel, one per tower of each of the two ciphertext elements. Second, the decompose calls are merged into the external product function, and every tower of every digit is sliced, centered and transformed independently, giving $2k\ell\cdot k$ parallel tasks and as many forward \gls{ntt} calls. Finally, the inner product is accumulated over the $2k$ pairs of ciphertext component and tower, each thread summing its own $2k\ell$ terms with no reduction across threads.
+
+The width of every stage depends on $k$ as well as $\ell$, so a parameter set with more \gls{rns} primes exposes proportionally more parallelism.
 
 %%%
 %%% External Product
@@ -85,9 +82,9 @@ Once we have a working $\Call{Decompose}{}$ function, the external product can b
 \State $acc \gets (0, 0)$
 \State $d_0 \gets \Call{Decompose}{c_0}$
 \State $d_1 \gets \Call{Decompose}{c_1}$
-\For{$r \gets [0, k)$}
-    \State $acc[0] \gets acc[0] + d_0[r] \cdot C[r][0] + d_1[r]\cdot C[r+\ell][0]$
-    \State $acc[1] \gets acc[1] + d_0[r] \cdot C[r][1] + d_1[r]\cdot C[r+\ell][1]$
+\For{$r \gets [0, k\ell)$}
+    \State $acc[0] \gets acc[0] + d_0[r] \cdot C[r][0] + d_1[r]\cdot C[r + k\ell][0]$
+    \State $acc[1] \gets acc[1] + d_0[r] \cdot C[r][1] + d_1[r]\cdot C[r + k\ell][1]$
 \EndFor
 \State \Return $acc$
 \end{algorithmic}

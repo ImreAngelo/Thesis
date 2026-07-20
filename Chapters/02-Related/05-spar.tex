@@ -17,7 +17,7 @@ Two further assumptions are what the protocol takes explicit measures to satisfy
 A one-time setup is followed by polynomially many rounds under the same keys, each consisting of four computations separated by two client--server round trips.
 
 \subsubsection{Setup}
-The clients agree on a set of \gls{FHE} parameters and run the multi-party key generation of \autoref{sec:mpfhe}, producing a joint public key under which every round is encrypted. % In contrast to existing protocols, neither a permutation nor any trusted party enters the setup.
+The clients agree on a set of \gls{fhe} parameters and run the multi-party key generation of \autoref{sec:mpfhe}, producing a joint public key under which every round is encrypted. % In contrast to existing protocols, neither a permutation nor any trusted party enters the setup.
 
 \subsubsection{Client: Encryption}
 Client $i$ encrypts its message under the joint key and samples three bucket indices $a_0, a_1, a_2 \overset{\$}{\leftarrow} [0, \eta)$ uniformly, encrypting the $\log\eta$ bits of each index separately. A single index per client would collide too often, whereas with $\eta$ buckets of three slots the probability that all nine candidate slots are taken falls below $10^{-11}$, and on that event the message is dropped and retransmitted in a later round~\cite{cryptoeprint:2025/860}.

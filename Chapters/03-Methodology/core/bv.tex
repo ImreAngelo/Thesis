@@ -1,5 +1,3 @@
-%% TODO: Validate algorithms in this section actual match context-bv.cpp and the explanation is correct!
-
 \subsection{RGSW Encryption}
 \input{Chapters/03-Methodology/core/bv-encrypt}
 
@@ -7,7 +5,7 @@
 \input{Chapters/03-Methodology/core/bv-extprod}
 
 \subsection{Internal Product}
-The internal product is trivially implemented as repeated external products as per the definition~\autoref{def:prod:internal}.
+The internal product is trivially implemented as repeated external products as per the definition~\autoref{def:prod:internal}. Each of the $2k\ell$ rows of the left operand is an independent \gls{rlwe} ciphertext, so the rows are distributed across threads. Nested parallelism is disabled, meaning the stages inside \autoref{alg:external-product} collapse to a single thread when it is invoked from here; a standalone external product keeps its own parallelism.
 
 %%%
 %%% Internal Product
@@ -17,10 +15,10 @@ The internal product is trivially implemented as repeated external products as p
 \label{alg:internal-product}
 \begin{algorithmic}[1]
 \Require RGSW ciphertexts $L \in R_Q^{2k\ell}$ and $R \in R_Q^{2k\ell}$
-\Ensure RLWE ciphertext of product
-\State Initialize an empty list of $2k\ell$ \gls{rlwe} ciphertexts
+\Ensure RGSW ciphertext of the product
+\State Initialize a vector of $2k\ell$ empty RLWE ciphertexts $acc$
 \For{$i \gets [0, 2k\ell)$ \textbf{in parallel}}
-    \State $\Call{EvalExternalProduct}{}$
+    \State $acc[i] \gets \Call{EvalExternalProduct}{acc[i],\; R}$
 \EndFor
 \State \Return $acc$
 \end{algorithmic}
