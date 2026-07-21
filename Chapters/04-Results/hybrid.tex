@@ -1,75 +1,136 @@
 \subsection{Theoretical Hybrid Improvement}
 \label{sec:results:hybrid}
-An alternative to gadget decomposition often employed in \gls{rns} key-switching is \textit{hybrid} keyswitching \cite{cryptoeprint:2012/099, cryptoeprint:2021/204}. 
+An alternative to gadget decomposition often employed in \gls{rns} key-switching is the \textit{hybrid} technique \cite{cryptoeprint:2012/099, cryptoeprint:2021/204}. A natural question is wether this technique can be employed in the external and internal products.
 
-\begin{itemize}
-    \item This approach nearly fits inside the gadget decomposition framework established in \autoref{sec:gadget-decomposition}, as $\langle u \cdot  P^{-1}, v\cdot P\rangle = u\cdot v \cdot P^{-1}\cdot P = u\cdot v \bmod{QP}$
-    \item This actually defines a valid external product, the problem is that the $P$-scaling is consumed after this operation
-\end{itemize}
+% We defer a proper treatise of the 
+In hybrid, the idea is to pre-scale a message $m$ by an auxiliary modulus $P$, where $|P| \approx |Q|/d_{num}$ for some integer $d_{num} | k$, resulting in a encryption of $m\cdot P$ in the extended ciphertext modulus $QP$. After some homomorphic operation(s) we end up with the message $m'P$ and more noise $\epsilon' \geq\epsilon$. Dividing the ciphertext by $P$ will result in a ciphertext encrypting $m'$ in modulus $Q$, but the noise is also scaled down by $P$.
+\begin{gather*}
+    (a\cdot s + \Delta m P + \epsilon, a) \pmod{QP} \\
+    P^{-1}\cdot (a\cdot s + \Delta m' P + \epsilon', a) \pmod{QP} \\
+    (a'\cdot s + \Delta m' + \epsilon'/P, a') \pmod{Q}
+\end{gather*}
 
-\begin{definition}[Hybrid-RGSW Ciphertext]
-    An \gls{rgsw} ciphertext that encodes $\mu P$ in the extended  
+Reframing this technique in terms of the gadget framework established in \autoref{sec:gadget-decomposition} is straight forward. If we let $g = P$, the gadget property holds in the extended modulus $QP$. Using $P^{-1}$ as our decomposition is identical to dividing by $P$ in hybrid.
+\begin{gather*}
+    \langle x, yP\rangle = x\cdot y \cdot P \pmod{QP} \\
+    \langle P^{-1}\cdot x, yP\rangle = P^{-1}\langle x, yP\rangle = x\cdot y \pmod{Q}
+\end{gather*}
+
+This is sufficient to define the external product using the hybrid gadget.\footnote{This result should come as no surprise since key-switching and the external product is essentially the same operation.} We must note, however, that this creates an imbalance between the left and right operands, where the right \gls{rgsw} must be defined in the extended modulus $QP$ while the left \gls{rlwe} is defined in the target modulus $Q$.
+
+\begin{definition}[Hybrid-RGSW]
+    An \gls{rgsw} ciphertext that encodes $\mu P$ \textbf{in the extended modulus} $QP$.
     \begin{equation}
         C_{QP} = Z_{QP} + \mu \begin{pmatrix}
             P & 0 \\
             0 & P
         \end{pmatrix} \pmod{QP}
     \end{equation}
-    \begin{equation}
-        \Call{HybridRGSW}{b} = \Call{RGSW}{b\cdot P}
-    \end{equation}
+    % \begin{equation}
+    %     \Call{HybridRGSW}{b} = \Call{RGSW}{b\cdot P}
+    % \end{equation}
 \end{definition}
+
+Thanks to the abstract interface layout of the core library, a second implementation was developed for this thesis that implements the external product. Note that this implementation is technically using the \emph{GHS} technique from~\cite{cryptoeprint:2012/099}, which is (by definition) hybrid with $d_{num} = 1$. % The implementation was tested in the same way, with the same parameters, as the BV implementation.
 
 \input{Algorithms/new/encrypt-hybrid}
 
-\begin{definition}[Hybrid External Product]
-    Is valid...
-\end{definition}
-
-\begin{lemma}
-    The external product $\Call{RGSW}{} \boxdot \Call{HybridRGSW}{}$ is a valid product...
-    \begin{proof}
-        \begin{gather}
-            x_{Q} \boxdot C_{QP} = P^{-1}(x_q \cdot 
-            Z_{QP} + \mu \begin{pmatrix}
-            P & 0 \\
-            0 & P
-        \end{pmatrix}
-            ) \pmod{QP}
-        \end{gather}
-    \end{proof}
-\end{lemma}
-
+%% TODO: use scale and approx mod down etc.
 \input{Algorithms/new/extprod-hybrid}
 
+Hybrid is very fast in \gls{rns} because (1) it uses the fast approximations discussed in \autoref{sec:base-conversion} and (2) the decomposition parameter $d_{num}$ is relatively small compared to, for example, the BV gadget with its $k\ell$ parameter. 
+
+%% TODO: Insert table comparing the benchmarks of encryption + external product (single threaded)
+
+Our testing suggests the hybrid approach not only improves the speed of the external product, but also improves the noise growth properties significantly. In a full implementation this could be tweaked by varying $d_{num}$, with larger values resulting in even faster speeds at the cost of more noise. 
+
+%% TODO: Insert graph of BV versus hybrid external product noise
+
+\subsubsection{Internal Product}
+One would think that since the internal product is defined as repeated applications of the external product, the hybrid technique would trivially extend to this product as well. However, the internal product works on the assumption that each row of an \gls{rgsw} can be treated as an \gls{rlwe}, such that the external product can be applied between each row and \textit{any} \gls{rgsw}. This implicitly assumes the modulus is the same for the left and right operands, which is not the case in our hybrid construction!
+
+Consider a single row of the internal product if we try to naively apply the hybrid variant. Let $L$ and $R$ be the left and right hybrid-RGSW ciphertexts.
+\begin{gather*}
+    L \boxtimes R = \begin{bmatrix}
+        L_0 \boxdot R \\
+        L_{1} \boxdot R
+    \end{bmatrix} 
+    \\
+    \\
+    \text{Row } 0:\quad L_0 \boxdot R \implies P^{-1} \cdot m_l\cdot P \cdot m_R \cdot P 
+    \\
+    m_L \cdot m_R \cdot P \pmod{QP}
+    \\
+    \text{Mod down: } m_L \cdot m_R 
+\end{gather*}
+
+each row of an \gls{rgsw} encodes the message $mg_i$... In the 
+
+\begin{conjecture}[Hybrid Internal Product]
+    
+\end{conjecture}
+
+\subsubsection{A Compromise}
+If the left 
+
+If we distinguish between a \emph{left} and a \emph{right} RGSW, then we can define a \textit{mixed} product that 
+
+%% TODO: Algorithmic
 \begin{itemize}
-    \item This was actually implemented as below
+    \item For each row in left RGSW
+    \begin{itemize}
+        \item Apply external product to row x right RGSW
+    \end{itemize}
 \end{itemize}
 
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.54\linewidth}
-        \centering
-        \input{Figures/dependency-graph}
-        % \includegraphics[width=\linewidth]{Figures/dependency-graph-preview.png}
-        \caption{Dependency graph}
-        \label{fig:depgraph}
-    \end{subfigure}
-\end{figure}
+% \begin{definition}[Hybrid External Product]
+%     Is valid...
+% \end{definition}
 
-\begin{itemize}
-    \item This method shows far better noise handling and 
-    \item Show graphs for same parameters but $|P| \approx |Q|$ i.e. $d_{num} = 1$ and security parameter smaller but still $\geq 128$ bits
-    \item Also show numbers with security-parity
-    \item Problem: internal product does not work with both sides as Hybrid-RGSW and one $P$ is consumed each external product!
-\end{itemize}
+% \begin{lemma}
+%     The external product $\Call{RGSW}{} \boxdot \Call{HybridRGSW}{}$ is a valid product...
+%     \begin{proof}
+%         \begin{gather}
+%             x_{Q} \boxdot C_{QP} = P^{-1}(x_q \cdot 
+%             Z_{QP} + \mu \begin{pmatrix}
+%             P & 0 \\
+%             0 & P
+%         \end{pmatrix}
+%             ) \pmod{QP}
+%         \end{gather}
+%     \end{proof}
+% \end{lemma}
 
-\begin{definition}[Hybrid Internal Product]
-    I define the \textit{hybrid internal product} as 
-    \begin{gather}
-        \boxtimes_H \;:=\; \Call{RGSW}{a} \boxtimes_H \Call{RGSW}{b\cdot P} = \Call{RGSW}{a\cdot b}
-    \end{gather}
-\end{definition}
+% \input{Algorithms/new/extprod-hybrid}
+
+% \begin{itemize}
+%     \item This was actually implemented as below
+% \end{itemize}
+
+% \begin{figure}[H]
+%     \centering
+%     \begin{subfigure}[b]{0.54\linewidth}
+%         \centering
+%         \input{Figures/dependency-graph}
+%         % \includegraphics[width=\linewidth]{Figures/dependency-graph-preview.png}
+%         \caption{Dependency graph}
+%         \label{fig:depgraph}
+%     \end{subfigure}
+% \end{figure}
+
+% \begin{itemize}
+%     \item This method shows far better noise handling and 
+%     \item Show graphs for same parameters but $|P| \approx |Q|$ i.e. $d_{num} = 1$ and security parameter smaller but still $\geq 128$ bits
+%     \item Also show numbers with security-parity
+%     \item Problem: internal product does not work with both sides as Hybrid-RGSW and one $P$ is consumed each external product!
+% \end{itemize}
+
+% \begin{definition}[Hybrid Internal Product]
+%     I define the \textit{hybrid internal product} as 
+%     \begin{gather}
+%         \boxtimes_H \;:=\; \Call{RGSW}{a} \boxtimes_H \Call{RGSW}{b\cdot P} = \Call{RGSW}{a\cdot b}
+%     \end{gather}
+% \end{definition}
 
 \begin{conjecture}[Mixed Internal Product]
     Performance $\mathcal{O}(k^2\ell/d_{num})$ instead of $\mathcal{O}(k^2\ell^2)$ because hybrid has $k/d_num$ rows.
@@ -78,13 +139,13 @@ An alternative to gadget decomposition often employed in \gls{rns} key-switching
 
 \begin{algorithm}
 \caption{Modified}
-\label{alg:hybrid:spar}
+\label{alg:hybrid:intprod}
 \begin{algorithmic}[1]
 \Require Extended basis $\mathcal{B}_{P}$
 \Require RNS polynomial $[\mu]^{\mathsf{NTT}}_{\mathcal{B}_Q} \in \mathbb{Z}_{q_0} \times \dots \times  \mathbb{Z}_{q_{k-1}}$
 \Ensure $\Call{RGSW}{\mu\cdot P}$
 \State Initialize empty array $C$ with $2k\ell$ slots
-\For{$r \gets [0, k\ell)$ \textbf{in parallel}}
+\For{$r \gets L$ \textbf{in parallel}}
     \State $h\gets (I_{i,k}\boxtimes \mathsf{nhw}) \boxed{\Tilde{}} \boxtimes_H z_{i,d}$
 \EndFor
 \State \Return $C$
