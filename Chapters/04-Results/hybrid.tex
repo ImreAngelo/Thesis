@@ -3,20 +3,20 @@
 An alternative to gadget decomposition often employed in \gls{rns} key-switching is the \textit{hybrid} technique \cite{cryptoeprint:2012/099, cryptoeprint:2021/204}. A natural question is wether this technique can be employed in the external and internal products.
 
 % We defer a proper treatise of the 
-In hybrid, the idea is to pre-scale a message $m$ by an auxiliary modulus $P$, where $|P| \approx |Q|/d_{num}$ for some integer $d_{num} | k$, resulting in a encryption of $m\cdot P$ in the extended ciphertext modulus $QP$. After some homomorphic operation(s) we end up with the message $m'P$ and more noise $\epsilon' \geq\epsilon$. Dividing the ciphertext by $P$ will result in a ciphertext encrypting $m'$ in modulus $Q$, but the noise is also scaled down by $P$.
+In hybrid, the idea is to pre-scale a message $m$ by an auxiliary modulus $P$, where $|P| \approx |Q|/d_{num}$ for some integer $d_{num} \;|\; k$, resulting in a encryption of $m\cdot P$ in the extended ciphertext modulus $QP$. After some homomorphic operation(s) we end up with the message $m'P$ and noise $\epsilon' \geq\epsilon$. Dividing the ciphertext by $P$ will result in a ciphertext encrypting $m'$ in modulus $Q$, scaling down the error by $P$ in the process.
 \begin{gather*}
     (a\cdot s + \Delta m P + \epsilon, a) \pmod{QP} \\
-    P^{-1}\cdot (a\cdot s + \Delta m' P + \epsilon', a) \pmod{QP} \\
+    P^{-1}\cdot \left[(a\cdot s + \Delta m' P + \epsilon', a) \pmod{QP}\right] \\
     (a'\cdot s + \Delta m' + \epsilon'/P, a') \pmod{Q}
 \end{gather*}
 
 Reframing this technique in terms of the gadget framework established in \autoref{sec:gadget-decomposition} is straight forward. If we let $g = P$, the gadget property holds in the extended modulus $QP$. Using $P^{-1}$ as our decomposition is identical to dividing by $P$ in hybrid.
 \begin{gather*}
     \langle x, yP\rangle = x\cdot y \cdot P \pmod{QP} \\
-    \langle P^{-1}\cdot x, yP\rangle = P^{-1}\langle x, yP\rangle = x\cdot y \pmod{Q}
+    \langle P^{-1}\cdot x, yP\rangle = P^{-1}\left[\langle x, yP\rangle\right] = x\cdot y \pmod{Q}
 \end{gather*}
 
-This is sufficient to define the external product using the hybrid gadget.\footnote{This result should come as no surprise since key-switching and the external product is essentially the same operation.} We must note, however, that this creates an imbalance between the left and right operands, where the right \gls{rgsw} must be defined in the extended modulus $QP$ while the left \gls{rlwe} is defined in the target modulus $Q$.
+This is sufficient to define the external product using the hybrid gadget.\footnote{This should come as no surprise since key-switching and the external product is essentially the same operation.} We must note, however, that this creates an imbalance between the left and right operands, where the right \gls{rgsw} has rows in the extended $QP$-modulus space while the left \gls{rlwe} is defined in the target modulus $Q$.
 
 \begin{definition}[Hybrid-RGSW]
     An \gls{rgsw} ciphertext that encodes $\mu P$ \textbf{in the extended modulus} $QP$.
@@ -39,9 +39,22 @@ Thanks to the abstract interface layout of the core library, a second implementa
 %% TODO: use scale and approx mod down etc.
 \input{Algorithms/new/extprod-hybrid}
 
-Hybrid is very fast in \gls{rns} because (1) it uses the fast approximations discussed in \autoref{sec:base-conversion} and (2) the decomposition parameter $d_{num}$ is relatively small compared to, for example, the BV gadget with its $k\ell$ parameter. 
+Hybrid is very fast in \gls{rns} because (1) it uses the fast approximations discussed in \autoref{sec:rns-base-conversion} and (2) the decomposition parameter $d_{num}$ is relatively small compared to, for example, the BV gadget with its $k\ell$ parameter. 
 
 %% TODO: Insert table comparing the benchmarks of encryption + external product (single threaded)
+\begin{table}[H]
+    \caption{Mean CPU time spent per operation, single-threaded.}
+    \label{tab:bench:rgsw}
+    \centering
+    \begin{tabular}{lcccccc}
+        \toprule
+        \textbf{Operation}  & \textbf{BV} & \textbf{Hybrid}  \\
+        \midrule
+        Encrypt RGSW        & \num{123}~ms  & \num{}~ms \\
+        External Product    & \num{36.9}~ms & \num{}~ms \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 Our testing suggests the hybrid approach not only improves the speed of the external product, but also improves the noise growth properties significantly. In a full implementation this could be tweaked by varying $d_{num}$, with larger values resulting in even faster speeds at the cost of more noise. 
 

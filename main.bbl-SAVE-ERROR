@@ -900,6 +900,57 @@
       \verb https://eprint.iacr.org/2013/340
       \endverb
     \endentry
+    \entry{Gustafson:2011}{inbook}{}
+      \name{author}{1}{}{%
+        {{hash=351aa3ec1bf2b12adf8f540f6ab58b7d}{%
+           family={Gustafson},
+           familyi={G\bibinitperiod},
+           given={John\bibnamedelima L.},
+           giveni={J\bibinitperiod\bibinitdelim L\bibinitperiod}}}%
+      }
+      \name{editor}{1}{}{%
+        {{hash=10069b6c0f07f4f656cd2853b6599848}{%
+           family={Padua},
+           familyi={P\bibinitperiod},
+           given={David},
+           giveni={D\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Boston, MA}%
+      }
+      \list{publisher}{1}{%
+        {Springer US}%
+      }
+      \strng{namehash}{351aa3ec1bf2b12adf8f540f6ab58b7d}
+      \strng{fullhash}{351aa3ec1bf2b12adf8f540f6ab58b7d}
+      \strng{bibnamehash}{351aa3ec1bf2b12adf8f540f6ab58b7d}
+      \strng{authorbibnamehash}{351aa3ec1bf2b12adf8f540f6ab58b7d}
+      \strng{authornamehash}{351aa3ec1bf2b12adf8f540f6ab58b7d}
+      \strng{authorfullhash}{351aa3ec1bf2b12adf8f540f6ab58b7d}
+      \strng{editorbibnamehash}{10069b6c0f07f4f656cd2853b6599848}
+      \strng{editornamehash}{10069b6c0f07f4f656cd2853b6599848}
+      \strng{editorfullhash}{10069b6c0f07f4f656cd2853b6599848}
+      \field{labelalpha}{Gus11}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Encyclopedia of Parallel Computing}
+      \field{isbn}{978-0-387-09766-4}
+      \field{title}{Amdahl's Law}
+      \field{year}{2011}
+      \field{pages}{53\bibrangedash 60}
+      \range{pages}{8}
+      \verb{doi}
+      \verb 10.1007/978-0-387-09766-4_77
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1007/978-0-387-09766-4_77
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1007/978-0-387-09766-4_77
+      \endverb
+    \endentry
     \entry{cryptoeprint:2018/117}{misc}{}
       \name{author}{3}{}{%
         {{hash=7c86404bf6ef06056efb632aff16d2c0}{%
@@ -981,6 +1032,45 @@
       \verb https://eprint.iacr.org/2021/204
       \endverb
     \endentry
+    \entry{cryptoeprint:2012/230}{misc}{}
+      \name{author}{3}{}{%
+        {{hash=928bcadb00050adca6148fe4cbefc5d7}{%
+           family={Lyubashevsky},
+           familyi={L\bibinitperiod},
+           given={Vadim},
+           giveni={V\bibinitperiod}}}%
+        {{hash=910b4f34f67502ebf51d7391c9ce096b}{%
+           family={Peikert},
+           familyi={P\bibinitperiod},
+           given={Chris},
+           giveni={C\bibinitperiod}}}%
+        {{hash=f945cb644f60f5c1d47ef6bce1233586}{%
+           family={Regev},
+           familyi={R\bibinitperiod},
+           given={Oded},
+           giveni={O\bibinitperiod}}}%
+      }
+      \strng{namehash}{d24712455ce167a2183dd923f59e00c3}
+      \strng{fullhash}{d24712455ce167a2183dd923f59e00c3}
+      \strng{bibnamehash}{d24712455ce167a2183dd923f59e00c3}
+      \strng{authorbibnamehash}{d24712455ce167a2183dd923f59e00c3}
+      \strng{authornamehash}{d24712455ce167a2183dd923f59e00c3}
+      \strng{authorfullhash}{d24712455ce167a2183dd923f59e00c3}
+      \field{labelalpha}{LPR12}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Cryptology {ePrint} Archive, Paper 2012/230}
+      \field{title}{On Ideal Lattices and Learning with Errors Over Rings}
+      \field{year}{2012}
+      \verb{urlraw}
+      \verb https://eprint.iacr.org/2012/230
+      \endverb
+      \verb{url}
+      \verb https://eprint.iacr.org/2012/230
+      \endverb
+    \endentry
     \entry{cryptoeprint:2025/1088}{misc}{}
       \name{author}{2}{}{%
         {{hash=51dc17c15b06fde80df9a4787cc0d159}{%
@@ -1013,6 +1103,44 @@
       \endverb
       \verb{url}
       \verb https://eprint.iacr.org/2025/1088
+      \endverb
+    \endentry
+    \entry{liang:2022}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=26cbc4bfe109d2397dc602e0f4388619}{%
+           family={Liang},
+           familyi={L\bibinitperiod},
+           given={Zhichuang},
+           giveni={Z\bibinitperiod}}}%
+        {{hash=7db0d40e18c57569494b1eaf191f5877}{%
+           family={Zhao},
+           familyi={Z\bibinitperiod},
+           given={Yunlei},
+           giveni={Y\bibinitperiod}}}%
+      }
+      \strng{namehash}{2a75e30e9c5cd0abec0e72a54328011c}
+      \strng{fullhash}{2a75e30e9c5cd0abec0e72a54328011c}
+      \strng{bibnamehash}{2a75e30e9c5cd0abec0e72a54328011c}
+      \strng{authorbibnamehash}{2a75e30e9c5cd0abec0e72a54328011c}
+      \strng{authornamehash}{2a75e30e9c5cd0abec0e72a54328011c}
+      \strng{authorfullhash}{2a75e30e9c5cd0abec0e72a54328011c}
+      \field{labelalpha}{LZ22}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{cs.CR}
+      \field{eprinttype}{arXiv}
+      \field{title}{Number Theoretic Transform and Its Applications in Lattice-based Cryptosystems: A Survey}
+      \field{year}{2022}
+      \verb{eprint}
+      \verb 2211.13546
+      \endverb
+      \verb{urlraw}
+      \verb https://arxiv.org/abs/2211.13546
+      \endverb
+      \verb{url}
+      \verb https://arxiv.org/abs/2211.13546
       \endverb
     \endentry
     \entry{rivest:1978:databanks}{incollection}{}
@@ -1049,6 +1177,36 @@
       \field{year}{1978}
       \field{pages}{169\bibrangedash 180}
       \range{pages}{12}
+    \endentry
+    \entry{regev:2009}{article}{}
+      \name{author}{1}{}{%
+        {{hash=f945cb644f60f5c1d47ef6bce1233586}{%
+           family={Regev},
+           familyi={R\bibinitperiod},
+           given={Oded},
+           giveni={O\bibinitperiod}}}%
+      }
+      \strng{namehash}{f945cb644f60f5c1d47ef6bce1233586}
+      \strng{fullhash}{f945cb644f60f5c1d47ef6bce1233586}
+      \strng{bibnamehash}{f945cb644f60f5c1d47ef6bce1233586}
+      \strng{authorbibnamehash}{f945cb644f60f5c1d47ef6bce1233586}
+      \strng{authornamehash}{f945cb644f60f5c1d47ef6bce1233586}
+      \strng{authorfullhash}{f945cb644f60f5c1d47ef6bce1233586}
+      \field{labelalpha}{Reg09}
+      \field{sortinit}{R}
+      \field{sortinithash}{5e1c39a9d46ffb6bebd8f801023a9486}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of the {ACM}}
+      \field{number}{6}
+      \field{title}{On Lattices, Learning with Errors, Random Linear Codes, and Cryptography}
+      \field{volume}{56}
+      \field{year}{2009}
+      \field{pages}{34:1\bibrangedash 34:40}
+      \range{pages}{-1}
+      \verb{doi}
+      \verb 10.1145/1568318.1568324
+      \endverb
     \endentry
     \entry{sun:2015:RAPTOR}{inproceedings}{}
       \name{author}{7}{}{%
@@ -1188,11 +1346,6 @@
       \endverb
     \endentry
   \enddatalist
-  \missing{BFV}
-  \missing{BV11}
-  \missing{CKKS}
-  \missing{TFHE}
-  \missing{regev:2009}
 \endrefsection
 \endinput
 

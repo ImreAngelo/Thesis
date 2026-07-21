@@ -34,18 +34,18 @@ We present the measured benchmarks in \autoref{tab:bench:rgsw} and extrapolate n
     \centering
     \begin{tabular}{lcccc}
         \toprule
-        \textbf{Operation} & $\mathbf{\beta_0}$ \textbf{(ms)} & $\mathbf{\beta_1}$ \textbf{(ms)} & $\mathbf{f}$ & $\mathbf{E(12)}$ \textbf{(ms)} \\
+        \textbf{Operation} & $\mathbf{\beta_0}$ \textbf{(ms)} & $\mathbf{\beta_1}$ \textbf{(ms)} & $\mathbf{f}$ & $\mathbf{E(12)}$ \\
         \midrule
-        Encrypt RGSW     & $12.44$ & $110.2$ & $10.1\%$ & $21.6$ \\
-        External Product & $3.75$  & $33.0$  & $10.2\%$ & $6.50$ \\
-        Internal Product & $34.22$ & $710.3$ & $4.6\%$  & $93.4$ \\
+        Encrypt RGSW     & $12.44$ & $110.2$ & $10.1\%$ & $21.6$~ms \\
+        External Product & $3.75$  & $33.0$  & $10.2\%$ & $6.50$~ms \\
+        Internal Product & $34.22$ & $710.3$ & $4.6\%$  & $93.4$~ms \\
         \bottomrule
     \end{tabular}
 \end{table}
 
 \subsection{sPAR}
 \label{sec:results:bench:spar}
-Each function in~\autoref{tab:bench:full} except \texttt{server::Decrypt} is invoked once per client every round, so the times below are per call. The \texttt{client} functions would in practice run in parallel, as each user encrypts and partially decrypts independently.
+Each function in~\autoref{tab:bench:full} except \texttt{server::Decrypt} is invoked once per client every round, so the times below are per call. The \texttt{client} functions would in practice run in perfect parallel, as each user encrypts and partially decrypts independently.
 
 \begin{table}[H]
     \caption{Measured computation time per call of the sPAR functions, 6 threads.}
@@ -55,10 +55,6 @@ Each function in~\autoref{tab:bench:full} except \texttt{server::Decrypt} is inv
         \toprule
         $\mathbf{\eta}$ & \textbf{\texttt{Encrypt}} & \textbf{\texttt{Write}} & \textbf{\texttt{Partial dec.}} & \textbf{\texttt{Final dec.}} \\
         \midrule
-        % $2$ & $336$~ms & $11.14$~s & $44.7$~ms & $10.1$~ms \\
-        % $4$ & $573$~ms & $23.27$~s & $80.0$~ms & $20.6$~ms \\
-        % $8$ & $573$~ms & $23.27$~s & $80.0$~ms & $20.6$~ms \\
-        % $16$ & $573$~ms & $23.27$~s & $80.0$~ms & $20.6$~ms \\
         $2$  &      $201.26$ ms &   $8.06798$ s &     $70.3$ ms &  $\num{5.02677}$ ms \\
         $4$  &      $413.01$ ms &   $15.9965$ s &   $106.28$ ms &  $\num{10.783}$ ms \\
         $8$  &      $843.13$ ms &   $33.0402$ s &   $184.07$ ms &  $\num{28.1619}$ ms \\
@@ -66,34 +62,3 @@ Each function in~\autoref{tab:bench:full} except \texttt{server::Decrypt} is inv
         \bottomrule
     \end{tabular}
 \end{table}
-
-% A round comprises one encryption and one partial decryption per client, $\eta$ sequential writes, and a single final decryption, which totals $23.0$~s at $\eta = 2$ and $95.7$~s at $\eta = 4$. The corresponding run at $\eta = 8$ did not complete.
-
-% TODO: Load from JSON
-% \begin{table}[H]
-%     \caption{One round of the full sPAR protocol, not adjusted to per user except Write, 6 threads (slower params)}
-%     \label{tab:bench:full}
-%     \centering
-%     \begin{tabular}{cc}
-%         \toprule
-%         $\mathbf{\eta}$ & \Call{Server::Write}{} \textbf{per $\eta$} \\
-%         \midrule
-%             2  &     $8.262$ s \\
-%             4  &    $16.794$ s \\
-%             8  &    $33.856$ s \\
-%             16 &    $65.956$ s \\
-%             32 &   $131.481$ s \\
-%             64 &   $281.886$ s \\
-%         \bottomrule
-%     \end{tabular}
-% \end{table}
-% Check gain vs DC-net -> throughput
-
-% \subsection{Multi-Threaded Performance}
-% \begin{itemize}
-%     \item Works now, but only some functions (EncryptRGSW, BV Decompose) are optimized to take advantage of multi-threading.
-%     \item $\leq k\ell$ threads saturate, so $k = 2, \ell = 3$ has optimal performance at 6 threads.
-%     \item Ideally more threads would used to perform multiple coefficients simultaneously, but this is not implemented.
-% \end{itemize}
-
-% \textbf{Table of improvements +X\% at 1 to 6 threads}
