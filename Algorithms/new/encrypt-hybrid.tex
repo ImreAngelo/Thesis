@@ -7,11 +7,9 @@
 \Ensure $\Call{RGSW}{\mu\cdot P}$
 \State Initialize empty array $C$ with $2k\ell$ slots
 \For{$r \gets [0, k\ell)$ \textbf{in parallel}}
-    \State $z \gets \Call{HE.Encrypt}{0, pk_{\mathcal{B}_{QP}}}$
-    \State $mG \gets P \cdot \Call{BaseExtend}{m, Q, P}$
-    
-    \State $C_r \gets \Call{HE.Enc}{0} + (mg, 0) $
-    \State $C_{r + \ell} \gets \Call{HE.Enc}{0} + (0, mg)$
+    \State $mG \gets \Call{Scale}{m, P}$
+    \State $C_r \gets \Call{EncryptQP}{0} + (mg, 0) $
+    \State $C_{r + \ell} \gets \Call{EncryptQP}{0} + (0, mg)$
 \EndFor
 \State \Return $C$
 \end{algorithmic}

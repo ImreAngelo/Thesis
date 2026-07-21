@@ -43,6 +43,7 @@ We present the measured benchmarks in \autoref{tab:bench:rgsw} and extrapolate n
     \end{tabular}
 \end{table}
 
+\newpage
 \subsection{sPAR}
 \label{sec:results:bench:spar}
 Each function in~\autoref{tab:bench:full} except \texttt{server::Decrypt} is invoked once per client every round, so the times below are per call. The \texttt{client} functions would in practice run in perfect parallel, as each user encrypts and partially decrypts independently.

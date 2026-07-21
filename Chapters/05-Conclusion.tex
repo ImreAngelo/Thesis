@@ -9,19 +9,19 @@
 % \newpage
 
 \section{Conclusion}
-\begin{itemize}
-    %% TODO: Answer the research questions directly
-    \item Cost higher than original paper (internal products not mentioned), slower than anticipated ("a few seconds for hundred users")
-    \item Not really practical wrt. time
-    \item Is practical wrt. instantiation is possible with well established FHE primitives
-    \item TODO: List number of users that could be supported (determine how it scales)
-\end{itemize}
+This thesis set out to answer two questions about \gls{spar}. What does the protocol cost to run, and how far does it scale before it becomes impractical.
+
+On the first question, the measured cost is substantially higher than the original paper anticipates. The cost of a round is dominated by the server's write step, and the write step is dominated by internal products, an operation absent from the cost analysis in~\cite{cryptoeprint:2025/860}. A single internal product costs roughly twenty times an external product at our parameters (\autoref{tab:bench:rgsw}). The paper's expectation of round times on the order of seconds for a hundred users is not feasible with this instantiation.
+
+On the second question, computation time, not noise, is the binding constraint. A single \texttt{server::Write} call grows linearly in $\eta$ at roughly $4.2$ seconds per participant on our hardware, and since the server performs one call per client, the total server time per round grows quadratically. At $\eta = 16$ the server already spends around $18$ minutes per round, and extrapolating to $\eta = 100$ gives round times on the order of hours. The noise budget would allow the protocol to run somewhat further, with an estimated $\eta < 32$ at $\ell = 3$ under multi-party noise flooding (\autoref{tab:noise:multiparty}), and the protocol itself contributes so little noise that a single-key instantiation supports a practically unbounded number of users. Time renders the protocol impractical well before either limit matters.
+
+The positive result is that \gls{spar} can be instantiated at all from well-established \gls{fhe} primitives. The protocol runs end-to-end on standard \gls{rlwe} and \gls{rgsw} constructions in OpenFHE, with correct decryption under multi-party thresholdized keys. The obstacles we encountered were quantitative rather than structural, which suggests the optimizations below could change the picture materially.
 
 \section{Future Work}
-\begin{itemize}
-    \item Investigate BGV SIMD capabilities \cite{cryptoeprint:2011/133} in write loop \autoref{def:simd}
-    \item Concrete performance improvements form AVX512
-    \item RGSW/packed RLWE bandwidth optimization; originally planned, dropped due to time constraints, requires more complicated setup phase as $\rgsw{s}$ is required \cite{chillotti:onionring:2019, cryptoeprint:2025/1088}
-    \item The full sPAR protocols contains additional things such as equivocation protection, sorting buckets etc. RGSW/packed RLWE bandwidth optimizations
-    \item 
-\end{itemize}
+The most direct algorithmic lever is \gls{simd} packing (\autoref{def:simd}) in the write loop~\cite{cryptoeprint:2011/133}. Packing lets the server evaluate $N$ rounds simultaneously, dividing the per-round cost of the dominant loop by $N$, though converting this into throughput requires protocol changes on the client side as discussed in \autoref{sec:results:discussion}.
+
+On the implementation side, OpenFHE's AVX512 backend was left unmeasured for lack of suitable hardware (\autoref{sec:avx512}). Quantifying its concrete speedup, and choosing moduli sized to fill the $512$-bit registers, is a natural next step.
+
+% A bandwidth optimization using \gls{rgsw} or packed \gls{rlwe} ciphertexts~\cite{chillotti:onionring:2019, cryptoeprint:2025/1088} was originally planned but dropped due to time constraints. It would reduce what each client uploads, at the price of a more involved setup phase since the server requires $\rgsw{s}$.
+
+Finally, our implementation covers the core of \gls{spar} but not the full protocol, which additionally specifies equivocation protection, bandwidth optimizations, and the sorting of messages into buckets. Completing these components is required before the end-to-end system can be evaluated, but would do little to improve the cost of the protocol.

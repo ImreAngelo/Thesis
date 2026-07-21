@@ -1,10 +1,6 @@
 \section{Discussions}
 \label{sec:results:discussion}
-\begin{itemize}
-    \item The results are slower than anticipated. 
-    \item Even though we are using larger parameters than the small TFHE parameters suggested in~\cite{cryptoeprint:2025/860}, the protocol is an order of magnitude larger than what would be practical for most applications.
-    \item TODO: Number of users, but check first the number of users supported with smaller $t$
-\end{itemize}
+The results are slower than anticipated. Even though we are using much larger parameters than the small TFHE parameters suggested in~\cite{cryptoeprint:2025/860}, the protocol is an order of magnitude slower than what would be practical for most applications. In theory, an arbitrary number of users can be supported, but the parameters that make it possible are too slow for it to be practical in large networks. In the remainder of this section we discuss some potential optimizations that could improve the performance of \gls{spar}.
 
 %% TODO: Make complete
 \subsubsection{AVX512 Instruction Set}

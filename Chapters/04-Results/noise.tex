@@ -20,8 +20,9 @@ For the internal product, we apply $X_i = X_{i-1} \boxtimes A_i$ where $X_0 = \C
 
 Again we see exactly what we expect; the growth is linear in the length of the chain and again shifts downwards with $\ell$. Both the starting error and the amount added per product are substantially larger than for the external product.
 
+\newpage
 \subsection{sPAR}
-The protocol was run end-to-end under the multi-party context using OpenFHE's \texttt{NOISE\_FLOODING\_MULTIPARTY} mode. With the settings from \autoref{tab:noise:multiparty}, we were only able to support $\eta = 4$ users. Increasing $\ell$ allows more users, but also degrades the performance. \autoref{tab:noise:multiparty} lists the largest error found in the message matrix $L$ once every client has written. % Decryption fails once the error reaches $\lfloor Q/2 \rfloor$, which is $359$ bits at the parameters of \autoref{tab:bench:params}.
+The protocol was run end-to-end under the multi-party context using OpenFHE's \texttt{NOISE\_FLOODING\_MULTIPARTY} mode. With the settings from \autoref{tab:bench:params}, we were only able to support $\eta = 4$ users. Increasing $\ell$ allows more users, but also degrades the performance significantly. \autoref{tab:noise:multiparty} lists the largest error found in the message matrix $L$ once every client has written. Decryption fails once the error reaches $\lfloor Q/2 \rfloor$, which is $359$ bits at the parameters of \autoref{tab:bench:params}.
 
 \begin{table}[H]
     \caption{Largest number of error bits in $L$ after 1 full round.}
@@ -29,17 +30,20 @@ The protocol was run end-to-end under the multi-party context using OpenFHE's \t
     \centering
     \begin{tabular}{cccc}
         \toprule
-        $\mathbf{\eta}$ & \textbf{Error bits \\ $(\ell = 2)$} & \textbf{Error bits \\ $(\ell = 3)$} & \textbf{Error bits \\ $(\ell = 4)$} \\
+        & \multicolumn{3}{c}{\textbf{Error (in bits)}} \\
+        \cmidrule(lr){2-4}
+        $\mathbf{\eta}$ & $\ell = 2$ & $\ell = 3$ & $\ell = 4$ \\
         \midrule
-        $2$  & $245$ & $221$ &  \\
-        $4$  & $359$ & $288$ &  \\
-        $8$  &  ---  & $356$ &  \\
-        % $16$ &  ---  &  ---  & \\
+        $2$  & $245$ & $221$ & $189$ \\
+        $4$  & $358$ & $256$ & $216$ \\
+        $8$  &  ---  & $294$ & $*$ \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-Even with $\ell = 3$, we were only able to support $\eta = 8$ users. Initially we suspected this was due to the large $t$. Since the $h \gets I_{i,k}\boxtimes\mathsf{notHasWritten}\boxtimes z_{i,d}$ assignment has only a single fresh ciphertext, $z_{i,d}$, a ``dirty'' ciphertext necessarily must appear on the right hand side in one of the internal products, breaking the noise asymmetry from \autoref{rem:extprod-asymmetry}. However, running the same test with $t=2^8$ only increased the headroom by a few bits.
+We were unable to test $\eta \geq 16$ and $\ell = 4$ at $\eta = 8$ both due to the amount of RAM available to the test environment and time constraints (see \autoref{tab:bench:full}). However, we estimate the number of users supported at $\ell = 3$ is $\eta < 32$, by considering the average increase in error from $\eta \to 2\eta$ in the table above. 
+
+Initially we suspected this number of users to be artificially low due to the large $t$. Since the $h \gets I_{i,k}\boxtimes\mathsf{notHasWritten}\boxtimes z_{i,d}$ assignment has only a single fresh ciphertext, $z_{i,d}$, a ``dirty'' ciphertext necessarily must appear on the right hand side in one of the internal products, breaking the noise asymmetry from \autoref{rem:extprod-asymmetry}. However, running the same test with $t=2^8$ only increased the headroom by a few bits.
 
 \input{Figures/Plots/spar-write}
 
