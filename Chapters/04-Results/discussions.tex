@@ -1,19 +1,21 @@
 \section{Discussions}
 \label{sec:results:discussion}
 \begin{itemize}
-    \item The results are slower than anticipated. Even though we are using larger parameters than the small TFHE parameters suggested in~\cite{cryptoeprint:2025/860}, it stands to reason that 
+    \item The results are slower than anticipated. 
+    \item Even though we are using larger parameters than the small TFHE parameters suggested in~\cite{cryptoeprint:2025/860}, the protocol is an order of magnitude larger than what would be practical for most applications.
+    \item TODO: Number of users, but check first the number of users supported with smaller $t$
 \end{itemize}
 
-\begin{itemize}
-    \item Interpretation moved out of \autoref{sec:results:noise}: growth is additive rather than multiplicative because the \gls{rgsw} operand is fresh at every step, the favourable case of \autoref{rem:extprod-asymmetry}; a larger $\ell$ lowers the floor because smaller digits mean a smaller $\beta$, paid for in the $2k\ell$ rows each product must traverse; the internal product governs the supportable circuit depth since it is $2k\ell$ external products stacked.
-    \item The write step dominates a round entirely, and it is the one phase that cannot be parallelized across clients.
-    \item Noise, not runtime, is what caps $\eta$ at $8$: only $3$ bits of headroom remain at that point, and the per-run spread is larger than that margin.
-    \item Some possible avenues:
-    \item AVX512 not tested due to hardware incompatability
-    \item Throughput
-    \item SIMD
-\end{itemize}
+%% TODO: Disable SIMD in the default parameters, see if the number of users supported is significantly higher
+\subsubsection{Multi-Party Mode}
+The noise mode 
 
-\begin{itemize}
-    \item \textbf{Discussions:} If write can use \gls{simd} batching the write loop can be divided by up to $N \implies 4.675$ ms, $18.798$ ms, $74.69$ ms per round, respectively, but the other functions must also be scaled up.. % works in some scenarios
-\end{itemize}
+\subsubsection{AVX512 Instruction Set}
+\label{sec:avx512}
+This is true \gls{simd} vectorization, as opposed to the \gls{simd} \emph{packing} mentioned in \autoref{sec:bgv}. OpenFHE supports the AVX512 instruction set ... was not tested due to hardware limitations (no access to a CPU that has this instruction set.) Optimizing for AVX512 would also require tweaking the parameters (in a way which could affect the noise or not?); a 512 bit register can for example hold $11\times 42$ bit integers and one larger 50 bit integer or $12\times 42$ bit integers with some unused bits. One could set these as the moduli size, so that $k = 12$ and $Q = 2^{512}$.
+
+%% Througput?
+\subsection{SIMD Packing}
+Throughout this thesis we have emphasized that our implementation supports \gls{simd} packing, but nowhere in \gls{spar} is this utilized. The \texttt{server::Write} loop is the most computationally expensive part of the whole protocol. \gls{simd} packing allows the server to perform $N$ rounds simultaneously, making the \textit{per-round} times $N$ times faster, but converting this into higher throughput would require significant changes to the protocol. If $N$ rounds are performed then every client would presumably be encrypting, sending and partially decrypting $N$ times more data, requiring significantly higher bandwidth and RAM on the server.
+
+%% TODO: Place noise table here for SIMD parameters
