@@ -29,6 +29,7 @@ The growth is again linear in the length of the chain and again shifts downwards
 \subsection{sPAR}
 The protocol was run end to end under the multi-party context for $\eta \in \{2, 4, 8\}$, and \autoref{tab:noise:multiparty} lists the largest error found in the message matrix $L$ once every client has written. Decryption fails once the error reaches $\lfloor Q/2 \rfloor$, which is $359$ bits at the parameters of \autoref{tab:bench:params}, and the table reports the remaining headroom against that bound.
 
+% TODO: Multiple (10) runs
 \begin{table}[H]
     \caption{Largest error in $L$ after all $\eta$ writes, multi-party context}
     \label{tab:noise:multiparty}
@@ -44,7 +45,11 @@ The protocol was run end to end under the multi-party context for $\eta \in \{2,
     \end{tabular}
 \end{table}
 
-A second, independent run of the same configuration recorded $241$, $288$ and $334$ bits, so the measurement varies by up to roughly twenty bits with the bucket indices the clients happen to sample. At $\eta = 16$ the protocol no longer decrypts correctly under these parameters.
+\begin{itemize}
+    \item Graph single-key setting with same parameters here
+\end{itemize}
+
+% A second, independent run of the same configuration recorded $241$, $288$ and $334$ bits, so the measurement varies by up to roughly twenty bits with the bucket indices the clients happen to sample. At $\eta = 16$ the protocol no longer decrypts correctly under these parameters.
 
 %% NOTE: Figures/Plots/spar-write reads Data/Noise/write-N16.csv, which still holds
 %% pre-operand-swap data from before the parameter change (see write-N2.csv for the
