@@ -1,8 +1,0 @@
-
-// Using standard OpenFHE functions
-auto ct = cc->Encrypt(publicKey, m);
-auto ct_sqr = cc->EvalMult(ct, ct); // Result is RLWE(m*m)
-
-// Using functions provided by the IExtendedContext interface
-auto rgsw_one = cc->EncryptRGSW(publicKey, m); // RGSW(m)
-auto ct_ext = cc->EvalExternalProduct(ct, rgsw_one); // RLWE(m*m)

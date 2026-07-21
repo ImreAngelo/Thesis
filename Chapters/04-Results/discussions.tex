@@ -10,6 +10,7 @@
 \subsubsection{Multi-Party Mode}
 The noise mode 
 
+%% TODO: Make complete
 \subsubsection{AVX512 Instruction Set}
 \label{sec:avx512}
 This is true \gls{simd} vectorization, as opposed to the \gls{simd} \emph{packing} mentioned in \autoref{sec:bgv}. OpenFHE supports the AVX512 instruction set ... was not tested due to hardware limitations (no access to a CPU that has this instruction set.) Optimizing for AVX512 would also require tweaking the parameters (in a way which could affect the noise or not?); a 512 bit register can for example hold $11\times 42$ bit integers and one larger 50 bit integer or $12\times 42$ bit integers with some unused bits. One could set these as the moduli size, so that $k = 12$ and $Q = 2^{512}$.
@@ -18,4 +19,20 @@ This is true \gls{simd} vectorization, as opposed to the \gls{simd} \emph{packin
 \subsection{SIMD Packing}
 Throughout this thesis we have emphasized that our implementation supports \gls{simd} packing, but nowhere in \gls{spar} is this utilized. The \texttt{server::Write} loop is the most computationally expensive part of the whole protocol. \gls{simd} packing allows the server to perform $N$ rounds simultaneously, making the \textit{per-round} times $N$ times faster, but converting this into higher throughput would require significant changes to the protocol. If $N$ rounds are performed then every client would presumably be encrypting, sending and partially decrypting $N$ times more data, requiring significantly higher bandwidth and RAM on the server.
 
-%% TODO: Place noise table here for SIMD parameters
+% Enabling \gls{simd} presents another problem for \gls{spar}, since it requires $t$ to be a prime such that $t \equiv 1 \pmod{2N}$. The smallest such prime is $t = 65537$ for the other parameters of \autoref{tab:bench:params}. This is problematic since the $h \gets I_{i,k}\boxtimes\mathsf{notHasWritten}\boxtimes z_{i,d}$ assignment has only a single fresh ciphertext, $z_{i,d}$, meaning a ``dirty'' ciphertext necessarily must appear on the right hand side in one of the internal products, breaking the noise asymmetry from \autoref{rem:extprod-asymmetry}. We found that using this larger $t$, the \gls{spar} protocol was only able to support $\eta=3$ users.
+
+% % TODO: Multiple (10) runs
+% \begin{table}[H]
+%     \caption{Largest error in $L$ after all $\eta$ writes.}
+%     \label{tab:noise:multiparty}
+%     \centering
+%     \begin{tabular}{ccc}
+%         \toprule
+%         $\mathbf{\eta}$ & \textbf{Error (bits)} & \textbf{Headroom (bits)} \\
+%         \midrule
+%         $2$ & $239$ & $120$ \\
+%         $4$ & $288$ & $71$  \\
+%         $8$ & $356$ & $3$   \\
+%         \bottomrule
+%     \end{tabular}
+% \end{table}

@@ -13,12 +13,13 @@
 
 % Taken together the measurements answer both research questions. The cost of a round is dominated by the server's write step, which grows \textcolor{red}{\textbf{[PLACEHOLDER: linearly/quadratically]}} in $\eta$ and puts the protocol beyond a \textcolor{red}{\textbf{[PLACEHOLDER: Y]}}-second latency budget at roughly $\eta = \textcolor{red}{\textbf{[PLACEHOLDER: X]}}$ participants --- far below the point at which noise becomes the binding constraint. \autoref{sec:results:discussion} discusses what dominates that cost, and \autoref{sec:results:hybrid} proposes a hybrid-gadget variant that lowers it, together with the obstruction that currently stops the variant from extending to the internal product.
 \vfill
-This section presents the noise and performance measurements from the core and \gls{spar} libraries.
+This section presents the noise and performance measurements from the core and \gls{spar} libraries. We also discuss the findings, and suggest some possible optimization.
 \newpage
 
 %%
 %% RESULTS
 \input{Chapters/04-Results/params}
+\newpage
 \input{Chapters/04-Results/noise}
 \input{Chapters/04-Results/benchmarks}
 

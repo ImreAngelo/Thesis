@@ -2,12 +2,13 @@
 
 \section{Parameters}
 \label{sec:results:params}
-I found that the parameters suggested in \cite{cryptoeprint:2025/860} results in too much noise for the \texttt{Server::Write} function to effectively handle, and are thus not capable of running the full \gls{spar} protocol without decryption failure. Rather than tweaking these parameters until the protocol produces correct decryptions, I instead aim to fully utilize the \gls{rns} context by using much larger parameters that enable \gls{simd} batching and far more data transferred per message. % The parameteres were designed for TFHE, with Q = 2^64
+We found that the parameters suggested in \cite{cryptoeprint:2025/860} results in too much noise for the \texttt{Server::Write} function to effectively handle, and are thus not capable of running the full \gls{spar} protocol without decryption failure. Rather than tweaking these parameters until the protocol produces correct decryptions, I instead aim to fully utilize the \gls{rns} context by using much larger parameters that enable \gls{simd} batching and far more data transferred per message. % The parameteres were designed for TFHE, with Q = 2^64
 
-New parameters were thus selected to provide $\lambda \geq 128$ bits of security at the largest possible modulus $Q$, while supporting \gls{simd} batching, minimizing $\ell$ so that $k\ell$ is as small as possible, and ensuring sPAR outputs correct results. The RNS primes are slightly smaller than $64$ bits to fit inside $64$-bit machine words with a few bits of headroom to prevent overflowing registers. %% TODO: Explain breifly why first prime is slightly larger, and maybe alter scaling mod size so they are smaller?
+New parameters were thus selected to provide $\lambda \geq 128$ bits of security at the largest possible modulus $Q$, while supporting \gls{simd} batching, minimizing $\ell$ so that $k\ell$ is as small as possible, and ensuring sPAR outputs correct results. The RNS moduli are slightly smaller than $64$ bits to fit inside $64$-bit machine words with a few bits of headroom to prevent overflowing registers.
 
-The resulting parameters, listed in~\autoref{tab:bench:params}, yield an esitmated security parameter of $\securityBits$ bits~\cite{cryptoeprint:2015/046} for the underlying \gls{rlwe} scheme, and serve as a baseline for the benchmarks that follow. % In some cases, varying some parameter, for example $\ell$, is of interest. In this case, deviations from the base parameters will be explicitly listed.
+The resulting parameters, listed in~\autoref{tab:bench:params}, yield an esitmated security parameter of $\securityBits$ bits~\cite{cryptoeprint:2015/046} for the underlying \gls{rlwe} scheme, and serve as the baseline for the benchmarks that follow.
 
+\vfill
 \begin{table}[H]
     \caption{Base parameters for BV-RNS}
     \label{tab:bench:params}
@@ -27,13 +28,5 @@ The resulting parameters, listed in~\autoref{tab:bench:params}, yield an esitmat
         \bottomrule
     \end{tabular}
 \end{table}
-
-% Note that the RNS moduli $q_i$ are randomly generated $60$-bit primes to guarantuee the moduli are pairwise coprime so \gls{crt} can be applied. The actual value of the primes has no impact on the results, the important characteristic is the size (60 bits).
-
-% \begin{itemize}
-%     % \item Tried to replicate the original parameters exactly, I was not able to run the protocol using the exact parameters from~\cite{cryptoeprint:2025/860} due to noise (even for $\eta=2$). These parameters would be too small to take advantage of RNS anyways, as they all fit inside a computer register $\leq 2^{64}$
-%     \item Explain difference in size between $q_0$ and $q_i$
-%     \item Explain $q_i$ are random $59$-bit primes so only their order is listed 
-%     \item For performance, the key is generally to minimize $k\ell$, in this case $2k\ell = 2\cdot  4\cdot 3 = 2\cdot 12 = 24$ rows per RGSW! 
-% %     \item MOVE TO IMPLEMENTATION DETAILS: For BV, the base $B = \lfloor \max q_i \rfloor$ is chosen automatically so to be the smallest $B$ that covers the largest RNS prime with $\ell$ digits when the program starts, because the $q_i$ are randomly chosen. 
-% \end{itemize}
+\vfill
+\vfill

@@ -10,22 +10,22 @@
 % \edef\smallSlope{\pgfplotstableregressiona}
 % \edef\smallIntercept{\pgfplotstableregressionb}
 
-\pgfplotstableread[col sep=comma]{Data/Noise/write-N16.csv}\bvlarge
+\pgfplotstableread[col sep=comma]{Data/Noise/write-N32.csv}\bvlarge
 \pgfplotstablecreatecol[linear regression={x=n, y=noise}]{reg}{\bvlarge}
 \edef\largeSlope{\pgfplotstableregressiona}
 \edef\largeIntercept{\pgfplotstableregressionb}
 
 \begin{figure}[H]
     \centering
-    \caption{\texttt{Server::Write}}
+    \caption{Noise in $L$ after full round.}
     \label{fig:spar:plot-1}
     \begin{tikzpicture}
     \begin{semilogyaxis}[
         noiseaxis,
         log basis y=2,
-        xmin=1.1, xmax=17,
-        xlabel={Iterations},
-        ylabel={$\log\|\epsilon\|_\infty$},
+        xmin=1.1, xmax=33,
+        xlabel={$\eta$},
+        ylabel={Error $\|\epsilon\|_\infty$},
         legend pos=south east,
         set layers,
         width=\textwidth,
@@ -35,7 +35,7 @@
         % \addplot[only marks, mark=*, mark size=4pt, color=gaussblue]
         %     table[col sep=comma, x expr=\thisrow{n}+1, y=noise] {Data/Noise/write-N2.csv};
         \addplot[only marks, mark=*, mark size=1pt, color=hpsgreen]
-            table[col sep=comma, x expr=\thisrow{n}+1, y=noise] {Data/Noise/write-N16.csv};
+            table[col sep=comma, x expr=\thisrow{n}+1, y=noise] {Data/Noise/write-N32.csv};
             
         % ---------- Regression lines ----------
         % \addplot[thick, solid, dotted, on layer=axis foreground, color=canonorange, domain=1:16, samples=16, forget plot]
@@ -43,7 +43,7 @@
         % \addplot[thick, solid, dotted, on layer=axis foreground, color=hpspurple, domain=1:16, samples=16, forget plot]
         %     {\largeSlope*x + \largeIntercept};
             
-        \legend{$\eta = 16$} % \legend{$\eta = 2$, $\eta = 16$}
+        % \legend{$\eta = 16$} % \legend{$\eta = 2$, $\eta = 16$}
     \end{semilogyaxis}
     \end{tikzpicture}
 \end{figure}
