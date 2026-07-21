@@ -42,7 +42,7 @@ The regression of \autoref{sec:amdahl} is fitted over $T = 1, \dots, 5$ and excl
     \end{tabular}
 \end{table}
 
-Since $T = 12$ is twice the largest thread count measured, these are projections of the fitted model rather than measurements.
+% Since $T = 12$ is twice the largest thread count measured, these are projections of the fitted model rather than measurements.
 
 % Encrypt RGSW        & \num{\jsonms{\rgswData}{benchmarks[0].cpu_time}}~ms \\
 % External Product    & \num{\jsonms{\rgswData}{benchmarks[1].cpu_time}}~ms \\
@@ -53,20 +53,26 @@ Since $T = 12$ is twice the largest thread count measured, these are projections
 Each function in~\autoref{tab:bench:full} except \texttt{server::Decrypt} is invoked once per client every round, so the times below are per call. The \texttt{client} functions would in practice run in parallel, as each user encrypts and partially decrypts independently.
 
 \begin{table}[H]
-    \caption{Measured computation time per call of the sPAR functions, 6 threads. The two client functions are timed per client, the two server functions per invocation.}
+    \caption{Measured computation time per call of the sPAR functions, 6 threads.}
     \label{tab:bench:full}
     \centering
     \begin{tabular}{ccccc}
         \toprule
         $\mathbf{\eta}$ & \textbf{\texttt{Encrypt}} & \textbf{\texttt{Write}} & \textbf{\texttt{Partial dec.}} & \textbf{\texttt{Final dec.}} \\
         \midrule
-        $2$ & $336$~ms & $11.14$~s & $44.7$~ms & $10.1$~ms \\
-        $4$ & $573$~ms & $23.27$~s & $80.0$~ms & $20.6$~ms \\
+        % $2$ & $336$~ms & $11.14$~s & $44.7$~ms & $10.1$~ms \\
+        % $4$ & $573$~ms & $23.27$~s & $80.0$~ms & $20.6$~ms \\
+        % $8$ & $573$~ms & $23.27$~s & $80.0$~ms & $20.6$~ms \\
+        % $16$ & $573$~ms & $23.27$~s & $80.0$~ms & $20.6$~ms \\
+        $2$  &      $201.26$ ms &   $8.06798$ s &     $70.3$ ms &  $\num{5.02677}$ ms \\
+        $4$  &      $413.01$ ms &   $15.9965$ s &   $106.28$ ms &  $\num{10.783}$ ms \\
+        $8$  &      $843.13$ ms &   $33.0402$ s &   $184.07$ ms &  $\num{28.1619}$ ms \\
+        $16$ &     $1648.91$ ms &    $67.368$ s &   $312.84$ ms &  $\num{60.5488}$ ms \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-A round comprises one encryption and one partial decryption per client, $\eta$ sequential writes, and a single final decryption, which totals $23.0$~s at $\eta = 2$ and $95.7$~s at $\eta = 4$. The corresponding run at $\eta = 8$ did not complete.
+% A round comprises one encryption and one partial decryption per client, $\eta$ sequential writes, and a single final decryption, which totals $23.0$~s at $\eta = 2$ and $95.7$~s at $\eta = 4$. The corresponding run at $\eta = 8$ did not complete.
 
 % TODO: Load from JSON
 % \begin{table}[H]

@@ -5,13 +5,18 @@
 \end{itemize}
 
 \begin{itemize}
-    \item Interpretation moved out of \autoref{sec:results:noise}: growth is additive rather than multiplicative because the \gls{rgsw} operand is fresh at every step, the favourable case of \autoref{rem:extprod-asymmetry}; a larger $\ell$ lowers the floor because smaller digits mean a smaller $\beta$, paid for in the $2k\ell$ rows each product must traverse; the internal product governs the supportable circuit depth since it is $2k\ell$ external products stacked.
+    % \item Interpretation moved out of \autoref{sec:results:noise}: growth is additive rather than multiplicative because the \gls{rgsw} operand is fresh at every step, the favourable case of \autoref{rem:extprod-asymmetry}; a larger $\ell$ lowers the floor because smaller digits mean a smaller $\beta$, paid for in the $2k\ell$ rows each product must traverse; the internal product governs the supportable circuit depth since it is $2k\ell$ external products stacked.
     \item The write step dominates a round entirely, and it is the one phase that cannot be parallelized across clients.
-    \item Noise, not runtime, is what caps $\eta$ at $8$: only $3$ bits of headroom remain at that point, and the per-run spread is larger than that margin.
+    \item In the multi-party setting, noise (flooding) caps $\eta \leq 8$ with the current parameters.
     \item Some possible avenues:
     \item AVX512 not tested due to hardware incompatability
-    \item Throughput
     \item SIMD
+    \item Throughput angle
+    \item \begin{itemize}
+        \item Data per message = $N\log(t)/8 \approx 16385 \cdot (16)/8 = 32770$ bytes $\approx 32$ Kb
+        \item sPAR data per msg = $2048 * 8/8 = 2048 = 2$ Kb
+        \item If larger params is 16 times slower than expected, throughput is the same
+    \end{itemize}
 \end{itemize}
 
 \begin{itemize}
