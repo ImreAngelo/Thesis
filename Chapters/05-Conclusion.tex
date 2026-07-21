@@ -14,6 +14,9 @@ The first section below states what the measurements show about the protocol's p
     % \item TFHE could allow 
 \end{itemize}
 
+
+    \item Assuming \autoref{alg:spar:write} is implemented using only external products, or the internal product can be implemented in the hybrid scheme, we see that the hybrid approach is generally faster and has better noise properties
+
 \section{Future Work}
 \begin{itemize}
     \item BGV SIMD capabilities \cite{cryptoeprint:2011/133} not utilized in write loop; \texttt{Server::Write} can perform $N$ rounds simultaneously, but does this translate into higher throughput? A constant polynomial is the same object in \gls{simd} batching and as a regular polynomial, so if write is changed to output binary $\{0,1\}$ it should be possible with:

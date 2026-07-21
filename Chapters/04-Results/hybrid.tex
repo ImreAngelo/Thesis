@@ -21,6 +21,7 @@ This is sufficient to define the external product using the hybrid gadget.\footn
 \begin{definition}[Hybrid-RGSW]
     An \gls{rgsw} ciphertext that encodes $\mu P$ \textbf{in the extended modulus} $QP$.
     \begin{equation}
+        \label{eq:hybrid-rgsw}
         C_{QP} = Z_{QP} + \mu \begin{pmatrix}
             P & 0 \\
             0 & P
@@ -47,113 +48,27 @@ Our testing suggests the hybrid approach not only improves the speed of the exte
 %% TODO: Insert graph of BV versus hybrid external product noise
 
 \subsubsection{Internal Product}
-One would think that since the internal product is defined as repeated applications of the external product, the hybrid technique would trivially extend to this product as well. However, the internal product works on the assumption that each row of an \gls{rgsw} can be treated as an \gls{rlwe}, such that the external product can be applied between each row and \textit{any} \gls{rgsw}. This implicitly assumes the modulus is the same for the left and right operands, which is not the case in our hybrid construction!
-
-Consider a single row of the internal product if we try to naively apply the hybrid variant. Let $L$ and $R$ be the left and right hybrid-RGSW ciphertexts.
-\begin{gather*}
-    L \boxtimes R = \begin{bmatrix}
-        L_0 \boxdot R \\
-        L_{1} \boxdot R
-    \end{bmatrix} 
-    \\
-    \\
-    \text{Row } 0:\quad L_0 \boxdot R \implies P^{-1} \cdot m_l\cdot P \cdot m_R \cdot P 
-    \\
-    m_L \cdot m_R \cdot P \pmod{QP}
-    \\
-    \text{Mod down: } m_L \cdot m_R 
-\end{gather*}
-
-each row of an \gls{rgsw} encodes the message $mg_i$... In the 
-
-\begin{conjecture}[Hybrid Internal Product]
-    
-\end{conjecture}
+One would think that since the internal product is defined as repeated applications of the external product, the hybrid technique would extend to this product as well. It does not. The noise advantage of the hybrid external product comes from the rescaling by $P^{-1}$, which necessarily maps the result down to modulus $Q$. Since $P$ is a zero divisor of the ring $R_{QP}$, the inverse does not exist and division by $P$ is only well-defined as a map $R_{QP}\to R_{Q}$. Therefore, a pure ``hybrid'' internal product cannot exist.
 
 \subsubsection{A Compromise}
-If the left 
+Observe that the pure hybrid internal product only breaks because we require the output to be in a modulus that is a factor of $P$. If we distinguish between a \emph{left} (regular) and a \emph{right} (hybrid) RGSW, then we can define a \textit{mixed} product that takes a hybrid-RGSW as one of its operands, but outputs a regular RGSW. Importantly, this product would be infinitely chain-able using only hybrid external products.
 
-If we distinguish between a \emph{left} and a \emph{right} RGSW, then we can define a \textit{mixed} product that 
+\newcommand{\mixedprod}{\;\boxed{\diamond}\;}
+\begin{corollary}[Mixed Product]
+    Let $\boxdot$ denote the hybrid external product. Let $S$ be an \gls{rgsw} ciphertext \eqref{def:rgsw} with $2\ell$ rows and $H$ be a hybrid-RGSW ciphertext \eqref{eq:hybrid-rgsw}. We define the \emph{mixed internal product} $\mixedprod$ as
+    \begin{align}
+        \mixedprod:\;\; \Call{RGSW}{} \mixedprod \Call{HybridRGSW}{} &\longmapsto \Call{RGSW}{}  \\
+        (A, H) &\longmapsto A \mixedprod H = \begin{bmatrix}
+            A_0 \boxdot H \\
+            \vdots \\
+            A_{2\ell - 1} \boxdot H
+        \end{bmatrix}
+    \end{align}
+    
+    and propose that this product is \emph{right-chainable} wrt. hybrid-RGSW ciphertexts, in the sense that a sequence of hybrid-RGSW ciphertexts $H_i$ can be repeatedly applied as the right operand: 
+    \begin{equation*}
+        (((S \mixedprod H_0) \mixedprod H_1) ... ) \mixedprod H_i \mapsto \Call{RGSW}{}
+    \end{equation*}
+\end{corollary}
 
-%% TODO: Algorithmic
-\begin{itemize}
-    \item For each row in left RGSW
-    \begin{itemize}
-        \item Apply external product to row x right RGSW
-    \end{itemize}
-\end{itemize}
-
-% \begin{definition}[Hybrid External Product]
-%     Is valid...
-% \end{definition}
-
-% \begin{lemma}
-%     The external product $\Call{RGSW}{} \boxdot \Call{HybridRGSW}{}$ is a valid product...
-%     \begin{proof}
-%         \begin{gather}
-%             x_{Q} \boxdot C_{QP} = P^{-1}(x_q \cdot 
-%             Z_{QP} + \mu \begin{pmatrix}
-%             P & 0 \\
-%             0 & P
-%         \end{pmatrix}
-%             ) \pmod{QP}
-%         \end{gather}
-%     \end{proof}
-% \end{lemma}
-
-% \input{Algorithms/new/extprod-hybrid}
-
-% \begin{itemize}
-%     \item This was actually implemented as below
-% \end{itemize}
-
-% \begin{figure}[H]
-%     \centering
-%     \begin{subfigure}[b]{0.54\linewidth}
-%         \centering
-%         \input{Figures/dependency-graph}
-%         % \includegraphics[width=\linewidth]{Figures/dependency-graph-preview.png}
-%         \caption{Dependency graph}
-%         \label{fig:depgraph}
-%     \end{subfigure}
-% \end{figure}
-
-% \begin{itemize}
-%     \item This method shows far better noise handling and 
-%     \item Show graphs for same parameters but $|P| \approx |Q|$ i.e. $d_{num} = 1$ and security parameter smaller but still $\geq 128$ bits
-%     \item Also show numbers with security-parity
-%     \item Problem: internal product does not work with both sides as Hybrid-RGSW and one $P$ is consumed each external product!
-% \end{itemize}
-
-% \begin{definition}[Hybrid Internal Product]
-%     I define the \textit{hybrid internal product} as 
-%     \begin{gather}
-%         \boxtimes_H \;:=\; \Call{RGSW}{a} \boxtimes_H \Call{RGSW}{b\cdot P} = \Call{RGSW}{a\cdot b}
-%     \end{gather}
-% \end{definition}
-
-\begin{conjecture}[Mixed Internal Product]
-    Performance $\mathcal{O}(k^2\ell/d_{num})$ instead of $\mathcal{O}(k^2\ell^2)$ because hybrid has $k/d_num$ rows.
-    Is better for large $\ell$
-\end{conjecture}
-
-\begin{algorithm}
-\caption{Modified}
-\label{alg:hybrid:intprod}
-\begin{algorithmic}[1]
-\Require Extended basis $\mathcal{B}_{P}$
-\Require RNS polynomial $[\mu]^{\mathsf{NTT}}_{\mathcal{B}_Q} \in \mathbb{Z}_{q_0} \times \dots \times  \mathbb{Z}_{q_{k-1}}$
-\Ensure $\Call{RGSW}{\mu\cdot P}$
-\State Initialize empty array $C$ with $2k\ell$ slots
-\For{$r \gets L$ \textbf{in parallel}}
-    \State $h\gets (I_{i,k}\boxtimes \mathsf{nhw}) \boxed{\Tilde{}} \boxtimes_H z_{i,d}$
-\EndFor
-\State \Return $C$
-\end{algorithmic}
-\end{algorithm}
-
-\begin{itemize}
-    \item Assuming \autoref{alg:spar:write} is implemented using only external products, or the internal product can be implemented in the hybrid scheme, we see that the hybrid approach is generally faster and has better noise properties
-    %\item These results are not technically valid as the noise overflows immediately after 1 or 2 internal products, but it gives an idea of what the system \textit{could} do with more work
-    %\item Explain problem
-\end{itemize}
+This product has not been implemented in our code, so we can only speculate on its performance. However, it stands to reason that it would outperform the regular internal product in an \gls{rns} setting as it uses the faster hybrid external product. In \gls{spar}, specifically, it can be applied to the \texttt{server::Write} loop by setting $h\gets (I_{i,k}\boxtimes \mathsf{notHasWritten}) \mixedprod z_{i,d}$. 
