@@ -1,6 +1,6 @@
 {
   "context": {
-    "date": "2026-07-20T19:49:51+02:00",
+    "date": "2026-07-21T17:46:26+02:00",
     "host_name": "DESKTOP",
     "executable": "/home/angelo/thesis/fhe-master-thesis/build/benchmark/bench-rgsw",
     "num_cpus": 12,
@@ -32,7 +32,7 @@
         "num_sharing": 12
       }
     ],
-    "load_avg": [1.37939,0.650879,0.46582],
+    "load_avg": [0.855469,0.544434,0.314453],
     "library_version": "v1.9.1",
     "library_build_type": "release",
     "json_schema_version": 1
@@ -49,8 +49,8 @@
       "aggregate_name": "mean",
       "aggregate_unit": "time",
       "iterations": 10,
-      "real_time": 4.8625548091513345e+01,
-      "cpu_time": 4.9297639183333324e+01,
+      "real_time": 1.1927655208000260e+02,
+      "cpu_time": 1.1833983831999998e+02,
       "time_unit": "ms"
     },
     {
@@ -64,8 +64,8 @@
       "aggregate_name": "median",
       "aggregate_unit": "time",
       "iterations": 10,
-      "real_time": 4.8153431541019629e+01,
-      "cpu_time": 4.9240415874999982e+01,
+      "real_time": 1.1927255660000355e+02,
+      "cpu_time": 1.1837503660000000e+02,
       "time_unit": "ms"
     },
     {
@@ -79,8 +79,8 @@
       "aggregate_name": "stddev",
       "aggregate_unit": "time",
       "iterations": 10,
-      "real_time": 1.6967065550650866e+00,
-      "cpu_time": 1.3793428670370138e+00,
+      "real_time": 8.7644918327153276e-01,
+      "cpu_time": 2.9589914664941336e-01,
       "time_unit": "ms"
     },
     {
@@ -94,8 +94,8 @@
       "aggregate_name": "cv",
       "aggregate_unit": "percentage",
       "iterations": 10,
-      "real_time": 3.4893314762681600e-02,
-      "cpu_time": 2.7979897006981738e-02,
+      "real_time": 7.3480425782568755e-03,
+      "cpu_time": 2.5004187165549390e-03,
       "time_unit": "ms"
     },
     {
@@ -109,8 +109,8 @@
       "aggregate_name": "mean",
       "aggregate_unit": "time",
       "iterations": 10,
-      "real_time": 1.5173097971777537e+01,
-      "cpu_time": 1.5966643648717952e+01,
+      "real_time": 3.7830847668421455e+01,
+      "cpu_time": 3.7746230431578958e+01,
       "time_unit": "ms"
     },
     {
@@ -124,8 +124,8 @@
       "aggregate_name": "median",
       "aggregate_unit": "time",
       "iterations": 10,
-      "real_time": 1.4818720064142372e+01,
-      "cpu_time": 1.5954137076923084e+01,
+      "real_time": 3.7791104131578749e+01,
+      "cpu_time": 3.7711455157894726e+01,
       "time_unit": "ms"
     },
     {
@@ -139,8 +139,8 @@
       "aggregate_name": "stddev",
       "aggregate_unit": "time",
       "iterations": 10,
-      "real_time": 1.1613393851050220e+00,
-      "cpu_time": 1.0666717642700234e+00,
+      "real_time": 7.0073055282650087e-01,
+      "cpu_time": 7.4584261975462229e-01,
       "time_unit": "ms"
     },
     {
@@ -154,8 +154,8 @@
       "aggregate_name": "cv",
       "aggregate_unit": "percentage",
       "iterations": 10,
-      "real_time": 7.6539371673810544e-02,
-      "cpu_time": 6.6806261086416394e-02,
+      "real_time": 1.8522729360130663e-02,
+      "cpu_time": 1.9759393487161072e-02,
       "time_unit": "ms"
     },
     {
@@ -169,8 +169,8 @@
       "aggregate_name": "mean",
       "aggregate_unit": "time",
       "iterations": 10,
-      "real_time": 3.0009309480010415e+02,
-      "cpu_time": 3.0282382575000003e+02,
+      "real_time": 7.5186321690000568e+02,
+      "cpu_time": 7.5356386100000009e+02,
       "time_unit": "ms"
     },
     {
@@ -184,8 +184,8 @@
       "aggregate_name": "median",
       "aggregate_unit": "time",
       "iterations": 10,
-      "real_time": 2.9701119575111079e+02,
-      "cpu_time": 3.0308815524999977e+02,
+      "real_time": 7.4982127350000383e+02,
+      "cpu_time": 7.5179813299999944e+02,
       "time_unit": "ms"
     },
     {
@@ -199,8 +199,8 @@
       "aggregate_name": "stddev",
       "aggregate_unit": "time",
       "iterations": 10,
-      "real_time": 1.4913833827740325e+01,
-      "cpu_time": 1.5895130316028773e+01,
+      "real_time": 1.0343231960377951e+01,
+      "cpu_time": 1.0191069974325952e+01,
       "time_unit": "ms"
     },
     {
@@ -214,8 +214,8 @@
       "aggregate_name": "cv",
       "aggregate_unit": "percentage",
       "iterations": 10,
-      "real_time": 4.9697357540581265e-02,
-      "cpu_time": 5.2489695210281101e-02,
+      "real_time": 1.3756800077311872e-02,
+      "cpu_time": 1.3523830562683992e-02,
       "time_unit": "ms"
     }
   ]

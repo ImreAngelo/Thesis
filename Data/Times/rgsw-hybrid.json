@@ -1,0 +1,162 @@
+{
+  "context": {
+    "date": "2026-07-21T17:47:09+02:00",
+    "host_name": "DESKTOP",
+    "executable": "/home/angelo/thesis/fhe-master-thesis/build/benchmark/bench-rgsw-hybrid",
+    "num_cpus": 12,
+    "mhz_per_cpu": 3700,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 32768,
+        "num_sharing": 2
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 32768,
+        "num_sharing": 2
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 524288,
+        "num_sharing": 2
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 33554432,
+        "num_sharing": 12
+      }
+    ],
+    "load_avg": [0.876465,0.586914,0.339355],
+    "library_version": "v1.9.1",
+    "library_build_type": "release",
+    "json_schema_version": 1
+  },
+  "benchmarks": [
+    {
+      "name": "RGSW/Encrypt/Hybrid_mean",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "RGSW/Encrypt/Hybrid",
+      "run_type": "aggregate",
+      "repetitions": 10,
+      "threads": 1,
+      "aggregate_name": "mean",
+      "aggregate_unit": "time",
+      "iterations": 10,
+      "real_time": 2.0027173311428410e+01,
+      "cpu_time": 2.0045462182857140e+01,
+      "time_unit": "ms"
+    },
+    {
+      "name": "RGSW/Encrypt/Hybrid_median",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "RGSW/Encrypt/Hybrid",
+      "run_type": "aggregate",
+      "repetitions": 10,
+      "threads": 1,
+      "aggregate_name": "median",
+      "aggregate_unit": "time",
+      "iterations": 10,
+      "real_time": 1.9961091457142693e+01,
+      "cpu_time": 1.9994176614285699e+01,
+      "time_unit": "ms"
+    },
+    {
+      "name": "RGSW/Encrypt/Hybrid_stddev",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "RGSW/Encrypt/Hybrid",
+      "run_type": "aggregate",
+      "repetitions": 10,
+      "threads": 1,
+      "aggregate_name": "stddev",
+      "aggregate_unit": "time",
+      "iterations": 10,
+      "real_time": 2.5167287367149249e-01,
+      "cpu_time": 2.3786648301013935e-01,
+      "time_unit": "ms"
+    },
+    {
+      "name": "RGSW/Encrypt/Hybrid_cv",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "RGSW/Encrypt/Hybrid",
+      "run_type": "aggregate",
+      "repetitions": 10,
+      "threads": 1,
+      "aggregate_name": "cv",
+      "aggregate_unit": "percentage",
+      "iterations": 10,
+      "real_time": 1.2566569917676629e-02,
+      "cpu_time": 1.1866350640373986e-02,
+      "time_unit": "ms"
+    },
+    {
+      "name": "RGSW/ExternalProduct/Hybrid_mean",
+      "family_index": 1,
+      "per_family_instance_index": 0,
+      "run_name": "RGSW/ExternalProduct/Hybrid",
+      "run_type": "aggregate",
+      "repetitions": 10,
+      "threads": 1,
+      "aggregate_name": "mean",
+      "aggregate_unit": "time",
+      "iterations": 10,
+      "real_time": 1.8378647502564220e+01,
+      "cpu_time": 1.8439251028205131e+01,
+      "time_unit": "ms"
+    },
+    {
+      "name": "RGSW/ExternalProduct/Hybrid_median",
+      "family_index": 1,
+      "per_family_instance_index": 0,
+      "run_name": "RGSW/ExternalProduct/Hybrid",
+      "run_type": "aggregate",
+      "repetitions": 10,
+      "threads": 1,
+      "aggregate_name": "median",
+      "aggregate_unit": "time",
+      "iterations": 10,
+      "real_time": 1.8309550576922891e+01,
+      "cpu_time": 1.8361274487179482e+01,
+      "time_unit": "ms"
+    },
+    {
+      "name": "RGSW/ExternalProduct/Hybrid_stddev",
+      "family_index": 1,
+      "per_family_instance_index": 0,
+      "run_name": "RGSW/ExternalProduct/Hybrid",
+      "run_type": "aggregate",
+      "repetitions": 10,
+      "threads": 1,
+      "aggregate_name": "stddev",
+      "aggregate_unit": "time",
+      "iterations": 10,
+      "real_time": 3.1344185436635980e-01,
+      "cpu_time": 3.1993513563053932e-01,
+      "time_unit": "ms"
+    },
+    {
+      "name": "RGSW/ExternalProduct/Hybrid_cv",
+      "family_index": 1,
+      "per_family_instance_index": 0,
+      "run_name": "RGSW/ExternalProduct/Hybrid",
+      "run_type": "aggregate",
+      "repetitions": 10,
+      "threads": 1,
+      "aggregate_name": "cv",
+      "aggregate_unit": "percentage",
+      "iterations": 10,
+      "real_time": 1.7054674688255913e-02,
+      "cpu_time": 1.7350766315896382e-02,
+      "time_unit": "ms"
+    }
+  ]
+}

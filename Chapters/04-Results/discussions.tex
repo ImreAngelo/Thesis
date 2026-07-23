@@ -2,10 +2,11 @@
 \label{sec:results:discussion}
 The results are slower than anticipated. Even though we are using much larger parameters than the small TFHE parameters suggested in~\cite{cryptoeprint:2025/860}, the protocol is an order of magnitude slower than what would be practical for most applications. In theory, an arbitrary number of users can be supported, but the parameters that make it possible are too slow for it to be practical in large networks. In the remainder of this section we discuss some potential optimizations that could improve the performance of \gls{spar}.
 
-%% TODO: Make complete
 \subsubsection{AVX512 Instruction Set}
 \label{sec:avx512}
-This is true \gls{simd} vectorization, as opposed to the \gls{simd} \emph{packing} mentioned in \autoref{sec:bgv}. OpenFHE supports the AVX512 instruction set ... was not tested due to hardware limitations (no access to a CPU that has this instruction set.) Optimizing for AVX512 would also require tweaking the parameters (in a way which could affect the noise or not?); a 512 bit register can for example hold $11\times 42$ bit integers and one larger 50 bit integer or $12\times 42$ bit integers with some unused bits. One could set these as the moduli size, so that $k = 12$ and $Q = 2^{512}$.
+AVX512 offers true \gls{simd} vectorization, as opposed to the \gls{simd} \emph{packing} of \autoref{sec:bgv}. A single instruction operates on a 512-bit register, letting the CPU process several coefficients of an \gls{rns} residue polynomial at once. OpenFHE supports AVX512 acceleration through the Intel HEXL backend, but we were unable to benchmark it because none of the machines available to us have a CPU implementing the instruction set.
+
+Taking full advantage of AVX512 would also motivate revisiting the parameters, since register utilization depends on the sizes of the \gls{rns} moduli. A 512-bit register can for example hold eleven 42-bit integers together with one 50-bit integer, or twelve 42-bit integers with some bits left unused. Choosing the moduli to match such a layout, so that $k = 12$ and $Q \approx 2^{512}$, would fill every register completely. Whether this repartitioning of $Q$ leaves the noise behaviour of \autoref{sec:results:noise} unchanged is a question we leave open.
 
 %% Througput?
 \subsection{SIMD Packing}
