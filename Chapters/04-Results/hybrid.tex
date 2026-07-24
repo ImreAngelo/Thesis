@@ -71,4 +71,6 @@ Observe that the pure hybrid internal product only breaks because we require the
     \end{equation*}
 \end{corollary}
 
-This product has not been implemented in our code, so we can only speculate on its performance. However, it stands to reason that it would outperform the regular internal product in an \gls{rns} setting as it uses the faster hybrid external product. In \gls{spar}, specifically, it can be applied to the \texttt{server::Write} loop by setting $h\gets (I_{i,k}\boxtimes \mathsf{notHasWritten}) \mixedprod z_{i,d}$. 
+This product has not been implemented in our code, so we can only speculate on its performance. However, it stands to reason that it would outperform the regular internal product in an \gls{rns} setting as it uses the faster hybrid external product. In \gls{spar}, specifically, it can be applied to the \texttt{server::Write} loop by setting $h\gets (I_{i,k}\boxtimes \mathsf{notHasWritten}) \mixedprod z_{i,d}$ and having the client send $z$ pre-scaled by $P$ and in the $QP$-modulus space.
+
+To summarize, we believe that if \autoref{alg:spar:write} was rewritten using only external products, the performance would be significantly improved by using the hybrid technique. Barring that, the protocol might also see a non-negligible speed-up by employing the mixed product when assigning $h$.
