@@ -1,44 +1,37 @@
-\chapter{Noise Asymmetry in RGSW Products}
+\chapter{RGSW Noise Asymmetry}
 \label{appendix:asymmetry}
-\autoref{rem:extprod-asymmetry} notes an asymmetry . Here is the full derivation
-
+Several authors~\cite{cryptoeprint:2013/541, cryptoeprint:2014/094, cryptoeprint:2014/816, cryptoeprint:2018/421} have noted the noise asymmetry of (R)\gls{gsw} operations. In this appendix we explore \autoref{rem:extprod-asymmetry} in more detail. Beginning with the external product $\eqref{def:extprod}$, and applying the gadget property $G^{-1}(x)\cdot G = x + e \pmod{Q}$:
 \begin{gather*}
-    x\cdot C = G^{-1}(x)(Z + \mu G) \\ % \pmod{Q} \\
+    x\boxdot C = G^{-1}(x)(Z + \mu G) \\ % \pmod{Q} \\
     G^{-1}(x)\cdot Z + \mu(G^{-1}(x)\cdot G) \\
-    G^{-1}(x)Z + \mu(x + \epsilon_g)
+    G^{-1}(x)Z + \mu(x + e)
 \end{gather*}
-where $\|G^{-1}\|_\infty \leq \beta$ is inhertied
 
+As $x = (a_xs + \Delta m_x + \epsilon_x, a_x)$ is an \gls{rlwe} sample and $e = (e_0, e_1)$ is the precision of the gadget $G$, the error in the right term $\mu(x + e)$ is $\mu[\epsilon_x + e_0 + e_1(1 - s)]$ and collapses into just $\mu\epsilon_x$ when using an exact gadget. Call this error $\mu e_r$.
+
+To retrieve the error in the left term, we use the gadget matrix construction of \autoref{lemma:gadget-matrix-construction} where $G^{-1}(x) = [D(x_0)|D(x_1)] \in R_\beta^{2\ell}$ and recall that $Z\in R_Q^{2\ell\times 2}$ is a collection of $2\ell$ \gls{rlwe} public keys. Let $D_i = G^{-1}(x)[i]$ and $Z_i = (a_i\cdot s + \epsilon_i, a_i)$.
 \begin{gather*}
-    \text{Using \eqref{def:Ginvmat}: } G^{-1}(x) Z = 
-    [D(x_0)|D(x_1)]\begin{pmatrix}
-        \Call{RLWE}{0} \\
-        \vdots \\
-        \Call{RLWE}{0} \\
-    \end{pmatrix}
-    \\
-    \text{Let } D_i = G^{-1}(x)[i] \text{ and } Z_i = (a_i\cdot s + \epsilon_i, a_i)
-    \\
-    \\
+    % \text{Using \eqref{def:Ginvmat}: } G^{-1}(x) Z = 
+    % [D(x_0)|D(x_1)]\begin{pmatrix}
+    %     \Call{RLWE}{0} \\
+    %     \vdots \\
+    %     \Call{RLWE}{0} \\
+    % \end{pmatrix}
+    % \\
+    % \text{Let } D_i = G^{-1}(x)[i] \text{ and } Z_i = (a_i\cdot s + \epsilon_i, a_i)
+    % \\
     \implies  G^{-1}(x)\cdot Z = \left(\sum_{i=0}^{2\ell - 1} a_i D_i s + \epsilon_i D_i, \;\; \sum_{i=0}^{2\ell - 1} a_i D_i\right)
     \\
         \left(\left[\sum_{i=0}^{2\ell - 1} a_i D_i \right]s + \sum_{i=0}^{2\ell - 1}\epsilon_i D_i, \;\; \sum_{i=0}^{2\ell - 1} a_i D_i\right)
-    \\
-    \\
+\end{gather*}
+\begin{gather*}
     \text{Let } a = \sum_{i=0}^{2\ell - 1} a_i D_i \text{ and } \epsilon = \sum_{i=0}^{2\ell - 1}\epsilon_i \text{, and recall } \|D(x_i)\|_\infty \leq \beta
     \\
     (a\cdot s + \sum_{i=0}^{2\ell - 1}\epsilon_i D_i, a) \leq (a\cdot s + \sum_{i=0}^{2\ell - 1}\epsilon_i \beta, a)
     \\
-    \therefore G^{-1}(x)\cdot Z \leq (a\cdot s + \beta \epsilon, a)
+    \therefore\; G^{-1}(x)\cdot Z \leq (a\cdot s + \beta \epsilon, a)
 \end{gather*}
 
-So clearly, the error sources are:
-\begin{itemize}
-    \item $\mu \epsilon_g$ which is 0 if the gadget is exact
-    \item $\beta\sum e_z$ the sum of 
-\end{itemize}
+Typically $\mu$ is constrained to $\{0, 1\}$ such that $\beta\epsilon \gg \mu e_r$. This effectively means the left term $G^{-1}(x)Z$ determines the error, while the right term $\mu(x + e)$ calculates the encrypted message $m_x\cdot \mu$. The error in the external products is thus mainly a product of $\beta$ and the masking errors $\epsilon_i$ in $Z$. Consequently, the external product noise remains small assuming the quality $\beta$ is small and $C$ is a fresh \gls{rgsw} sample with small errors, even if the \gls{rlwe} sample $x$ is noisy. 
 
-\begin{gather*}
-    xxxx
-\end{gather*}
-\newpage
+The exact same logic applies to the internal product, as each row \emph{is} an external product by definition \eqref{def:prod:internal}. In this case, the order of the product $A\boxtimes C$ is very important if the result is reused in another internal product. Any error accumulated in the left operand $A$ is negligible due to the discussed asymmetry. For fresh $C_i$ samples, the chain $A_i = A_{i-1} \boxdot C_i$ has far better noise handling than $A_i = C_i \boxdot A_{i-1}$.

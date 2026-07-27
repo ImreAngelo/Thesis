@@ -32,7 +32,12 @@ The idea has since been generalized into the idea of \emph{gadget decomposition}
 
 %%
 %% Why its helpful
-Digit decomposition has two important properties. First, if the digits $\gamma_i$ of $\decomp{\gamma}{}$ are small, then $\langle \decomp{\gamma}{}, \epsilon\rangle \leq \ell\cdot \max\{\gamma_i\cdot \epsilon_i\} \leq \ell B\epsilon \ll \gamma\epsilon$. This is the property that allows some control over the noise growth. Second, two integers can be multiplied through the decomposition. By construction, $\langle\decomp{\gamma}{}, g\rangle = \gamma$ for the fixed vector $g = (q/B, \dots, q/B^{\ell})$, meaning $\langle\decomp{\gamma}{}, g\cdot x\rangle = \gamma\cdot x$ for an arbitrary integer $x\in \mathbb{Z}$. For either of these properties, the particular form of $g$ is unimportant as long as the digits $\gamma_i$ remain small. Furthermore, as we are generally working with some intrinsic error in FHE, \cite{cryptoeprint:2018/421} proposed allowing some error $\epsilon$ in the reconstruction, giving the definition from their paper verbatim:
+By construction, $\langle\decomp{\gamma}{}, g\rangle = \gamma$ for the fixed vector $g = (q/B, \dots, q/B^{\ell})$, meaning $\langle\decomp{\gamma}{}, g\cdot x\rangle = \gamma\cdot x$ for an arbitrary integer $x\in \mathbb{Z}$. If the digits of $\decomp{\gamma}{}$ are small, 
+\begin{equation*}
+    \langle\decomp{\gamma + \epsilon}{}, g\cdot x\rangle =  
+\end{equation*}
+
+If the digits of $\decomp{\gamma}{}$ are small, then $\langle \decomp{\gamma}{}, \epsilon \cdot g\rangle \leq \ell\cdot \max\{\gamma_i\cdot \epsilon_i\} \leq \ell B\epsilon \ll \gamma\epsilon$. This allows some control over the noise growth, since . Second, two integers can be multiplied through the decomposition. By construction, $\langle\decomp{\gamma}{}, g\rangle = \gamma$ for the fixed vector $g = (q/B, \dots, q/B^{\ell})$, meaning $\langle\decomp{\gamma}{}, g\cdot x\rangle = \gamma\cdot x$ for an arbitrary integer $x\in \mathbb{Z}$. For either of these properties, the particular form of $g$ is unimportant as long as the digits $\gamma_i$ remain small. Furthermore, as we are generally working with some intrinsic error in FHE, \cite{cryptoeprint:2018/421} proposed allowing some error $\epsilon$ in the reconstruction, giving the definition from their paper verbatim:
 
 %%
 %% Gadget Decomposition
