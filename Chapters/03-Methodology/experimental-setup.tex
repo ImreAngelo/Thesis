@@ -45,7 +45,7 @@ so where a result is itself \gls{rgsw}, as with the internal product or $\mathsf
 %% TODO: Do not touch this section
 \subsubsection{Multi-Threaded Performance}
 \label{sec:amdahl}
-The main advantage \gls{rns} holds over classical single-precision representations is its multi-threading capability. As described above, our implementation allows efficient parallelization over $k\ell$ threads. However, if fewer than $k\ell$ threads are available during benchmarking, we extrapolate the expected performance at $k\ell$ processors by modeling theoretical scaling behavior using Amdahl's Law~\cite{Gustafson:2011}.
+The main advantage \gls{rns} holds over classical single-precision representations is its multi-threading capability. As described above, our implementation allows efficient parallelization over $k\ell$ threads. However, if fewer threads are available during benchmarking, we extrapolate the expected performance at $k\ell$ processors by modeling theoretical scaling behavior using Amdahl's Law~\cite{Gustafson:2011}.
 
 \begin{definition}[Amdahl's Law]
     A task whose execution is divided into a strictly serial fraction $f$ and a broadly parallelizable fraction $1-f$ will experience a theoretical speedup over $T$ processors given by:

@@ -1,6 +1,6 @@
 \subsubsection{Bitwise Operations}
 \label{sec:bitwise}
-Our implementation takes the bit-length $b = \log{B}$ as a parameter rather than the base $B$ itself. By restricting the base $B = 2^b$ to a power-of-two, we can substitute certain computationally expensive arithmetic operations with hardware-native bitwise operations. They also operate independently on each bit of a machine word without the need for carry propagation, making then highly conducive to \gls{simd} vectorization.\footnote{As an added bonus, replacing branching paths with bitwise masks guarantees constant-time execution, aligning with cryptographic best practices to prevent timing side-channels.} % allowing for accelerated bulk reductions across arrays of polynomial coefficients. 
+We take the bit-length $b = \log{B}$ as a parameter rather than the base $B$ itself. By restricting the base to a power-of-two $B = 2^b$, we can substitute certain computationally expensive arithmetic operations with fast, hardware-native bitwise operations. They operate independently on each bit of a machine word without the need for carry propagation, additionally making then highly conducive to \gls{simd} vectorization.\footnote{As an added bonus, replacing branching paths with bitwise masks guarantees constant-time execution, aligning with cryptographic best practices to prevent timing side-channels.} % allowing for accelerated bulk reductions across arrays of polynomial coefficients. 
 
 \begin{table}[H]
     \caption{Common bitwise operations}
@@ -19,8 +19,7 @@ Our implementation takes the bit-length $b = \log{B}$ as a parameter rather than
     \end{tabular}
 \end{table}
 
-As bitwise operations operate on the bits of binary representations of integers, functions built around these typically involve masking out certain bits using $\Call{And}{value \text{, mask}}$ where the mask is 1 in positions that are involved in the calculations, and 0 elsewhere. Below we highlight two efficient patterns used throughout the implementation, both exploiting the 
-binary structure of $B=2^b$. % fact that $B=2^b$ in binary is $1$ followed by $b - 1$ zeros, and subtracting 1 is $b - 1$ ones. 
+Functions built around bitwise operations typically involve masking out certain bits using $\Call{And}{value \text{, mask}}$ where the mask is 1 in bit-positions involved in the calculations, and 0 elsewhere. Below we highlight two efficient patterns used throughout the implementation, exploiting the binary structure of $B=2^b$.
 
 %%%
 %%% Center residue

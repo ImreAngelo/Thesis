@@ -16,27 +16,23 @@
     \end{align*}
     \begin{gather}
         \nonumber
-        \text{Let } Q = \prod_{i=0}^{k-1}q_i, \; \hat{q}_i = \frac{Q}{q_i} \text{ and } \hat{q}_i^{-1} \text{ be the inverse s.t. } \hat{q}_i^{-1}\hat{q}_i \equiv 1 \pmod q_i
+        \text{Let } Q = \prod_{i=0}^{k-1}q_i, \; \hat{q}_i = \frac{Q}{q_i} \text{ and } \hat{q}_i^{-1} \text{ be the inverse s.t. } \hat{q}_i^{-1}\hat{q}_i \equiv 1 \pmod{q_i}
         \\
         \text{Then \gls{crt} states } x = \sum_{i=0}^{k-1} x_i \cdot \hat{q}_i \cdot \hat{q}_i^{-1} \pmod{Q} 
         \\
         \label{eq:crt-gadget}
-        x = \langle \{ x_i \}_{i=0}^{k-1}, \{ \hat{q}_i\cdot\hat{q}_i^{-1} \}_{i=0}^{k-1} \rangle \pmod{Q}
+        \text{Or equivalently } x = \langle \{ x_i\}_{i=0}^{k-1}, \{\hat{q}_i\cdot\hat{q}_i^{-1} \}_{i=0}^{k-1} \rangle \pmod{Q}
     \end{gather}
 \end{definition}
-
-% Within the context of a Residue Number System (RNS), the \gls{crt} provides the mathematical foundation for representing large integers as arrays of smaller, independent residues. By choosing word-sized coprime moduli $q_i$, operations on a large integer modulo $Q$ can be executed component-wise in parallel across the individual moduli, completely bypassing multi-precision carry propagation. Equation~\eqref{eq:crt-gadget} explicitly formulates this reconstruction as an inner product, which maps naturally to the gadget reconstruction structures utilized in homomorphic encryption.
-
-
 
 %%
 %% NTT
 %%
 \section{The Number Theoretic Transform}
 \label{app:ntt}
-
 The efficiency of modern ring-based homomorphic encryption relies strictly on substituting high-complexity polynomial arithmetic with low-complexity scalar operations. This appendix formalizes the algebraic mechanics of the Number Theoretic Transform (NTT) over the negacyclic polynomial ring $R_{q_i} = \mathbb{Z}_{q_i}[X]/(X^N+1)$, which dictates the behavior of a single RNS tower.
 
+\newpage
 \begin{definition}[Principal Roots of Unity]
     Let $N$ be a power of two and $q$ be an $N$-transformable modulus such that $q \equiv 1 \pmod{2N}$. The algebraic field $\mathbb{Z}_q$ is guaranteed to contain a \emph{primitive $2N$-th root of unity}, denoted $\psi$, which strictly satisfies $\psi^{2N} \equiv 1 \pmod q$ and $\psi^k \not\equiv 1 \pmod q$ for all $0 < k < 2N$. Consequently, it holds that $\psi^N \equiv -1 \pmod q$.
 \end{definition}
@@ -66,5 +62,5 @@ The efficiency of modern ring-based homomorphic encryption relies strictly on su
         c = \text{INTT}(\text{NTT}(a) \odot \text{NTT}(b))
     \end{equation}
     
-    By exploiting the symmetry of roots of unity via fast decimation algorithms, functionally identical to the Fast Fourier Transform utilizing the Cooley-Tukey butterfly structure, the computational evaluation of both the forward and inverse NTT is mathematically reduced from a standard complexity of $\mathcal{O}(N^2)$ to $\mathcal{O}(N \log N)$~\cite{liang:2022}. This precise algorithmic reduction forms the absolute baseline requirement for practical latency in RNS-variant homomorphic cryptography.
+    By exploiting the symmetry of roots of unity via fast decimation algorithms, functionally identical to the Fast Fourier Transform utilizing the Cooley-Tukey butterfly structure, the computational evaluation of both the forward and inverse NTT is mathematically reduced from a standard complexity of $\mathcal{O}(N^2)$ to $\mathcal{O}(N \log N)$~\cite{liang:2022}. % This precise algorithmic reduction forms the absolute baseline requirement for practical latency in RNS-variant homomorphic cryptography.
 \end{theorem}
