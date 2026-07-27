@@ -26,15 +26,15 @@
         xmin=0, xmax=1000,
         xlabel={Chain length},
         ylabel={Error $\|\epsilon\|_\infty$},
-        legend pos=north west,
+        legend pos=south east,
         set layers,
         width=\textwidth,
         height=0.55\textwidth,
     ]
         % ---------- Scatter plots ----------
-        % \addplot[only marks, mark=*, mark size=1pt, color=gaussblue]
-        %     table[col sep=comma, x=n, y=noise] {Data/Noise/ExternalProd/hybrid_small.csv};
-        \addplot[only marks, mark=*, mark size=1pt, color=hpsgreen]
+        \addplot[only marks, mark=*, mark size=.5pt, color=gaussblue]
+            table[col sep=comma, x=n, y=noise] {Data/Noise/ExternalProd/bv.csv};
+        \addplot[only marks, mark=*, mark size=.5pt, color=hpsgreen]
             table[col sep=comma, x=n, y=noise] {Data/Noise/ExternalProd/hybrid.csv};
             
         % ---------- Regression lines ----------
@@ -43,7 +43,7 @@
         % \addplot[thick, solid, dotted, on layer=axis foreground, color=hpspurple, domain=1:1000, samples=300, forget plot]
         %     {\largeSlope*x + \largeIntercept};
             
-        \legend{Hybrid}
+        \legend{BV, Hybrid}
     \end{semilogyaxis}
     \end{tikzpicture}
 \end{figure}

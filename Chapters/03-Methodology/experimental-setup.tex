@@ -7,9 +7,9 @@ Communication between parties is not simulated. In its place a single ``all-know
 The orchestrator takes the number of users $\eta$ as input and gives each user a unique identifier. Every user encrypts its identifier under the joint key and sends it to the server together with three random indices, and once all messages have been received the server performs the write operation on each of them. The setup phase is considered free, as it is static and involves no communication in the simulation.
 
 \subsubsection{Measurement and Validation}
-Timings are collected with Google Benchmark and correctness is checked with GoogleTest. Each benchmark runs $10$ repetitions, and every repetition continually repeats the operation within a span of one second. Operations taking longer than a second therefore yield at least $10$ samples and the faster functions yield hundreds, in both cases with a low coefficient of variation.
+Timings are collected with Google Benchmark and correctness is checked with GoogleTest. Each benchmark runs $10$ repetitions, and every repetition continually repeats the operation within a span of one second. Operations taking longer than a second therefore yield at least $10$ samples and the faster functions yield hundreds, in both cases with a low coefficient of variation. 
 
-The two serve different purposes. Benchmarks are optimized for speed and perform no correctness checks, which could otherwise affect the measurement. Each function only needs to run once, since the total time can be extrapolated: client encryption and decryption are run independently by each user and the final decryption is a single aggregation, so the one-shot runtime \textit{is} the runtime, and for the server write only the per-user runtime is of interest. Unit tests are not optimized for speed and instead repeat slow correctness checks at several levels, so that a failure reports not only that an operation failed but \textit{where} and why. Because both share the same parameters and code, a passing test empirically validates the correctness of what the benchmarks measure.
+% The two serve different purposes. Benchmarks are optimized for speed and perform no correctness checks, which could otherwise affect the measurement. Each function only needs to run once, since the total time can be extrapolated: client encryption and decryption are run independently by each user and the final decryption is a single aggregation, so the one-shot runtime \textit{is} the runtime, and for the server write only the per-user runtime is of interest. Unit tests are not optimized for speed and instead repeat slow correctness checks at several levels, so that a failure reports not only that an operation failed but \textit{where} and why. Because both share the same parameters and code, a passing test empirically validates the correctness of what the benchmarks measure.
 
 % \subsubsection{Choice of Parameters}
 % \begin{itemize}
@@ -33,12 +33,14 @@ The two serve different purposes. Benchmarks are optimized for speed and perform
 % \end{itemize}
 
 \subsubsection{Noise Analysis}
+% As the clients are simulated
 The testing environment always has access to the secret key, so the error of an \gls{rlwe} ciphertext is checked directly rather than inferred.
 \begin{gather}
     x = (c_0, c_1) = (c_1s + \Delta m + \epsilon, c_1) \\
     \implies \epsilon = c_0 - c_1s - \Delta m, \quad m = \Call{Decrypt}{x, s}
 \end{gather}
-An \gls{rgsw} ciphertext is an intermediate object, so where a result is itself \gls{rgsw}, as with the internal product or $\mathsf{notHasWritten}$, two methods are available. The first row encodes $\mu\cdot 1$, so that row can be extracted on its own and its error checked. Alternatively the external product with $\Call{RLWE}{1}$ can be computed, where that ciphertext is made noiseless so as not to contribute any error of its own. We use the latter, because the first relies on the gadget containing $1$, which is traditionally but not necessarily the case.
+An \gls{rgsw} ciphertext is an intermediate object, %% TODO: Shorten
+so where a result is itself \gls{rgsw}, as with the internal product or $\mathsf{notHasWritten}$, two methods are available. The first row encodes $\mu\cdot 1$, so that row can be extracted on its own and its error checked. Alternatively the external product with $\Call{RLWE}{1}$ can be computed, where that ciphertext is made noiseless so as not to contribute any error of its own. We use the latter, because the first relies on the gadget containing $1$, which is traditionally but not necessarily the case.
 
 %% TODO: Do not touch this section
 \subsubsection{Multi-Threaded Performance}

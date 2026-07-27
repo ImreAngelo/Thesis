@@ -1,4 +1,4 @@
-\subsection{Theoretical Hybrid Improvement}
+\subsection{Hybrid Gadget} % Theoretical Hybrid Improvement
 \label{sec:results:hybrid}
 An alternative to gadget decomposition often employed in \gls{rns} key-switching is the \textit{hybrid} technique \cite{cryptoeprint:2012/099, cryptoeprint:2021/204}. A natural question is wether this technique can be employed in the external and internal products.
 
@@ -50,21 +50,25 @@ Hybrid is very fast in \gls{rns} because (1) it uses the fast approximations dis
         \toprule
         \textbf{Operation}  & \textbf{BV} & \textbf{Hybrid}  \\
         \midrule
-        Encrypt RGSW        & \num{123}~ms  & \num{20}~ms \\
-        External Product    & \num{36.9}~ms & \num{18.4}~ms \\
+        Encrypt RGSW        & \num{230}~ms & \num{28.7}~ms \\
+        External Product    & \num{67}~ms  & \num{29.2}~ms \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-Our testing suggests the hybrid approach not only improves the speed of the external product, but also improves the noise growth properties significantly. In a full implementation this could be tweaked by varying $d_{num}$, with larger values resulting in even faster speeds at the cost of more noise. 
+Our testing suggests the hybrid approach not only improves the speed of the external product, but also improves the noise significantly. In a full implementation this could be tweaked by varying $d_{num}$, with larger values resulting in even faster speeds at the cost of more noise. 
 
 %% TODO: Insert graph of BV versus hybrid external product noise
 \input{Figures/Plots/hybrid-external-product.tex}
 
+\begin{remark}
+    Since hybrid encrypts messages in the extended modulus $QP$, the security of the system must be estimated at the extended modulus $QP$. %% TODO: The table does not have security parity, but it doesn't matter because...
+\end{remark}
+
 \subsubsection{Internal Product}
 One would think that since the internal product is defined as repeated applications of the external product, the hybrid technique would extend to this product as well. It does not. The noise advantage of the hybrid external product comes from the rescaling by $P^{-1}$, which necessarily maps the result down to modulus $Q$. Since $P$ is a zero divisor of the ring $R_{QP}$, the inverse does not exist and division by $P$ is only well-defined as a map $R_{QP}\to R_{Q}$. Therefore, a pure ``hybrid'' internal product cannot exist.
 
-\subsubsection{A Compromise}
+\subsubsection{Mixed Product}
 Observe that the pure hybrid internal product only breaks because we require the output to be in a modulus that is a factor of $P$. If we distinguish between a \emph{left} (regular) and a \emph{right} (hybrid) RGSW, then we can define a \textit{mixed} product that takes a hybrid-RGSW as one of its operands, but outputs a regular RGSW. Importantly, this product would be infinitely chain-able using only hybrid external products.
 
 \newcommand{\mixedprod}{\;\boxed{\diamond}\;}

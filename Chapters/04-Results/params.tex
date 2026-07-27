@@ -1,10 +1,10 @@
-\newcommand{\securityBits}{155.3}
+\newcommand{\securityBits}{131.5}
 
 \section{Parameters}
 \label{sec:results:params}
-We found that the parameters suggested in \cite{cryptoeprint:2025/860} results in too much noise for the \texttt{Server::Write} function to effectively handle, and are thus not capable of running the full \gls{spar} protocol without decryption failure. Rather than tweaking these parameters until the protocol produces correct decryptions, I instead aim to fully utilize the \gls{rns} context by using much larger parameters that enable \gls{simd} batching and far more data transferred per message. % The parameteres were designed for TFHE, with Q = 2^64
+We found that the parameters suggested in \cite{cryptoeprint:2025/860} results in too much noise for the \texttt{Server::Write} function to effectively handle, and are thus not capable of running the full \gls{spar} protocol without decryption failure. Rather than tweaking these parameters until the protocol produces correct decryptions, we instead aim to fully utilize the \gls{rns} context by using much large parameters that enable \gls{simd} batching and far more data transferred per message.
 
-New parameters were thus selected to provide $\lambda \geq 128$ bits of security at the largest possible modulus $Q$, while supporting \gls{simd} batching, minimizing $\ell$ so that $k\ell$ is as small as possible, and ensuring sPAR outputs correct results. The RNS moduli are slightly smaller than $64$ bits to fit inside $64$-bit machine words with a few bits of headroom to prevent overflowing registers.
+New parameters were thus selected to provide $\lambda \geq 128$ bits of security at the largest possible modulus $Q$, while supporting \gls{simd} batching, minimizing $k\ell$, and ensuring sPAR outputs correct results. The RNS moduli are slightly smaller than $64$ bits to fit inside $64$-bit machine words with a few bits of headroom to prevent overflowing registers.
 
 The resulting parameters, listed in~\autoref{tab:bench:params}, yield an esitmated security parameter of $\securityBits$ bits~\cite{cryptoeprint:2015/046} for the underlying \gls{rlwe} scheme, and serve as the baseline for the benchmarks that follow.
 
@@ -18,9 +18,9 @@ The resulting parameters, listed in~\autoref{tab:bench:params}, yield an esitmat
         \textbf{Parameter}                      & & \textbf{Value}   \\
         \midrule
         decomposition $(\ell, B)$               & & $(2, 2^{31})$     \\
-        number of RNS moduli $k$                & & $6$               \\
+        number of RNS moduli $k$                & & $7$               \\
         size of moduli $\log{(q_0)}$            & & $60$ bits         \\
-        ciphertext modulus size ${Q}$           & & $2^{360}$        \\
+        ciphertext modulus size ${Q}$           & & $2^{420}$        \\
         standard deviation $\sigma$             & & $3.19$            \\
         plaintext modulus $t$                   & & $65537$           \\ % 2^{16}+1
         polynomial degree $N$                   & & $16384$           \\

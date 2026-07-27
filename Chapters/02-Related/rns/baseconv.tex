@@ -6,24 +6,41 @@
 One central operation that is contentious in \gls{rns} is \emph{base conversion}, where the goal is to convert an \secondForm{} polynomial in the basis $\mathcal{B}_Q$ to a different basis $\mathcal{B}_{Q'}$. 
 % When $Q \subset Q' = QP$ for some auxiliary modulus $P$, the operation is called \emph{base extension}. % The naive approach of scaling by $Q'/Q$ 
 When $Q < Q'$, the operation is called \emph{base extension}.
-In this section we briefly introduce four algorithms that significantly improve the performance of base conversion in \gls{rns}, summarized the the table below.
+In this section we briefly introduce four algorithms that significantly improve the performance of base conversion in \gls{rns}, summarized in the table below.
 
 %% TODO: use this formulation for [a]_Q or somewhere else: "naturally extends to polynomials of R_Q by applying it coefficientwise"
 \begin{center}
-    \begin{tabular}{@{}lll@{}}
+    \begin{tabular}{@{}llll@{}}
         \toprule
-        \textbf{Operation} & \textbf{Computes} & \textbf{Error} \\
+        \textbf{Operation} & \textbf{Input} & \textbf{Output} & \textbf{Domain} \\
         \midrule
-        \textsc{FastBConv}      & $[x]_{\mathcal{B}_Q} \mapsto [x + \epsilon]_{\mathcal{B}_P}$      & $\alpha_x Q$ \text{ for } $\alpha_x \in [0, k)$ \\
-        \textsc{FastBaseExtend} & $[x]_{\mathcal{B}_Q} \mapsto [x + \epsilon]_{\mathcal{B}_{QP}}$   & $\alpha_x Q$ \text{ for } $\alpha_x \in [0, k)$ \\
-        \textsc{Scale}          & $[x]_{\mathcal{B}_Q} \mapsto [xP]_{\mathcal{B}_{QP}}$          & $0$ \\
-        \textsc{ApproxModDown}  & $[x]_{\mathcal{B}_{QP}} \mapsto [\lfloor x/P \rceil - \alpha]_{\mathcal{B}_Q}$ & $\alpha \in [0, k)$ \\
+        \textsc{FastBConv}      & $[x]_{\mathcal{B}_Q}$    & $[x + \alpha_xQ]_{\mathcal{B}_P}$ for some $\alpha_x \in [0, k)$ & \gls{rns} \\
+        \textsc{FastBaseExtend} & $[x]_{\mathcal{B}_Q}$    & $[x + \alpha_xQ]_{\mathcal{B}_{QP}}$ for some $\alpha_x \in [0, k)$ & \gls{rns} \\
+        \textsc{Power}          & $[x]_{\mathcal{B}_Q}$    & $[xP]_{\mathcal{B}_{QP}}$ & \gls{ntt} \\
+        \textsc{ApproxModDown}  & $[x]_{\mathcal{B}_{QP}}$ & $[\lfloor x/P \rceil - \alpha]_{\mathcal{B}_Q}$ for some $\alpha \in [0, k)$ & \gls{rns} \\
         \bottomrule
     \end{tabular}
 \end{center}
+% \begin{center}
+%     \begin{tabular}{@{}lll@{}}
+%         \toprule
+%         \textbf{Operation} & \textbf{Computes} & \textbf{Error} \\
+%         \midrule
+%         \textsc{FastBConv}      & $[x]_{\mathcal{B}_Q} \mapsto [x + \epsilon]_{\mathcal{B}_P}$      & $\alpha_x Q$ \text{ for } $\alpha_x \in [0, k)$ \\
+%         \textsc{FastBaseExtend} & $[x]_{\mathcal{B}_Q} \mapsto [x + \epsilon]_{\mathcal{B}_{QP}}$   & $\alpha_x Q$ \text{ for } $\alpha_x \in [0, k)$ \\
+%         \textsc{Power}          & $[x]_{\mathcal{B}_Q} \mapsto [xP]_{\mathcal{B}_{QP}}$          & $0$ \\
+%         \textsc{ApproxModDown}  & $[x]_{\mathcal{B}_{QP}} \mapsto [\lfloor x/P \rceil - \alpha]_{\mathcal{B}_Q}$ & $\alpha \in [0, k)$ \\
+%         \bottomrule
+%     \end{tabular}
+% \end{center}
+
 
 \subsubsection{Fast Base Conversion}
-Introduced by Bajard et al. in \cite[Equation 2]{cryptoeprint:2016/510}, \emph{fast base conversion} is an approximation that computes $[x]_{Q'} + \alpha_x Q$ for some integer $\alpha_x\in [0, k)$ using the \firstForm{} residues $[x]_{\mathcal{B}_Q}$. Computing $\alpha_x Q$ is possible, but requires expensive operations in \gls{rns} and is typically skipped. Let $\hat{q}_i = Q/q_i$, then the fast base conversion is:
+Introduced by Bajard et al. in \cite[Equation 2]{cryptoeprint:2016/510}, \emph{fast base conversion} is an approximation that computes $x + \alpha_x Q$ in the desired basis % $[x]_{Q'} + \alpha_x Q$ 
+for some integer $\alpha_x\in [0, k)$ using the (\firstForm{}) residues of $[x]_{\mathcal{B}_Q}$. Correcting the error is possible but costly, and as we will soon see; unnecessary. 
+% Computing $\alpha_x Q$ is possible, but requires expensive operations in \gls{rns} and is typically skipped. 
+Let $\hat{q}_i = Q/q_i$, then the fast base conversion is:
+%% TODO: Residues = towers in RNS form
 
 \begin{equation}
     \label{eq:fastbconv}
@@ -31,16 +48,16 @@ Introduced by Bajard et al. in \cite[Equation 2]{cryptoeprint:2016/510}, \emph{f
 \end{equation}
 
 \begin{remark}
-    The coefficients $\hat{q}_i$ and $\hat{q}_i^{-1}$ are the \gls{crt} factors from \appref{app:crt} and \autoref{rem:hps-optimization}, and can be pre-calculated to maximize the runtime performance of \eqref{eq:fastbconv}.
+    The coefficients $\hat{q}_i$ and $\hat{q}_i^{-1}$ are the \gls{crt} factors from \appref{app:crt} and \autoref{rem:hps-optimization}, and can be pre-calculated to maximize runtime performance.
 \end{remark}
 
 \subsubsection{Fast Base Extension}
-Let $P$ be an auxiliary modulus formed by a disjoint \gls{rns} basis $\mathcal{B}_P$ of size $l$, such that $P = \prod_{j=0}^{l-1} p_j$ and $\gcd(Q, P) = 1$. The extended basis is defined as the union $\mathcal{B}_{QP} = \mathcal{B}_Q \cup \mathcal{B}_P$. If we use \eqref{eq:fastbconv} to convert $\mathcal{B}_Q \mapsto \mathcal{B}_{QP}$, the error $\alpha_x Q \bmod{QP}$ disappears in the $q_i$-limbs since $Q = \prod_{i}q_i$ is a product of every $q_i$.
+Let $P$ be an auxiliary modulus formed by a disjoint \gls{rns} basis $\mathcal{B}_P$ of size $l$, such that $P = \prod_{j=0}^{l-1} p_j$ and $\gcd(Q, P) = 1$. The extended basis is the union $\mathcal{B}_{QP} = \mathcal{B}_Q \cup \mathcal{B}_P$. If we use \eqref{eq:fastbconv} to convert $\mathcal{B}_Q \mapsto \mathcal{B}_{QP}$, the error $\alpha_x Q \bmod{QP}$ disappears in the $q_i$-limbs since $Q = \prod_{i}q_i$ is a product of every $q_i$. %% TODO: introduce $Q$-limbs 'notation' instead of $q_i$-limbs
 \begin{gather*}
     x + \alpha_x Q \equiv x + \alpha_x \prod_{j}q_j \equiv x + q_i\cdot (\alpha_x \prod_{j\neq i}q_j) \equiv x \pmod{q_i}
 \end{gather*}
 
-Restricting base extension to $\mathcal{B}_Q \mapsto \mathcal{B}_{QP}$ therefore allows us to skip the $k$ first moduli and calculate only the $l$ $p_i$-limbs using $\Call{FastBConv}{x, \mathcal{B}_Q, \mathcal{B}_P}$, appending the results to $[x]_{\mathcal{B}_Q}$.
+Restricting base extension to an extended basis where $\mathcal{B}_Q \subset \mathcal{B}_{QP}$ allows us to skip the $k$ first moduli and calculate only the $l$ $p_i$-limbs using $\Call{FastBConv}{x, \mathcal{B}_Q, \mathcal{B}_P}$, and appending the results to $[x]_{\mathcal{B}_Q}$.
 
 %% 
 %% FBE
@@ -57,16 +74,17 @@ Restricting base extension to $\mathcal{B}_Q \mapsto \mathcal{B}_{QP}$ therefore
 %         \State $a \gets a \cup \Call{NTT}{r}$
 %     \EndFor
     \State\Return $a \cup \Call{NTT}{a_P}$
-    \Comment{\gls{ntt} is applied to each $p_i$-limb individually}
+    \Comment{\gls{ntt} is applied to each $p_i$-limb}
 \end{algorithmic}
 \end{algorithm}
 
-\subsubsection{Scale}
-Observe that if $x + \alpha_x Q \bmod{QP}$ was multiplied by $P$, the error term $\alpha_x Q P$ would disappear entirely. Further, $xP \equiv 0 \bmod{p_j}$ and the only remaining non-zero calculation $xP \bmod q_i$ can be calulated in the evaluation domain. This gives rise to a specialized $\Call{Scale}{x, P}$ operation mapping $[x]_{\mathcal{B}_Q} \mapsto [xP]_{\mathcal{B}_{QP}}$ exactly and without using any inverse or forward \gls{ntt} operations. 
+%% TODO: Refactored Scale -> Power, make sure this is reflected everywhere
+\subsubsection{Power}
+Should $x + \alpha_x Q \bmod{QP}$ be multiplied by $P$, the error term $\alpha_x Q P$ would disappear entirely. Further, $xP \equiv 0 \bmod{p_j}$ and the only remaining non-zero calculation $x\cdot P \bmod q_i$ can be calculated in the evaluation domain. This gives rise to a specialized $\Call{Power}{x, P}$ operation mapping $[x]_{\mathcal{B}_Q} \mapsto [xP]_{\mathcal{B}_{QP}}$ exactly and without using any inverse or forward \gls{ntt} operations. 
 
 \begin{algorithm}[ht!]
-\caption{\protect\Call{Scale}{$x$, $P$}}
-\label{alg:scale}
+\caption{\protect\Call{Power}{$x$, $P$}}
+\label{alg:Power}
 \begin{algorithmic}[1]
     \Require $\ntt{[x]_{\mathcal{B}_Q}}$ and an RNS basis $\mathcal{B}_P$
     \Ensure $\ntt{[xP]_{\mathcal{B}_{QP}}}$
@@ -81,7 +99,7 @@ Observe that if $x + \alpha_x Q \bmod{QP}$ was multiplied by $P$, the error term
 \end{algorithm}
 
 \subsubsection{Approximate Mod Down}
-Following homomorphic evaluation in the extended basis $\mathcal{B}_{QP}$, the polynomial state must be scaled back down by $P$ to resolve the precision extension and return to the base coefficient ring $R_Q$. This operation, termed \emph{Approximate Mod Down}, functionally computes a rounded rational division $\lfloor x/P \rceil$ natively within the integer \gls{rns} domain. 
+Following homomorphic evaluation in the extended basis $\mathcal{B}_{QP}$, the polynomial must be scaled back down by $P$ to return to the base coefficient ring $R_Q$. This operation, termed \emph{Approximate Mod Down}, functionally computes a rounded rational division $\lfloor x/P \rceil$ natively within the integer \gls{rns} domain. 
 
 The procedure exploits the fact that the exact remainder of the division, $x \bmod P$, is inherently embedded in the auxiliary limbs $[x]_{\mathcal{B}_P}$. Because basis conversion necessitates the coefficient representation, these $l$ auxiliary limbs are first transitioned via an inverse \gls{ntt}. By projecting them back into $\mathcal{B}_Q$ using \textsc{FastBConv}, we obtain an approximated remainder $r = (x \bmod P) + \alpha P$ carrying a bounded structural error $\alpha \in [0, l)$. This projected remainder is then transformed back into the evaluation domain via a forward \gls{ntt}. Subtracting this evaluation-form remainder from the original $q_i$-limbs isolates a polynomial that is mathematically guaranteed to be a strict multiple of $P$. The discrete division is finally resolved by scaling the state by the modular inverse $P^{-1} \pmod{q_i}$ and severing the auxiliary basis entirely.
 

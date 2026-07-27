@@ -1,31 +1,19 @@
 \section{Discussions}
 \label{sec:results:discussion}
-The results are slower than anticipated. Even though we are using much larger parameters than the small TFHE parameters suggested in~\cite{cryptoeprint:2025/860}, the protocol is an order of magnitude slower than what would be practical for most applications. In theory, an arbitrary number of users can be supported, but the parameters that make it possible are too slow for it to be practical in large networks. In the remainder of this section we discuss some potential optimizations that could improve the performance of \gls{spar}.
+The results are slower than anticipated. 
+
+Even though we are using much larger parameters than the small TFHE parameters suggested in~\cite{cryptoeprint:2025/860}, the protocol is an order of magnitude slower than what would be practical for most applications. In theory, an arbitrary number of users can be supported, but the parameters that make it possible are too slow for it to be practical in large networks. In the remainder of this section we discuss some potential optimizations that could improve the performance of \gls{spar}.
 
 \subsubsection{AVX512 Instruction Set}
 \label{sec:avx512}
+OpenFHE supporst the AVX512 instruction set, which offers true \gls{simd} vectorization into 512-bit registers.  
+
 AVX512 offers true \gls{simd} vectorization, as opposed to the \gls{simd} \emph{packing} of \autoref{sec:bgv}. A single instruction operates on a 512-bit register, letting the CPU process several coefficients of an \gls{rns} residue polynomial at once. OpenFHE supports AVX512 acceleration through the Intel HEXL backend, but we were unable to benchmark it because none of the machines available to us have a CPU implementing the instruction set.
 
-Taking full advantage of AVX512 would also motivate revisiting the parameters, since register utilization depends on the sizes of the \gls{rns} moduli. A 512-bit register can for example hold eleven 42-bit integers together with one 50-bit integer, or twelve 42-bit integers with some bits left unused. Choosing the moduli to match such a layout, so that $k = 12$ and $Q \approx 2^{512}$, would fill every register completely. Whether this repartitioning of $Q$ leaves the noise behaviour of \autoref{sec:results:noise} unchanged is a question we leave open.
+Taking full advantage of AVX512 would require revisiting the parameters, since register utilization depends on the sizes of the \gls{rns} moduli. A 512-bit register can for example hold eleven 42-bit integers together with one 50-bit integer, or twelve 42-bit integers with some bits left unused. 
+
+Choosing the moduli to match such a layout, so that $k = 12$ and $Q \approx 2^{512}$, would fill every register completely. Whether this repartitioning of $Q$ leaves the noise behaviour of \autoref{sec:results:noise} unchanged is a question we leave open.
 
 %% Througput?
 \subsection{SIMD Packing}
-Throughout this thesis we have emphasized that our implementation supports \gls{simd} packing, but nowhere in \gls{spar} is this utilized. The \texttt{server::Write} loop is the most computationally expensive part of the whole protocol. \gls{simd} packing allows the server to perform $N$ rounds simultaneously, making the \textit{per-round} times $N$ times faster, but converting this into higher throughput would require significant changes to the protocol. If $N$ rounds are performed then every client would presumably be encrypting, sending and partially decrypting $N$ times more data, requiring significantly higher bandwidth and RAM on the server.
-
-% Enabling \gls{simd} presents another problem for \gls{spar}, since it requires $t$ to be a prime such that $t \equiv 1 \pmod{2N}$. The smallest such prime is $t = 65537$ for the other parameters of \autoref{tab:bench:params}. This is problematic since the $h \gets I_{i,k}\boxtimes\mathsf{notHasWritten}\boxtimes z_{i,d}$ assignment has only a single fresh ciphertext, $z_{i,d}$, meaning a ``dirty'' ciphertext necessarily must appear on the right hand side in one of the internal products, breaking the noise asymmetry from \autoref{rem:extprod-asymmetry}. We found that using this larger $t$, the \gls{spar} protocol was only able to support $\eta=3$ users.
-
-% % TODO: Multiple (10) runs
-% \begin{table}[H]
-%     \caption{Largest error in $L$ after all $\eta$ writes.}
-%     \label{tab:noise:multiparty}
-%     \centering
-%     \begin{tabular}{ccc}
-%         \toprule
-%         $\mathbf{\eta}$ & \textbf{Error (bits)} & \textbf{Headroom (bits)} \\
-%         \midrule
-%         $2$ & $239$ & $120$ \\
-%         $4$ & $288$ & $71$  \\
-%         $8$ & $356$ & $3$   \\
-%         \bottomrule
-%     \end{tabular}
-% \end{table}
+Throughout this thesis we have emphasized that our implementation supports \gls{simd} packing, but nowhere in \gls{spar} is this utilized. The \texttt{server::Write} loop is the most computationally expensive part of the whole protocol. In theory, \gls{simd} packing allows the server to perform $N$ rounds simultaneously. Converting this into higher throughput, however, would likely require significant changes to the protocol. If $N$ rounds are performed then every client would presumably be encrypting, sending and partially decrypting $N$ times more data, requiring significantly higher bandwidth and RAM on the server.

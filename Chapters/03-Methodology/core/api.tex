@@ -19,17 +19,18 @@ The core library, located in the \texttt{libs/core} directory of the repository 
 
 %%
 %% OpenFHE API
-The core library is designed to seamlessly extend OpenFHE, with the aim of making it easy for developers already familiar with OpenFHE to include and use in their own projects. Specifically, OpenFHE works by initializing a \emph{cryptographic context} that holds static parameters, such as the RNS moduli $q_i$. All homomorphic operations are called through the context object. Our library preserves this pattern: the functions of \autoref{tab:main-functions} are methods on the same context object and operate directly on OpenFHE's native ciphertext types, so standard and extended operations can be freely interleaved.
+The core library is designed to seamlessly extend OpenFHE, with the aim of making it easy for developers already familiar with OpenFHE to include and use in their own projects. Specifically, OpenFHE works by initializing a \emph{cryptographic context} that holds static parameters, such as the RNS moduli $q_i$. All homomorphic operations are called through the context object. This pattern is preserved in the library: the functions of \autoref{tab:main-functions} are methods on the same context object and operate directly on OpenFHE's native ciphertext types.
 
 \begin{example}[Simple Library Usage] 
 \begin{minted}{c++}
+
 
 // Using standard OpenFHE functions 
 auto ct = cc->Encrypt(publicKey, m);
 auto ct_sqr = cc->EvalMult(ct, ct); // Result is RLWE(m*m)
 
 // Using functions provided by the IExtendedContext interface
-auto rgsw_one = cc->EncryptRGSW(publicKey, m); // RGSW(m)
-auto ct_ext = cc->EvalExternalProduct(ct, rgsw_one); // RLWE(m*m)
+auto rgsw = cc->EncryptRGSW(publicKey, m); // RGSW(m)
+auto ct_ext = cc->EvalExternalProduct(ct, rgsw); // RLWE(m*m)
 \end{minted}
 \end{example}

@@ -8,13 +8,14 @@ To avoid sequential carry propagation, we apply a well-known offset trick by add
     \varGamma = \frac{B}{2}\cdot\frac{B^{\ell} - 1}{B - 1}
 \end{equation}
 
-The second fraction is the standard mathematical identity for the sum of a finite geometric series, meaning~\eqref{eq:carry-offset} represents the $g$-decomposition of a base-$B$ number $\gamma$ where every digit is $B/2$.
+%% TODO: State \varGamma must satisfy c + \varGamma < B^{\ell} 
+The second fraction is the standard identity for the sum of a finite geometric series, meaning~\eqref{eq:carry-offset} represents the $g$-decomposition of a base-$B$ number $\gamma$ where every digit is $B/2$.
 \begin{gather*}
     \frac{B^{\ell} - 1}{B - 1} = \sum_{i=0}^{k-1} B^i = 1 + B + B^2 + \dots + B^{\ell - 1} \\
     \implies\;\; \varGamma = \sum_{i=0}^{k-1}\frac{B}{2}\cdot B^i = \langle \decomp{\gamma}{}, g \rangle
 \end{gather*}
 
-To decompose a positive integer $c \in \mathbb{Z}^{+}$ into signed digits $[d]_{B}$, we first apply the global offset to compute a shifted, non-negative integer $c' = c + \varGamma$. We then slice $c'$ into intermediate unsigned base-$B$ digits $u_i$. Because $B=2^b$ is a power of two, this extraction is performed purely via the independent bitwise \autoref{alg:bit:center}, completely bypassing sequential dependencies.
+To decompose a positive integer $c \in \mathbb{Z}^{+}$ into signed digits $[d]_{B}$, we first apply the global offset to compute a shifted, non-negative integer $c' = c + \varGamma$. We then perform unsigned digit decomposition on the shifted integer $c'$, except the standard centering \autoref{alg:bit:center} is replaced with subtracting $B/2$.
 
 %%%
 %%% Unsigned digit decomposition (optimized for B = 2^b) --- superseded by the
@@ -40,35 +41,57 @@ To decompose a positive integer $c \in \mathbb{Z}^{+}$ into signed digits $[d]_{
 %%%
 %%% Signed digit decomposition 
 %%%
-\begin{algorithm}[ht!]
-\caption[Parallel Signed Decomposition]{\protect\Call{Decompose}{$c, b, \ell$}}
-\label{alg:decomp:parallel}
-\begin{algorithmic}[1]
-    \Require Bit-length $b$ (where $B = 2^b$), decomposition parameter $\ell$, offset $\varGamma$
-    \Require Integer $c \in \mathbb{Z}$
-    \Ensure Array of $\ell$ signed digits $d = (d_0, d_1, \dots, d_{\ell-1}) \in R_{\beta}^{\ell}$ with quality $\beta = B/2$
+\iffalse
+    \begin{algorithm}[ht!]
+    \caption[Parallel Signed Decomposition]{\protect\Call{Decompose}{$c, b, \ell$}}
+    \label{alg:decomp:parallel}
+    \begin{algorithmic}[1]
+        \Require Bit-length $b$ (where $B = 2^b$), decomposition parameter $\ell$, offset $\varGamma$
+        \Require Integer $c \in \mathbb{Z}$
+        \Ensure Array of $\ell$ signed digits $d = (d_0, d_1, \dots, d_{\ell-1}) \in R_{\beta}^{\ell}$ with quality $\beta = B/2$
+        
+        \State $c' \gets c + \varGamma$ \Comment{Shift all digits to $[0, B)$}
+        \State mask $\gets \Call{LeftShift}{1, b} - 1$
+        \State half $\gets \Call{LeftShift}{1, b - 1}$
+        \Comment{Bitwise $B/2$}
     
-    \State $c' \gets c + \varGamma$ \Comment{Shift all digits to positive range [0, B)}
-    \State mask $\gets \Call{LeftShift}{1, b} - 1$
-    \State half $\gets \Call{LeftShift}{1, b - 1}$
+        \For{$i \gets 0$ \textbf{to} $\ell - 1$ \textbf{in parallel}}
+            \State $s_i \gets \Call{RightShift}{c',\; i \cdot b}$ \Comment{Remove smaller digits, dividing by $B^i$}
+            \State $u_i \gets \Call{And}{s_i,\; \text{mask}}$ \Comment{Remove larger digits, modulo $B$}
+            \State $d_i \gets u_i - half$
+            \Comment{Recenter in $[-B/2, B/2)$}
+            % \Comment{Replaces \autoref{alg:bit:center} in the unsigned carry case}
+        \EndFor
+        
+        \State\Return $d = (d_0, d_1, \dots, d_{\ell-1})$
+    \end{algorithmic}
+    \end{algorithm}
+\else
+    \begin{algorithm}[ht!]
+    \caption[Parallel Signed Decomposition]{\protect\Call{Decompose}{$c, B, \ell$} without bitwise operators}
+    \label{alg:decomp:parallel}
+    \begin{algorithmic}[1]
+        \Require Base $B$, decomposition parameter $\ell$, offset $\varGamma$
+        \Require Integer $c \in \mathbb{Z}$
+        \Ensure Array of $\ell$ signed digits $d = (d_0, d_1, \dots, d_{\ell-1}) \in R_{\beta}^{\ell}$ with quality $\beta = B/2$
+        \State $c' \gets c + \varGamma$
+        \State mask $\gets (B - 1)$
+        \For{$i \gets 0$ \textbf{to} $\ell - 1$ \textbf{in parallel}}
+            \State $s_i \gets \lfloor c' / B^i \rfloor$
+            \State $u_i \gets s_i \bmod{B}$
+            \State $d_i \gets u_i - B/2$
+        \EndFor
+        \State\Return $d = (d_0, d_1, \dots, d_{\ell-1})$
+    \end{algorithmic}
+    \end{algorithm}
+\fi
 
-    \For{$i \gets 0$ \textbf{to} $\ell - 1$ \textbf{in parallel}}
-        \State $s_i \gets \Call{RightShift}{c',\; i \cdot b}$ \Comment{Remove smaller digits}
-        \State $u_i \gets \Call{And}{s_i,\; \text{mask}}$ \Comment{Remove larger digits}
-        \State $d_i \gets \Call{And}{u_i + \text{half},\; \text{mask}} - \text{half}$
-        \Comment{\autoref{alg:bit:center}}
-    \EndFor
-    
-    \State\Return $d = (d_0, d_1, \dots, d_{\ell-1})$
-\end{algorithmic}
-\end{algorithm}
-
-As with $\Call{GetPower}{i,j}$ from \autoref{sec:getpower} the offset $\varGamma$ is calculated exactly once, when the context is first created.\footnote{Specifically the bitwise $\varGamma = (1 \ll (b-1))\cdot((2 \ll (b \ell)) - 1)/((1\ll b) - 1)$ is used, but this is slightly less human readable than \eqref{eq:carry-offset}.} 
+As with $\Call{GetPower}{i,j}$ from \autoref{alg:bv:encrypt}, the offset $\varGamma$ is calculated exactly once; when the context is first created. Because $B=2^b$ is a power of two in practice, this extraction is performed purely with the bitwise operations of \autoref{sec:bitwise}.
 
 \newpage
 Once we have a working $\Call{Decompose}{}$ function, the external product can be written as \autoref{alg:external-product}. Our implementation is functionally the same, except that it has been split into three stages for better parallelization. First, the $2k$ inverse \gls{ntt} evaluations required by the decompositions are calculated in parallel, one per tower of each of the two ciphertext elements. Second, the decompose calls are merged into the external product function, and every tower of every digit is sliced, centered and transformed independently, giving $2k\ell\cdot k$ parallel tasks and as many forward \gls{ntt} calls. Finally, the inner product is accumulated over the $2k$ pairs of ciphertext component and tower, each thread summing its own $2k\ell$ terms with no reduction across threads.
 
-The width of every stage depends on $k$ as well as $\ell$, so a parameter set with more \gls{rns} primes exposes proportionally more parallelism.
+The width of every stage depends on $k$ as well as $\ell$, so a parameter set with more \gls{rns} moduli exposes proportionally more parallelism.
 
 %%%
 %%% External Product

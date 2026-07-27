@@ -1,5 +1,5 @@
 \subsection{RGSW}
-The gadget techniques above are used in the \gls{gsw} scheme~\cite{cryptoeprint:2013/340} and its ring variants~\cite{cryptoeprint:2014/816, cryptoeprint:2018/421}, where the ciphertext itself is built around a gadget. \gls{gsw} came with a homomorphic product between two of its ciphertexts, and TFHE later added an asymmetric product between an \gls{rlwe} and an \gls{rgsw} ciphertext~\cite{cryptoeprint:2016/870, cryptoeprint:2018/421}. This subsection defines the \gls{rgsw} ciphertext and both products.
+The techniques above are used in the \gls{gsw} scheme~\cite{cryptoeprint:2013/340} and its ring variants~\cite{cryptoeprint:2014/816, cryptoeprint:2018/421}, where the ciphertext itself is built around a gadget. \gls{gsw} came with a homomorphic product between two of its ciphertexts, and TFHE later added an asymmetric product between an \gls{rlwe} and an \gls{rgsw} ciphertext~\cite{cryptoeprint:2016/870, cryptoeprint:2018/421}. This subsection defines the \gls{rgsw} ciphertext and both products.
 
 \begin{definition}[Gadget Matrix]
     \label{def:gadget-matrix}
@@ -11,7 +11,7 @@ The gadget techniques above are used in the \gls{gsw} scheme~\cite{cryptoeprint:
 \end{definition}
 
 \begin{definition}[RGSW Ciphertext]
-    Given a gadget matrix $G = I_2 \otimes g$, let $Z \in R_Q^{2\ell\times 2}$ be a matrix whose $2\ell$ rows are fresh encryptions $\Call{RLWE}{0}$. An \gls{rgsw} encryption of $\mu \in R_Q$ is
+    Given a gadget matrix $G = I_2 \otimes g$, let $Z \in R_Q^{2\ell\times 2}$ be a matrix whose $2\ell$ rows are fresh $\Call{RLWE}{0}$ encryptions. An \gls{rgsw} encryption of $\mu \in R_Q$ is
     \begin{equation}
         \label{def:rgsw}
         C = Z + \mu\cdot G \in R_Q^{2\ell\times 2}
@@ -31,7 +31,7 @@ with quality $\|G^{-1}(x)\| \leq \beta$. No particular decomposition is prescrib
     \label{def:prod:external}
     Let $x \in R_Q^2$ be an \gls{rlwe} encryption of $m \in R_t$, let $C \in R_Q^{2\ell\times 2}$ be an \gls{rgsw} encryption of $\mu \in R_Q$ under the same secret key, and let $G^{-1}$ be a gadget decomposition satisfying \eqref{eq:gadget-matrix-property}. The {external product} is defined as
     \begin{align}
-        \boxdot: \Call{RLWE}{} \times \Call{RGSW}{} &\longrightarrow \Call{RLWE}{} \nonumber \\
+        \boxdot: \Call{RLWE}{} \times \Call{RGSW}{} &\longmapsto \Call{RLWE}{} \nonumber \\
         \label{def:extprod}
         (x, C) &\longmapsto x \boxdot C = G^{-1}(x) \cdot C,
     \end{align}
@@ -73,7 +73,6 @@ with quality $\|G^{-1}(x)\| \leq \beta$. No particular decomposition is prescrib
     The two noise terms of \eqref{eq:extprod-expansion} behave very differently, as detailed in \autoref{appendix:asymmetry}. The term $G^{-1}(x)\cdot Z \leq (a\cdot s + \beta\sum_{i=0}^{2\ell-1} \epsilon_i,\; a)$ amplifies the masking errors of the \gls{rgsw} operand by the decomposition quality. The precision term $e$ is scaled by $\mu$, which is why $\mu$ is typically constrained to $\{0,1\}$ when an inexact gadget is used. The error of the \gls{rlwe} operand, by contrast, is never amplified: it is carried into the result scaled only by $\mu$. This asymmetry was observed early on~\cite{cryptoeprint:2013/541, cryptoeprint:2014/094, cryptoeprint:2014/816}, and makes \gls{gsw}-style ciphertexts particularly suited to evaluating long chains of products. The noise stays low as long as the right operand is fresh, or at least has a small $\|\epsilon\|_\infty$, regardless of the error already accumulated on the left.
 \end{remark}
 
-\newpage
 The external product leaves the \gls{rgsw} operand untouched and returns an \gls{rlwe} ciphertext, so it cannot be chained: its output is not of the right type to serve as either operand again. The original \gls{gsw} construction therefore defined its product directly between two of its own ciphertexts~\cite{cryptoeprint:2013/340}. That product needs no separate machinery here. Every row of an \gls{rgsw} ciphertext is an \gls{rlwe} ciphertext, so applying the external product row by row multiplies the whole matrix by the same message and returns an \gls{rgsw} ciphertext again.
 
 \begin{definition}[Internal Product]

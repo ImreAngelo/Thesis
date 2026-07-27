@@ -1,28 +1,26 @@
 \section{Noise Analysis}
 \label{sec:results:noise}
-This section presents the noise growth of the implemented functions, reported throughout as the max-norm $\|\epsilon\|_\infty = \max_i\{\epsilon_i\}$. The absolute magnitude of the error is of little interest on its own; what matters is how many bits of the modulus it occupies. Every plot in this section is therefore semi-logarithmic with a base-2 $y$ axis, so that a vertical distance reads directly as a number of bits.
+This section presents the noise growth of the implemented functions, reported throughout as the max-norm $\|\epsilon\|_\infty = \max_i\{\epsilon_i\}$. The absolute magnitude of the error is of little interest on its own; what matters is how many bits of the modulus it occupies. Every plot in this section is therefore semi-logarithmic with a base-2 $y$ axis, such that a vertical distance reads directly as a number of bits.  %% TODO: Rewrite
 
 \subsection{Core Library}
-For the external product, we apply $x_i = x_{i-1} \boxdot A_i$ where $x_0 = \Call{Encrypt}{1}$ using fresh encryptions $A_i = \Call{RGSW}{1}$ each iteration.
+We analyze the noise growth in the \gls{rgsw} products by measuring the noise after each iteration of the recurrence relation $x_i = x_{i-1} \cdot A_i$ where $\cdot$ represents the external or internal product. The initial $x_0 = \Call{Encrypt}{1}$ is an \gls{rlwe} in the external product $\boxdot$ and an \gls{rgsw} in the internal product $\boxtimes$. A fresh \gls{rgsw} $A_i = \Call{RGSW}{1}$ is supplied every iteration. Due to the asymmetry discussed in~\autoref{rem:extprod-asymmetry} making the noise additive instead of multiplicative, we expect to see linear noise growth with repeated applications of \gls{rgsw} products as long as the right operand remains fresh.
 
 \subsubsection{External Product}
-Due to the asymmetry discussed in~\autoref{rem:extprod-asymmetry} making the noise additive instead of multiplicative, we expect to see linear noise growth with repeated applications of the external product as long as the \gls{rgsw} remains fresh.
+The measured growth is linear in the length of the chain, and the error gains only a few bits across the full chain at every value of $\ell$. Increasing $\ell$ shifts the whole series downwards without changing its slope.
 
 \input{Figures/Plots/bv-external-product.tex}
 
-The measured growth is linear in the length of the chain, and the error gains only a few bits across the full chain at every value of $\ell$. Increasing $\ell$ shifts the whole series downwards without changing its slope.
-
 \subsubsection{Internal product}
-For the internal product, we apply $X_i = X_{i-1} \boxtimes A_i$ where $X_0 = \Call{RGSW}{1}$ using fresh encryptions $A_i = \Call{RGSW}{1}$ each iteration.
+Again we see exactly what we expect; the growth is linear in the length of the chain and shifts downwards with $\ell$. The amount of noise added per product is substantially larger than for the external product.
 
 % \item Maybe: show max chain length if RHS is accumulated noise
 \input{Figures/Plots/bv-internal-product.tex}
 
-Again we see exactly what we expect; the growth is linear in the length of the chain and again shifts downwards with $\ell$. Both the starting error and the amount added per product are substantially larger than for the external product.
-
-\newpage
+% \newpage
 \subsection{sPAR}
-The protocol was run end-to-end under the multi-party context using OpenFHE's \texttt{NOISE\_FLOODING\_MULTIPARTY} mode. With the settings from \autoref{tab:bench:params}, we were only able to support $\eta = 4$ users. Increasing $\ell$ allows more users, but also degrades the performance significantly. \autoref{tab:noise:multiparty} lists the largest error found in the message matrix $L$ once every client has written. Decryption fails once the error reaches $\lfloor Q/2 \rfloor$, which is $359$ bits at the parameters of \autoref{tab:bench:params}.
+The protocol was run end-to-end under the multi-party context using OpenFHE's \texttt{NOISE\_FLOODING\_MULTIPARTY} mode. We measured the max-norm noise in every slot of the $L$ matrix after 1 full round, and consider only the largest of these. The mean average \emph{largest max-norm error} of 3 runs are presented in \autoref{tab:noise:multiparty}.
+
+% We ran the test 3 times and present the mean average max-norm error of the entries in \autoref{tab:noise:multiparty}. % With the parameters of \autoref{tab:bench:params}, we were only able to support $\eta = 8$ users. Increasing $\ell$ allows more users, but also degrades the performance significantly. % Decryption fails once the error exceeds $\lfloor Q/2 \rfloor = 419$ bits at the current parameters.
 
 \begin{table}[H]
     \caption{Largest number of error bits in $L$ after 1 full round.}
@@ -30,20 +28,21 @@ The protocol was run end-to-end under the multi-party context using OpenFHE's \t
     \centering
     \begin{tabular}{cccc}
         \toprule
-        & \multicolumn{3}{c}{\textbf{Error (in bits)}} \\
+        & \multicolumn{3}{c}{\textbf{Error bits}} \\
         \cmidrule(lr){2-4}
         $\mathbf{\eta}$ & $\ell = 2$ & $\ell = 3$ & $\ell = 4$ \\
         \midrule
-        $2$  & $245$ & $221$ & $189$ \\
-        $4$  & $358$ & $256$ & $216$ \\
-        $8$  &  ---  & $294$ & $*$ \\
+        $2$  & $259.3$ & x & x \\ % $290$ & $245$ & $243$
+        $4$  & $306.3$ & x & x \\ % $292$ & $293$ & $334$
+        $8$  & $394.0$ & x & x \\ % $382$ & $419$ & $381$
         \bottomrule
     \end{tabular}
 \end{table}
 
-We were unable to test $\eta \geq 16$ and $\ell = 4$ at $\eta = 8$ both due to the amount of RAM available to the test environment and time constraints (see \autoref{tab:bench:full}). However, we estimate the number of users supported at $\ell = 3$ is $\eta < 32$, by considering the average increase in error from $\eta \to 2\eta$ in the table above. 
+\newpage
+Due to the RAM configuration of the testing environment and per-run time constraints (see \autoref{tab:bench:full}), we were unable to test $\eta > 8$. However, we are able to estimate that each user adds approximately $23$ bits of error under the parameters from \autoref{tab:bench:params}. Decryption fails once the error exceeds $\lfloor Q/2 \rfloor = 419$ bits. Under this estimate we are able to support $\eta = 9$ users, though this leaves only 3 bits of headroom for random variance. The number of users that can \emph{reliably} be supported is therefore $\eta = 8$. % Increasing $\ell$ or $k$ naturally increases the number of users supported, but significantly decreases performance.
 
-Initially we suspected this number of users to be artificially low due to the large $t$. Since the $h \gets I_{i,k}\boxtimes\mathsf{notHasWritten}\boxtimes z_{i,d}$ assignment has only a single fresh ciphertext, $z_{i,d}$, a ``dirty'' ciphertext necessarily must appear on the right hand side in one of the internal products, breaking the noise asymmetry from \autoref{rem:extprod-asymmetry}. However, running the same test with $t=2^8$ only increased the headroom by a few bits.
+Initially we suspected this number to be artificially low due to the large $t$. Since the $h \gets I_{i,k}\boxtimes\mathsf{notHasWritten}\boxtimes z_{i,d}$ assignment has only a single fresh ciphertext, $z_{i,d}$, a ``dirty'' ciphertext necessarily must appear on the right hand side in one of the internal products, breaking the noise asymmetry from \autoref{rem:extprod-asymmetry}. However, running the same test with $t=2^8$ decreased the noise by a negligible amount.
 
 \input{Figures/Plots/spar-write}
 

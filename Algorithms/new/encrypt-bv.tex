@@ -2,8 +2,9 @@
 \caption{Parallel RGSW-BV Encryption}
 \label{alg:bv:encrypt}
 \begin{algorithmic}[1]
-\Require Basis $\mathcal{B}_Q$, decomposition parameter $\ell$, and $B^i \bmod q_j\;\forall\;i\in [0, \ell),\;j\in[0,k)$
-\Require RNS polynomial $[\mu]^{\mathsf{NTT}}_{\mathcal{B}_Q} \in \mathbb{Z}_{q_0} \times \dots \times  \mathbb{Z}_{q_{k-1}}$
+\Require Basis $\mathcal{B}_Q$, decomposition parameter $\ell$, and base $B$
+% \Require Pre-computed $B^i \bmod q_j\;\forall\;i\in [0, \ell),\;j\in[0,k)$
+\Require Evaluation form polynomial $[\mu]^{\mathsf{NTT}}_{\mathcal{B}_Q} \in \mathbb{Z}_{q_0} \times \dots \times  \mathbb{Z}_{q_{k-1}}$
 \Ensure $\Call{RGSW}{\mu}$
 \State Initialize empty array $C$ with $2k\ell$ slots
 \For{$r \gets [0, k\ell)$ \textbf{in parallel}}

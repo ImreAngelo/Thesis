@@ -5,7 +5,7 @@ The benchmarks were run on an AMD Ryzen 5 5600X CPU (6-core{@}3.7GHz) with 32Gb 
 OpenFHE version 1.5.1 and the code is compiled using GCC v16.1 with all available compiler optimizations, including \texttt{-O3} and \texttt{-march=native}, except for the AVX512 instruction set (see~\autoref{sec:avx512}). % All benchmarks were repeated 10 times and the mean times were recorded and presented in the tables below. Coefficient of variation was strictly below $2.5\%$ for all the runs. % TODO:: MAKE SURE THIS IS COVERED IN METHODOLOGY
 
 \subsection{Core Library}
-We present the measured benchmarks in \autoref{tab:bench:rgsw} and extrapolate numbers for $T=12$ using the method described in \autoref{sec:amdahl}. The fitted parameters and the resulting estimates are listed in \autoref{tab:bench:amdahl}. All three fits give $R^2 \geq 0.994$.
+We present the measured benchmarks in \autoref{tab:bench:rgsw} and extrapolate numbers for $T=14$ using the method described in \autoref{sec:amdahl}. The fitted parameters and resulting estimates are listed in \autoref{tab:bench:amdahl}. All three fits give $R^2 \geq 0.994$.
 
 %% TODO: Read from JSON
 % Encrypt RGSW        & \num{\jsonms{\rgswData}{benchmarks[0].cpu_time}}~ms \\
@@ -13,6 +13,22 @@ We present the measured benchmarks in \autoref{tab:bench:rgsw} and extrapolate n
 % Internal Product    & \num{\jsonms{\rgswData}{benchmarks[2].cpu_time}}~ms \\
 
 %% Encrypt RGSW, external product, internal product
+%% k = 6, ell = 2
+% \begin{table}[H]
+%     \caption{Mean CPU time in milliseconds spent per operation over $T$ threads}
+%     \label{tab:bench:rgsw}
+%     \centering
+%     \begin{tabular}{lcccccc}
+%         \toprule
+%         \textbf{Operation}  & \textbf{$T = 1$} & \textbf{$T = 2$} & \textbf{$T = 3$} & \textbf{$T = 4$} & \textbf{$T = 5$} & \textbf{$T = 6$} \\
+%         \midrule
+%         Encrypt RGSW        & \num{123}  & \num{64.8} & \num{52.9} & \num{41.4} & \num{31.8} & \num{32.5} \\
+%         External Product    & \num{36.9} & \num{19.8} & \num{14.8} & \num{12.2} & \num{10.4} & \num{10.6} \\
+%         Internal Product    & \num{741}  & \num{395}  & \num{281}  & \num{208}  & \num{168}  & \num{176}  \\
+%         \bottomrule
+%     \end{tabular}
+% \end{table}
+
 \begin{table}[H]
     \caption{Mean CPU time in milliseconds spent per operation over $T$ threads}
     \label{tab:bench:rgsw}
@@ -21,15 +37,15 @@ We present the measured benchmarks in \autoref{tab:bench:rgsw} and extrapolate n
         \toprule
         \textbf{Operation}  & \textbf{$T = 1$} & \textbf{$T = 2$} & \textbf{$T = 3$} & \textbf{$T = 4$} & \textbf{$T = 5$} & \textbf{$T = 6$} \\
         \midrule
-        Encrypt RGSW        & \num{123}  & \num{64.8} & \num{52.9} & \num{41.4} & \num{31.8} & \num{32.5} \\
-        External Product    & \num{36.9} & \num{19.8} & \num{14.8} & \num{12.2} & \num{10.4} & \num{10.6} \\
-        Internal Product    & \num{741}  & \num{395}  & \num{281}  & \num{208}  & \num{168}  & \num{176}  \\
+        Encrypt RGSW        & \num{219}  & \num{116}  & \num{88.1} & \num{73.5} & \num{61.0} & \num{63.4} \\
+        External Product    & \num{65.9} & \num{33.8} & \num{23.8} & \num{20.6} & \num{17.9} & \num{19.0} \\
+        Internal Product    & \num{1795} & \num{955}  & \num{724}  & \num{511}  & \num{460}  & \num{395}  \\
         \bottomrule
     \end{tabular}
 \end{table}
 
 \begin{table}[H]
-    \caption{Fitted serial time $\beta_0$, parallel work $\beta_1$, serial fraction $f$ and extrapolated execution time at $T = 12$}
+    \caption{\color{red} Fitted serial time $\beta_0$, parallel work $\beta_1$, serial fraction $f$ and extrapolated execution time at $T = 12 \to 14$ with new numbers} %% TODO: Redo fitting to numbers above
     \label{tab:bench:amdahl}
     \centering
     \begin{tabular}{lcccc}
@@ -43,23 +59,23 @@ We present the measured benchmarks in \autoref{tab:bench:rgsw} and extrapolate n
     \end{tabular}
 \end{table}
 
-\newpage
+% \newpage
 \subsection{sPAR}
 \label{sec:results:bench:spar}
-Each function in~\autoref{tab:bench:full} except \texttt{server::Decrypt} is invoked once per client every round, so the times below are per call. The \texttt{client} functions would in practice run in perfect parallel, as each user encrypts and partially decrypts independently.
+Each function in~\autoref{tab:bench:full} except \texttt{Server::Decrypt} is invoked once per client every round, so the times below are per call. The \texttt{client} functions would in practice run in perfect parallel, as each user encrypts and partially decrypts independently.
 
 \begin{table}[H]
     \caption{Measured computation time per call of the sPAR functions, 6 threads.}
     \label{tab:bench:full}
     \centering
     \begin{tabular}{ccccc}
-        \toprule
-        $\mathbf{\eta}$ & \textbf{\texttt{Encrypt}} & \textbf{\texttt{Write}} & \textbf{\texttt{Partial dec.}} & \textbf{\texttt{Final dec.}} \\
+        \toprule %% TODO: Multicolumn "client \\ decrypt"
+        $\mathbf{\eta}$ & \small\textbf{\Call{Client::Encrypt}{}} & \small\textbf{\Call{Server::Write}{}} & \small\textbf{\Call{Client::Decrypt}{}} & \small\textbf{\Call{Server::Decrypt}{}} \\
         \midrule
-        $2$  &      $201.26$ ms &   $8.06798$ s &     $70.3$ ms &  $\num{5.02677}$ ms \\
-        $4$  &      $413.01$ ms &   $15.9965$ s &   $106.28$ ms &  $\num{10.783}$ ms \\
-        $8$  &      $843.13$ ms &   $33.0402$ s &   $184.07$ ms &  $\num{28.1619}$ ms \\
-        $16$ &     $1648.91$ ms &    $67.368$ s &   $312.84$ ms &  $\num{60.5488}$ ms \\
+        $2$  &  \num{773.664}~ms    &  \num{15.0941}~s  &  \num{54.4199}~ms  &  \num{11.3074}~ms \\
+        $4$  &  \num{2989.03}~ms  &  \num{29.3706}~s  &  \num{211.852}~ms  &  \num{27.0575}~ms \\
+        $8$  &  \num{11911.3}~ms  &  \num{58.647}~s   &  \num{837.141}~ms  &  \num{64.8635}~ms \\
+        % $16$ &     $1648.91$ ms &    $67.368$ s &   $312.84$ ms &  $\num{60.5488}$ ms \\
         \bottomrule
     \end{tabular}
 \end{table}
