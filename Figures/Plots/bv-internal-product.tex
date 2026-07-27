@@ -23,7 +23,7 @@
     \begin{semilogyaxis}[
         noiseaxis,
         log basis y=2,
-        xmin=0, xmax=1000,
+        xmin=0, xmax=300,
         xlabel={Chain length},
         ylabel={Error $\|\epsilon\|_\infty$},
         legend pos=south east,
@@ -33,14 +33,12 @@
     ]
         % ---------- Scatter plots ----------
         % \addplot[only marks, mark=*, mark size=1pt, color=gaussblue]
-        %     table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv_small.csv};
-        % \addplot[only marks, mark=*, mark size=1pt, color=gaussblue]
         %     table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv_1.csv};
-        \addplot[only marks, mark=*, mark size=1pt, color=hpsgreen]
+        \addplot[only marks, mark=*, mark size=.5pt, color=hpsgreen]
             table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv_2.csv};
-        \addplot[only marks, mark=*, mark size=1pt, color=canonorange]
+        \addplot[only marks, mark=*, mark size=.5pt, color=canonorange]
             table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv_3.csv};
-        \addplot[only marks, mark=*, mark size=1pt, color=gaussblue]
+        \addplot[only marks, mark=*, mark size=.5pt, color=gaussblue]
             table[col sep=comma, x=n, y=noise] {Data/Noise/InternalProd/bv_4.csv};
             
         % ---------- Regression lines ----------
