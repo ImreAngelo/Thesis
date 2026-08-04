@@ -15,7 +15,7 @@
 \vfill
 OpenFHE does not expose \gls{rgsw} or the external and internal products through its public API. Running \gls{spar} on BGV therefore meant building the products before the protocol.
 
-This work produced two independent artefacts. The \corelib{} library extends OpenFHE~\cite{cryptoeprint:2022/915} with \gls{rgsw} encryption and both products over an \gls{rns} gadget, and is independent from \gls{spar}; any OpenFHE project needing \gls{rgsw} arithmetic can use it as it stands. The \clientlib{} and \serverlib{} libraries implement the protocol on top of it, reaching \corelib{} only through an abstract interface, so a different backend providing the same API would serve equally well.
+This work produced some artifacts in the form of reusable C++ libraries. The \corelib{} library extends OpenFHE~\cite{cryptoeprint:2022/915} with \gls{rgsw} encryption and both products over an \gls{rns} gadget, and is independent from \gls{spar}; any OpenFHE project needing \gls{rgsw} arithmetic can use it as it stands. The \clientlib{} and \serverlib{} libraries implement the protocol on top of it, reaching \corelib{} only through an abstract interface, so a different backend providing the same API would serve equally well.
 
 Section \ref{sec:impl:core} describes the \corelib{} library, from the gadget instantiation and the parallel decomposition through to the two products. Section \ref{sec:impl:spar} describes our instantiation of \gls{spar} and where it departs from the original specification. The final section describes the harness that produces the measurements of \cref{chp:results} --- what is benchmarked, how noise is extracted, and how thread scaling is extrapolated beyond the cores available.
 \newpage

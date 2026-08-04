@@ -2,7 +2,7 @@
 \section{Code Structure}
 The source code is published in a git repository~\cite{gitrepo} as three C++ libraries under \texttt{libs/}, each a separate build target with its own public header directory. The \corelib{} library extends OpenFHE with \gls{rgsw} ciphertexts and related products. The \gls{spar} protocol is split into separate \clientlib{} and \serverlib{} libraries, so that client and server binaries can be compiled independently.
 
-We highlight that the \corelib{} is entirely independent of \gls{spar}, making it reusable in any OpenFHE project that needs RGSW products. The \clientlib{} and \serverlib{} consume the \corelib{} library through an abstract interface.
+We highlight that the \corelib{} is entirely independent of \gls{spar}, making it reusable in any OpenFHE project that needs \gls{rgsw} products. The \clientlib{} and \serverlib{} consume the \corelib{} library through an abstract interface. By making this distinction between a front-facing interface and backend implementation, a project using the \corelib{} library does not need to care about how the \gls{rgsw} operations are implemented; so long as the implementation provides the functionality promised by the interface. This allows a project to swap out backends mid-development or to experiment with different backends without changing any of the projects own code.
 
 \begin{figure}[!htb]
     \centering
@@ -11,5 +11,6 @@ We highlight that the \corelib{} is entirely independent of \gls{spar}, making i
     \label{fig:lib-structure}
 \end{figure}
 
-%% [High Priority] TODO: Fill out this section or (re)move it
-To ensure our results are replicable, a \texttt{make test} command runs the full test suite and noise measurements, while \texttt{make bench} runs the benchmarks that produced the measurements reported in \autoref{chp:results}.
+%% TODO: Maybe cut this section, doesn't really add anything to the thesis itself
+%% TODO: \gls{cli}
+For convenience, and to ensure our results are easily replicable, a number of CLI commands are included in the repository. Most important is the ``\texttt{make test}'' command which runs all the correctness tests, and the ``\texttt{make bench}'' command which runs all the benchmarks that produced the measurements reported in \autoref{chp:results}. A variety of CLI flags and additional commands are also available, detailed in the repository's readme file \cite{gitrepo}.

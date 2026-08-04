@@ -21,7 +21,7 @@ Again we see exactly what we expect; the growth is linear in the length of the c
 
 % \newpage
 \subsection{sPAR}
-The protocol was run end-to-end in the multi-party context using OpenFHE's \texttt{NOISE\_FLOODING\_MULTIPARTY} mode. The max-norm noise was measured in every slot of the $L$ matrix after 1 full round, and the maximum $\|\varepsilon\|_\infty = \max_{\epsilon\in L}\{\|\epsilon\|_\infty\}$ over the entire matrix was recorded. The mean average of 3 runs are presented in the table below.
+The protocol was run end-to-end in the multi-party context using OpenFHE's \texttt{NOISE\_FLOODING\_MULTIPARTY} mode. The max-norm noise was measured in every slot of the $L$ matrix after 1 full round, and the maximum $\|\varepsilon\|_\infty = \max_{\epsilon\in L}\{\|\epsilon\|_\infty\}$ over the entire matrix was recorded. The mean average of 5 runs are presented in the table below.
 
 % We ran the test 3 times and present the mean average max-norm error of the entries in \autoref{tab:noise:multiparty}. % With the parameters of \autoref{tab:bench:params}, we were only able to support $\eta = 8$ users. Increasing $\ell$ allows more users, but also degrades the performance significantly. % Decryption fails once the error exceeds $\lfloor Q/2 \rfloor = 419$ bits at the current parameters.
 
@@ -30,32 +30,28 @@ The protocol was run end-to-end in the multi-party context using OpenFHE's \text
     \caption{Largest number of error bits in $L$ after 1 full round.}
     \label{tab:noise:multiparty}
     \centering
-    \begin{tabular}{cccc}
+    \begin{tabular}{ccc|cc}
         \toprule
-        & \multicolumn{3}{c}{\textbf{Error bits}} \\
-        \cmidrule(lr){2-4}
-        $\mathbf{\eta}$ & $\ell = 2$ & $\ell = 3$ & $\ell = 4$ \\
+        & \multicolumn{2}{c}{$\ell = 2$}
+        & \multicolumn{2}{c}{$\ell = 3$} \\
+        \cmidrule(lr){2-5}
+        $\mathbf{\eta}$ & \textbf{Error (bits)} & \textbf{Std.Dev.} $\sigma$ & \textbf{Error (bits)} & \textbf{Std.Dev.} $\sigma$ \\
         \midrule
-        $2$  & $259.3$ & x & x \\ % 290 & 245 & 243 & 240
-        $4$  & $306.3$ & x & x \\ % 292 & 293 & 334 & 290
-        $8$  & $394.0$ & x & x \\ % 382 & 419 & 381 & 419
-        $16$ &   ---   & x & x \\ % crash x 3 & decryption failure   
+        $2$  & $261.4$ & $23.0$ & x & y \\ % (290 + 245 + 243 + 240 + 289)/5 = 261.4 
+        $4$  & $299.6$ & $17.3$ & x & y \\ % (292 + 293 + 334 + 290 + 289)/5 = 299.6 --> 38.2/2 = 19.1
+        $8$  & $387.6$ & $33.9$ & x & y \\ % (382 + 419 + 381 + 419 + 337)/5 = 387.6 --> 88/4 = 22 --> Average = 20.55
+        $16$ &   ---   &   ---   & x & y \\ % decryption failure
         \bottomrule
     \end{tabular}
 \end{table}
 
 %% L = 3
-%     226, 190, 192
-%     292, 225, 262
-% failure, 261, 362
-% -------, 261, 
+%     226,   % (190 + 192 + 187 + ) = 189.666666667
+%     292,   % (225 + 262 + 260 + ) = 249            --> 59.333333333/2 = 29
+% failure,   % (261 + 362 + 255 + ) = 292.666666667  --> 50/4 = 12.5
+% -------,   % (261 + 332 + xxx) = 
 
-\newpage
-{
-%% [Top Priority] TODO: Finish the tests at ell = 3 and change this block to reflect the results (8 users supported at current parameters, increasing ell increases the number of users by X amount but also makes the code slower).
-\color{red}
-Due to the slow execution time (see \autoref{tab:bench:full}), we chose not to run this test with $\eta > 16$ for the non-baseline parameters $\ell > 2$. However, we are able to estimate that each user adds approximately $23$ bits of error under the parameters from \autoref{tab:bench:params}. Decryption fails once the error exceeds $\log\lfloor Q/2 \rfloor = 419$ bits. Under this estimate we are able to support $\eta = 9$ users, though this leaves only 3 bits of headroom for random variance. The number of users that can \emph{reliably} be supported is therefore $\eta = 8$. % Increasing $\ell$ or $k$ naturally increases the number of users supported, but significantly decreases performance.
-}
+We were unable to run the protocol at $\eta=16$ users without producing decryption failures. Decryption fails once the error exceeds $\lfloor Q/2 \rfloor = 419$ bits, and we can extrapolate that each user adds approximately $20.55$ bits of noise. On paper, then, the protocol supports $\eta = 9$ users, though this leaves only 3 bits of room for random variance. The number of users that can \emph{reliably} be supported is therefore $\eta = 8$. Increasing the decomposition parameter improves the noise as expected, but also increases the runtime of the algorithm by the same factor.
 
 Initially we suspected this number to be artificially low due to the large $t$, as BGV encodes the error in the most significant bits ($\epsilon = t\epsilon_{rlwe}$). Additionally, $h \gets I_{i,k}\boxtimes\mathsf{notHasWritten}\boxtimes z_{i,d}$ is created from a single fresh ciphertext, $z_{i,d}$, so a ``dirty'' ciphertext necessarily must appear on the right hand side in one of the internal products, breaking the freshness assumption in \cref{rem:extprod-asymmetry}. However, running the same test with $t=2^8$ decreased the noise by a negligible amount.
 

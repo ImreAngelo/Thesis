@@ -7,7 +7,7 @@
 \label{alg:spar:homplacing}
 \begin{algorithmic}[1]
     \Require Encrypted value $V_r$
-    \Require Encrypted indices $A_0, A_1, A_2$, where $A_d$ is $\log\eta$ encrypted bits $\{c_{d,0}, \dots, c_{d,\log\eta - 1}\}$
+    \Require Encrypted indices $A_d$ of $\log\eta$ encrypted bits $\{c_{d,0}, \dots, c_{d,\log\eta - 1}\}$
     \Require Server state matrices $L_{\eta\times3}$ and $I_{\eta\times3}$
     \Ensure Encrypted boolean indicating whether the value was placed
     \State $z_{i,d} := 0$ for $i \in [0, \eta),\; d \in \{0, 1, 2\}$
@@ -22,15 +22,16 @@
             \EndFor
         \EndFor
         \State $z_{i,d} := b_{\eta - 1 + i}$ for $i \in [0, \eta)$
-        \Comment{Leaves: indicator vector of $a_d$}
+        % \Comment{Leaves: indicator vector of $a_d$}
     \EndFor
     \State $\mathsf{hasWritten} := 0$
     \For{$d \gets \{0, 1, 2\}$}
         \For{$k \gets \{0, 1, 2\}$}
-            \Comment{Slots per bucket}
+            % \Comment{Slots per bucket}
             \For{$i \gets [0, \eta)$}
                 \State $h := z_{i,d}\cdot I_{i,k}\cdot(1 - \mathsf{hasWritten})$
                 \State $L_{i,k} := L_{i,k} + h\cdot V_r$
+                \Comment{Write value}
                 \State $I_{i,k} := I_{i,k} - h$
                 \Comment{Mark the slot as used}
                 \State $\mathsf{hasWritten} := \mathsf{hasWritten} + h$
