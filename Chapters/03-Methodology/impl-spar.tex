@@ -13,20 +13,12 @@ Our instantiation of \gls{spar} can be considered the \emph{minimal} version of 
 %     \item This was done so that the functionality is not tightly coupled to the benchmarking without spending time implementing actual communication which would require additional work: serializing data, error handling, and coordinating multiple machines. % Basically: justify not having a compiled executable "server" and "client"
 % \end{itemize}
 
-The client-side functions require no new cryptography. The \texttt{client::Encrypt} function produces the message ciphertext and the index vectors under the joint key, and \texttt{client::Decrypt} produces a partial decryption; both are thin wrappers around the multi-party interface of OpenFHE described in \autoref{sec:mpfhe}, as is the server's final decryption \texttt{server::Decrypt}. Hence we focus on the write step, 
-
-The weight of this section therefore falls on the write step, which is the only part of the protocol that required new machinery.
+The client-side functions require no new cryptography. The \texttt{client::Encrypt} function produces the message ciphertext and the index vectors under the joint key, and \texttt{client::Decrypt} produces a partial decryption; both are thin wrappers around the multi-party interface of OpenFHE described in \autoref{sec:mpfhe}, as is the server's final decryption \texttt{server::Decrypt}. The weight of this section therefore falls on the write step, which is the only part of the protocol that required new machinery.
 
 One consequence of leaving the placement to the clients is visible in what they transmit. Since the server never evaluates the binary tree, clients send the full $\eta$-entry indicator vectors rather than the $\log\eta$ encrypted index bits, which costs bandwidth but no computation. We consider bandwidth out of scope, and note only that the tree would otherwise run on the server, where it is parallel across buckets.
 
 \subsection{Server Write Step}
-Function names in this chapter follow a \texttt{namespace::function} convention matching the source code \cite{gitrepo}, so \serverWrite{} denotes the implementation of the phase presented as \emph{Server: Write} in \autoref{sec:spar:protocol}. It deviates slightly from~\cite[Algorithm 2]{cryptoeprint:2025/860}.
-
-While the authors of 
-
-{
-\color{purple}
-The first change is structural. The placement of \cite[Algorithm 2]{cryptoeprint:2025/860} is split out of the write step and moved to the client, so \serverWrite{} receives the indicator vectors ready-made and its own body is the second of the paper's two loops.
+Function names in this chapter follow a \texttt{namespace::function} convention matching the source code \cite{gitrepo}, so \serverWrite{} denotes the implementation of the phase presented as \emph{Server: Write} in \autoref{sec:spar:protocol}. It deviates slightly from~\cite[Algorithm 2]{cryptoeprint:2025/860}. The first change is structural. The placement of \cite[Algorithm 2]{cryptoeprint:2025/860} is split out of the write step and moved to the client, so \serverWrite{} receives the indicator vectors ready-made and its own body is the second of the paper's two loops.
 
 The remaining changes concern the homomorphic operations themselves. The paper writes $\mathsf{HomPlacing}^*$ for a generic homomorphic multiplication, which keeps it independent of any scheme; our version is the opposite, and names the specific product used at every step. Typing the operands as in \autoref{sec:spar:requirements} shows that the external product alone does not cover the circuit. Both $\mathsf{notHasWritten}$ and $I_{i,k}$ are \gls{rgsw} ciphertexts carrying state accumulated by earlier iterations, so the two products that form $h$ must be internal products, and only the application of $h$ to the message is external. Where the two products of $h$ are formed, the order of the operands is chosen so that the accumulated flag stays on the left and the freshly received $z_{i,d}$ enters on the right, which is the favourable case of \autoref{rem:extprod-asymmetry}.
 
@@ -35,7 +27,7 @@ Inverting the flag saves one operation per iteration. The paper multiplies by $(
 Finally, the initial state is not encrypted. The matrices $L$ and $I$, and the flag $\mathsf{notHasWritten}$, are constructed in the correct ciphertext form but with zeroed polynomials in place of a mask, which provides no security on its own. This is harmless because the initial state is public knowledge, and after a single product every entry is an ordinary ciphertext again. Avoiding the encryptions makes the setup considerably cheaper and starts the computation at a marginally lower noise level.
 
 The operands of \autoref{alg:spar:write} are typed accordingly. The indicator entries $z_{i,d}$, the availability entries $I_{i,k}$ and the flag $\mathsf{notHasWritten}$ are all $\Call{RGSW}{m}$ with $m \in \{0,1\}^N$, while the accumulator entries $L_{i,k}$ and the message $V_r$ are $\Call{RLWE}{m}$ with $m \in R_t$.
-}
+% }
 
 %%%
 %%% Server write loop
@@ -65,5 +57,5 @@ The operands of \autoref{alg:spar:write} are typed accordingly. The indicator en
 \end{algorithm}
 
 \begin{remark}
-    From a programming perspective, the choice of $K = 3$ and $D = 3$ is arbitrary. The number of slots per bucket and the number of choices per client are implemented as C++ template parameters, and are resolved at compile time rather than carried as runtime values. Our build instantiates them only at $K = D = 3$, and supporting another pair requires nothing beyond adding the corresponding instantiation.
+    From a programming perspective, the choice of $K = 3$ and $D = 3$ is arbitrary. The number of slots per bucket and the number of choices per client are implemented as C++ template parameters, and are resolved at compile time. % rather than carried as runtime values. Our build instantiates them only at $K = D = 3$, and supporting another pair requires nothing beyond adding the corresponding instantiation.
 \end{remark}

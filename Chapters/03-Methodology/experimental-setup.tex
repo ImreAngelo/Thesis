@@ -42,6 +42,7 @@ The testing environment always has access to the secret key, so the error of an 
 \end{gather}
 An \gls{rgsw} ciphertext is an intermediate object, not meant to be decrypted. To get a representative measure of the noise, we convert the \gls{rgsw} to an \gls{rlwe} ciphtext and measure its noise as above. Since the gadget vector usually contains $1$ as an element, one of the \gls{rgsw} rows are an \gls{rlwe} of the actual unscaled message. Alternatively, one can compute the external product using a public key \Call{RLWE}{0}. We use the latter method, as the former ignores the errors of the other rows.
 
+\newpage
 \subsubsection{Multi-Threaded Performance}
 \label{sec:amdahl}
 The main advantage \gls{rns} holds over classical single-precision representations is its multi-threading capability. As described above, our implementation allows efficient parallelization over $k\ell$ threads. However, if fewer threads are available during benchmarking, we extrapolate the expected performance at $k\ell$ processors by modeling theoretical scaling behavior using Amdahl's Law~\cite{Gustafson:2011}.
@@ -63,7 +64,6 @@ Let $E(T)$ denote the total execution time of the algorithm on $T$ threads. Beca
 
 By mapping \eqref{eq:amdahl-et} to the variables $y = E(T)$ and $x = \frac{1}{T}$, the relationship resolves into a standard linear model $y = \beta_0 + \beta_1 x$. The intercept $\beta_0 = E(1)f$ represents the fixed serial execution time, while the slope $\beta_1 = E(1)(1-f)$ captures the parallelizable workload scaled by the inverse thread count.
 
-\newpage
 By measuring empirical execution times across a limited set of processor counts ($T = 1, 2, 3, \dots, T_{max}$), we can perform an ordinary least squares linear regression on the variable pairs $(\frac{1}{T}, E(T))$. This regression identifies $\beta_0$ and $\beta_1$, mathematically separating the serial and parallel workloads. We can then substitute $T = k\ell$ into the fitted model to accurately extrapolate the expected execution time $E(k\ell)$ for a target architecture where $k\ell \gg T_{max}$.
 
 When fitting this regression model, it is critical to exclude measurements taken at complete hardware saturation (i.e., the benchmarking system's absolute maximum thread count $T_{max}$). At full capacity, execution time is artificially inflated by external systemic overheads, such as OS thread scheduling, memory bandwidth contention, and thermal throttling. Including this saturated data point warps the linear fit, systematically overestimating the serial fraction $f$ and severely degrading the accuracy of the large-scale extrapolation.
@@ -85,8 +85,20 @@ To ensure our results are as replicable as possible, we did not want to include 
     standard_deviation = 3.19
     ell = 2
     scheme = "bv"
+
+    ## Test with smaller plaintext modulus t
+    ## 131.5-bit security
+    [small-t]
+    plaintext_modulus = 256
+    ring_dim = 16384
+    limbs = 7
+    first_mod_size = 60
+    scaling_mod_size = 60
+    standard_deviation = 3.19
+    ell = 2
+    scheme = "bv"
 \end{minted}
-\caption{The default parameter set as it appears in \texttt{params.toml}}\label{code:toml}
+\caption{Two parameter sets as they appear in \texttt{params.toml}}\label{code:toml}
 \end{figure}
 
 The file format supports multiple sets of parameters with different labels, and a particular parameter set can be loaded into any test or benchmark by using the \texttt{SPAR\_PARAMS=label} flag. We decided on a single set of parameters as a baseline for our testing in \cref{chp:results}, with any variation on this set included as its own complete set of parameters. The baseline parameters are labeled ``\texttt{standard}'' in \texttt{params.toml}, and is the default set used if no \texttt{SPAR\_PARAMS} flag is specified. To estimate the security of our parameters, we also include a simple ``\texttt{make estimate}'' command which reads this file and runs the lattice estimator \cite{cryptoeprint:2015/046} on each parameter set.
