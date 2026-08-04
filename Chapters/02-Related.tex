@@ -2,8 +2,7 @@
 \label{chp:protocol}
 
 \vfill
-%% [Low Priority] TODO: Rewrite all chapter inrtoductions
-This section begins \autoref{sec:notation} by establishing the common notation used throughout the thesis. Section \ref{sec:fhe} introduces homomorphic encryption, the BGV scheme and its multi-party variant. The following section introduces RNS, and the remainder of the section is dedicated to the \gls{spar} construction, and the \gls{fhe} primitives it depends upon.
+\gls{spar} is assembled from standard \gls{fhe} components, and this chapter presents each of them in the form the rest of the thesis uses. \autoref{sec:notation} fixes the common notation. \autoref{sec:fhe} introduces homomorphic encryption and the BGV scheme, together with the multi-party variant that provides the protocol's threshold decryption. \autoref{sec:rns} presents the residue number system that practical BGV implementations compute in. \autoref{sec:gadget-decomposition} defines the gadget decomposition, \gls{rgsw} ciphertexts and the external and internal products. \autoref{sec:spar} presents the \gls{spar} construction itself and the requirements it places on the scheme beneath it.
 \newpage
 
 \newcommand{\gadgetformat}[2]{{#1}_{\mathsf{#2}}}

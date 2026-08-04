@@ -7,18 +7,10 @@
 
 %%
 %% INTRODUCTION
-% The parameters proposed alongside the original protocol do not carry a round of \gls{spar} to a correct decryption on BGV. Rather than shrink the circuit to fit them, we selected a much larger parameter set that uses the \gls{rns} context in earnest, and report every measurement under it.
-
-% \autoref{sec:results:params} gives that parameter set and the reasoning behind it. \autoref{sec:results:noise} measures noise growth, first for the two products in isolation and then across a full write step, establishing how many participants the noise budget admits. \autoref{sec:results:benchmarks} reports timings for both libraries and the scaling behaviour of the write step in the number of participants $\eta$.
-
-% Taken together the measurements answer both research questions. The cost of a round is dominated by the server's write step, which grows \textcolor{red}{\textbf{[PLACEHOLDER: linearly/quadratically]}} in $\eta$ and puts the protocol beyond a \textcolor{red}{\textbf{[PLACEHOLDER: Y]}}-second latency budget at roughly $\eta = \textcolor{red}{\textbf{[PLACEHOLDER: X]}}$ participants --- far below the point at which noise becomes the binding constraint. \autoref{sec:results:discussion} discusses what dominates that cost, and \autoref{sec:results:hybrid} proposes a hybrid-gadget variant that lowers it, together with the obstruction that currently stops the variant from extending to the internal product.
 \vfill
-{
-%% TODO!!!!
-\color{red}
-We benchmark our core and \gls{spar} libraries . In short, we found that the 
-This section presents the noise and performance measurements from the core and \gls{spar} libraries. We also discuss the findings, and suggest some possible optimization.
-}
+The parameters proposed alongside the original protocol do not carry a round of \gls{spar} to a correct decryption on BGV. Rather than shrink the circuit to fit them, we selected a much larger parameter set that uses the \gls{rns} context in earnest, and report every measurement under it. Under this set the cost of a round is dominated by the server's write step, which is invoked once per participant and itself scales linearly in $\eta$, making the total server work per round quadratic. Noise constrains the protocol as well; the flooding required by multi-party decryption caps reliable operation at $\eta = 8$ participants unless the decomposition is lengthened at a proportional cost in runtime.
+
+\autoref{sec:results:params} gives the parameter set and the reasoning behind it. \autoref{sec:results:noise} measures noise growth, first for the two products in isolation and then across a full protocol round, establishing how many participants the noise budget admits. \autoref{sec:results:benchmarks} reports timings for both libraries and the scaling behaviour of the write step in the number of participants $\eta$. \autoref{sec:results:discussion} discusses what dominates the cost, and \autoref{sec:results:hybrid} proposes a hybrid-gadget variant that lowers it, together with the obstruction that currently stops the variant from extending to the internal product.
 \newpage
 
 %%

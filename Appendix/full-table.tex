@@ -3,8 +3,6 @@
 
 \newcommand{\perUser}[2]{\fpeval{#2 / #1}}
 
-%% [Top Priority] TODO: Fill in the table
-%% [Optional] TODO: Make smaller and add CV, std.dev. etc.
 \begin{table}[H]
     \caption{Multi-threaded execution times for sPAR in milliseconds up to $\eta=8$ using the \texttt{standard} parameter set (\cref{tab:bench:params}).}
     \label{tab:bench:spar-multithreaded}
@@ -14,21 +12,23 @@
         \textbf{Threads}   & \textbf{Users}  & \multicolumn{2}{c|}{\textbf{Client}} & \multicolumn{2}{c}{\textbf{Server}} \\ 
         $T$                & $\eta$          & \textbf{Encrypt} (ms) & \textbf{Decrypt} (ms)  & \textbf{Write} (s) & \textbf{Decrypt} (ms)   \\
         \hline
-        \multirow{3}{*}{1} & $2$    &  \perUser{1}{1327.17} &  33.7159 &  63771.2 &  18.9869  \\
-                           & $4$    &  \perUser{1}{2558.81} &   66.408 &   126950 &  40.7687  \\
-                           & $8$    &  \perUser{1}{5277.96} &  137.697 &   258773 &  94.7295  \\
+        \multirow{3}{*}{1} & $2$    & 1327.17 &  33.7159 &  63771.2 &  18.9869  \\
+                           & $4$    & 2558.81 &   66.408 &   126950 &  40.7687  \\
+                           & $8$    & 5277.96 &  137.697 &   258773 &  94.7295  \\
         \hline
-        \multirow{3}{*}{2} & $2$    &  &  &  &  \\
-                           & $4$    &  &  &  &  \\
+        \multirow{3}{*}{2} & $2$    & 812.393 & 30.9635 & 37534.0 & 13.816 \\
+                           & $4$    & 1537.26 & 64.6277 & 74725.9 & 29.6208 \\
                            & $8$    &  &  &  &  \\
         \hline
-        \multirow{3}{*}{3} & $2$    &  &  &  &  \\
-                           & $4$    &  &  &  &  \\
-                           & $8$    &  &  &  &  \\
+        %% THIS HAS NOT BEEN RUN 10 TIMES
+        \multirow{3}{*}{3} & $2$    & 717.991   &  25.7952  &  26446.3  &  12.6342  \\
+                           & $4$    & 1189.64   &  58.183   &  54586.5  &  29.1487  \\
+                           & $8$    & 2343.15   &  114.507  &  109884.0 &  69.1535  \\
         \hline
-        \multirow{3}{*}{4} & $2$    &  &  &  &  \\
-                           & $4$    &  &  &  &  \\
-                           & $8$    &  &  &  &  \\
+        %% THIS HAS NOT BEEN RUN 10 TIMES
+        \multirow{3}{*}{4} & $2$    & 523.006   &  30.9986  &  20071.5  &  11.8264  \\
+                           & $4$    & 936.9     &  56.8255  &  41092.7  &  27.5973  \\
+                           & $8$    & 1920.2    &  112.982  &  80881.2  &  62.6529  \\
         \hline
         \multirow{3}{*}{5} & $2$    & 403.792   &  29.9346  &  17144.0  &  11.7628  \\
                            & $4$    & 779.568   &  59.3408  &  35031.8  &  26.1727  \\
@@ -41,6 +41,7 @@
     \end{tabular}
 \end{table}
 
+%% [Optional] TODO: Make smaller and add CV, std.dev. etc.
 % % 1 thread
 % \begin{table}[H]
 %     \caption{1 thread}
