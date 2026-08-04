@@ -2,15 +2,15 @@
 
 \section{Parameters}
 \label{sec:results:params}
-We found that the parameters suggested in \cite{cryptoeprint:2025/860} results in too much noise for the \texttt{Server::Write} function to effectively handle, and are thus not capable of running the full \gls{spar} protocol without decryption failure. Rather than tweaking these parameters until the protocol produces correct decryptions, we instead aim to fully utilize the \gls{rns} context by using much large parameters that enable \gls{simd} batching and far more data transferred per message.
+We found that the parameters suggested in \cite{cryptoeprint:2025/860} results in too much noise in the full multi-party setting, leading to decryption failure. Rather than tweaking these parameters until the protocol can handle the noise, we instead aim to fully utilize the \gls{rns} context by using much large parameters that enable \gls{simd} batching and far more data transferred per message\footnote{An \gls{rlwe} sample carries $N\log{t}$ bits of data. Each user sends one such message, approximately $32$ KiB, per round.}.
 
-New parameters were thus selected to provide $\lambda \geq 128$ bits of security at the largest possible modulus $Q$, while supporting \gls{simd} batching, minimizing $k\ell$, and ensuring sPAR outputs correct results. The RNS moduli are slightly smaller than $64$ bits to fit inside $64$-bit machine words with a few bits of headroom to prevent overflowing registers.
+New parameters were thus selected to support \gls{simd} batching and provide $\lambda \geq 128$ bits of security at the largest possible modulus $Q$, while minimizing $k\ell$. The \gls{rns} moduli are slightly smaller than $64$ bits to prevent operations that temporarily exceed the moduli from overflowing.
 
-The resulting parameters, listed in~\autoref{tab:bench:params}, yield an esitmated security parameter of $\securityBits$ bits~\cite{cryptoeprint:2015/046} for the underlying \gls{rlwe} scheme, and serve as the baseline for the benchmarks that follow.
+The resulting parameters, listed in~\cref{tab:bench:params}, yield an esitmated security parameter of $\securityBits$ bits~\cite{cryptoeprint:2015/046} for the underlying \gls{rlwe} scheme, and serve as the baseline for the benchmarks that follow. It is labeled ``\texttt{standard}'' in \texttt{params.toml}, and is the default set used if no \texttt{SPAR\_PARAMS} flag is specified.
 
-\vfill
+\vspace{4pt}
 \begin{table}[H]
-    \caption{Base parameters for BV-RNS}
+    \caption{BGV-RNS parameters for sPAR using BV gadget.}
     \label{tab:bench:params}
     \centering
     \begin{tabular}{lcc}
@@ -28,5 +28,5 @@ The resulting parameters, listed in~\autoref{tab:bench:params}, yield an esitmat
         \bottomrule
     \end{tabular}
 \end{table}
-\vfill
+
 \vfill

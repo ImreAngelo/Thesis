@@ -1,42 +1,18 @@
-The second layer of the gadget from \autoref{sec:gadget-decomposition} is a decomposition on $g = (1, B, \dots, B^{\ell-1})$, which is essentially digit extraction. Computing the digits as unsigned base-$B$ values puts each $d_i$ in $[0, B)$ and gives quality $\beta = B - 1$.
-
-By \autoref{rem:extprod-asymmetry} the noise of an external product grows with $\beta$, so it is worth halving. Centering the digits to $d_i \in [-B/2, B/2)$ does exactly that, at $\beta = B/2$. The residues are stored unsigned, so centering is not free: mapping a digit $d_i \geq B/2$ into the negative range subtracts $B$ from it, which must be compensated by a $+1$ carry into $d_{i+1}$. Standard recoding therefore walks the digits from least to most significant, and that dependency is what prevents the integer from being sliced into independent bit-windows.
-
-To avoid sequential carry propagation, we apply a well-known offset trick by adding the constant $\varGamma$~\eqref{eq:carry-offset}.
+The decomposition on the powers-of-base $B$ gadget $g=(1, B, \dots, B^{\ell-1})$ from \cref{sec:hps} is base-$B$ digit \emph{extraction}, whereby the \emph{unsigned} digits become $D(u) = \{\lfloor u/B^{i} \rfloor \bmod{B}\}_{i=0}^{\ell-1} \in [0, B)^{\ell}$ with quality $\beta=B$. \Cref{rem:extprod-asymmetry} shows the noise of an external product grows with $\beta$. Centering the digits to $d_i \in [-B/2, B/2)$ decreases the bound to $\beta=B/2$. % However, this also introduces a sequential .
+The residues are stored unsigned, so centering is not free: mapping a digit $d_i \geq B/2$ into the negative range subtracts $B$ from it, which must be compensated by a $+1$ carry into $d_{i+1}$. This introduces a \emph{sequential carry propagation} which prevents efficient parallelization. To fix this, we apply a well-known offset trick by adding the constant
 \begin{equation}
     \label{eq:carry-offset}
     \varGamma = \frac{B}{2}\cdot\frac{B^{\ell} - 1}{B - 1}
 \end{equation}
 
 %% TODO: State \varGamma must satisfy c + \varGamma < B^{\ell} 
-The second fraction is the standard identity for the sum of a finite geometric series, meaning~\eqref{eq:carry-offset} represents the $g$-decomposition of a base-$B$ number $\gamma$ where every digit is $B/2$.
+The second fraction is the standard identity for the sum of a finite geometric series, meaning~$\varGamma$ represents the gadget decomposition of a base-$B$ number $\gamma$ where every digit is exactly $B/2$.
 \begin{gather*}
     \frac{B^{\ell} - 1}{B - 1} = \sum_{i=0}^{k-1} B^i = 1 + B + B^2 + \dots + B^{\ell - 1} \\
     \implies\;\; \varGamma = \sum_{i=0}^{k-1}\frac{B}{2}\cdot B^i = \langle \decomp{\gamma}{}, g \rangle
 \end{gather*}
 
-To decompose a positive integer $c \in \mathbb{Z}^{+}$ into signed digits $[d]_{B}$, we first apply the global offset to compute a shifted, non-negative integer $c' = c + \varGamma$. We then perform unsigned digit decomposition on the shifted integer $c'$, except the standard centering \autoref{alg:bit:center} is replaced with subtracting $B/2$.
-
-%%%
-%%% Unsigned digit decomposition (optimized for B = 2^b) --- superseded by the
-%%% parallel signed variant below; kept for reference only.
-% \begin{algorithm}
-% \caption{Decompose wrt. $B$ (\textcolor{red}{TODO: Signed digit decomposition})}
-% \label{alg:bv:decompose}
-% \begin{algorithmic}[1]
-% \Require RNS polynomial $[x]_{\mathcal{B}_Q} \in \mathbb{Z}_{q_0} \times \mathbb{Z}_{q_1} \times \dots \times  \mathbb{Z}_{q_{k-1}}$, base $B = 2^b$, and decomposition parameter $\ell$
-% \Ensure $\ell$ RNS ``digit'' polynomials $\mathbf{d} = (d_0, d_1, \dots, d_{k\ell-1}) \in \mathbb{Z}_B^{k\ell}$
-% \State $a' \gets a$
-% \For{$j = 0$ to $\ell - 1$}
-%     \State $d_j \gets a' \pmod B$ \Comment{Extract the lower bits}
-%     \If{$d_j \ge B/2$}
-%         \State $d_j \gets d_j - B$ \Comment{Shift to signed range}
-%     \EndIf
-%     \State $a' \gets \frac{a' - d_j}{B}$ \Comment{Shift down and apply the carry}
-% \EndFor
-% \State \Return $\mathbf{d}$
-% \end{algorithmic}
-% \end{algorithm}
+To decompose a positive integer $c \in \mathbb{Z}^{+}$ into signed digits $[d_i]_{B}$, the offset is applied to compute a shifted, non-negative integer $c' = c + \varGamma$. This converts signed into unsigned digit decomposition on the shifted integer $c'$, which is then shifted into the correct range by subtracting $B/2$.
 
 %%%
 %%% Signed digit decomposition 
@@ -86,12 +62,12 @@ To decompose a positive integer $c \in \mathbb{Z}^{+}$ into signed digits $[d]_{
     \end{algorithm}
 \fi
 
-As with $\Call{GetPower}{i,j}$ from \autoref{alg:bv:encrypt}, the offset $\varGamma$ is calculated exactly once; when the context is first created. Because $B=2^b$ is a power of two in practice, this extraction is performed purely with the bitwise operations of \autoref{sec:bitwise}.
+As with $\Call{GetPower}{i,j}$ from \cref{alg:bv:encrypt}, the offset $\varGamma$ is calculated exactly once; when the context is first created. Because $B=2^b$ is a power of two, this extraction is performed purely with the bitwise operations of \cref{sec:bitwise}.
 
-\newpage
+%% TODO: Maybe just refer to the actual code in libs/core/src/context-bv.cpp
 Once we have a working $\Call{Decompose}{}$ function, the external product can be written as \autoref{alg:external-product}. Our implementation is functionally the same, except that it has been split into three stages for better parallelization. First, the $2k$ inverse \gls{ntt} evaluations required by the decompositions are calculated in parallel, one per tower of each of the two ciphertext elements. Second, the decompose calls are merged into the external product function, and every tower of every digit is sliced, centered and transformed independently, giving $2k\ell\cdot k$ parallel tasks and as many forward \gls{ntt} calls. Finally, the inner product is accumulated over the $2k$ pairs of ciphertext component and tower, each thread summing its own $2k\ell$ terms with no reduction across threads.
 
-The width of every stage depends on $k$ as well as $\ell$, so a parameter set with more \gls{rns} moduli exposes proportionally more parallelism.
+The width of every stage depends on $k$ as well as $\ell$, so a parameter set with more \gls{rns} moduli exposes proportionally more parallelism. %% TODO: A more efficient implementation could utilize more threads, spread over the coefficients, increasing the upper bound on threads to N*kl
 
 %%%
 %%% External Product

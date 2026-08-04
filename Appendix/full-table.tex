@@ -1,0 +1,70 @@
+\chapter{Additional Experimental Data}
+\label{appendix:data}
+
+\newcommand{\perUser}[2]{\fpeval{#2 / #1}}
+
+%% [Top Priority] TODO: Fill in the table
+%% [Optional] TODO: Make smaller and add CV, std.dev. etc.
+\begin{table}[H]
+    \caption{Multi-threaded execution times for sPAR in milliseconds up to $\eta=8$ using the \texttt{standard} parameter set (\cref{tab:bench:params}).}
+    \label{tab:bench:spar-multithreaded}
+    \centering
+    \begin{tabular}{cc|cc|cc}
+        \toprule
+        \textbf{Threads}   & \textbf{Users}  & \multicolumn{2}{c|}{\textbf{Client}} & \multicolumn{2}{c}{\textbf{Server}} \\ 
+        $T$                & $\eta$          & \textbf{Encrypt} (ms) & \textbf{Decrypt} (ms)  & \textbf{Write} (s) & \textbf{Decrypt} (ms)   \\
+        \hline
+        \multirow{3}{*}{1} & $2$    &  \perUser{1}{1327.17} &  33.7159 &  63771.2 &  18.9869  \\
+                           & $4$    &  \perUser{1}{2558.81} &   66.408 &   126950 &  40.7687  \\
+                           & $8$    &  \perUser{1}{5277.96} &  137.697 &   258773 &  94.7295  \\
+        \hline
+        \multirow{3}{*}{2} & $2$    &  &  &  &  \\
+                           & $4$    &  &  &  &  \\
+                           & $8$    &  &  &  &  \\
+        \hline
+        \multirow{3}{*}{3} & $2$    &  &  &  &  \\
+                           & $4$    &  &  &  &  \\
+                           & $8$    &  &  &  &  \\
+        \hline
+        \multirow{3}{*}{4} & $2$    &  &  &  &  \\
+                           & $4$    &  &  &  &  \\
+                           & $8$    &  &  &  &  \\
+        \hline
+        \multirow{3}{*}{5} & $2$    & 403.792   &  29.9346  &  17144.0  &  11.7628  \\
+                           & $4$    & 779.568   &  59.3408  &  35031.8  &  26.1727  \\
+                           & $8$    & 1578.14   &  112.749  &  69471.0  &  64.4156  \\
+        \hline
+        \multirow{3}{*}{6} & $2$    & 392.395   &  27.20995 &  14322.1  &  11.3107  \\
+                           & $4$    & 756.271   &  52.963   &  30261.8  &  27.0575  \\
+                           & $8$    & 1488.9125 &  104.643  &  59137.1  &  64.8635  \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% % 1 thread
+% \begin{table}[H]
+%     \caption{1 thread}
+%     \label{tab:bench:amdahl}
+%     \centering
+%     \begin{tabular}{l|c|cc|cc}
+%         \toprule
+%             & & \textbf{Client} & \textbf{Server} & \textbf{Client} & \textbf{Server} \\ 
+%             $\eta$ & \textbf{Measure} & \textbf{Encrypt} & \textbf{Write} & \textbf{Decrypt} & \textbf{Decrypt} \\
+%         \midrule
+%             2 & mean    &  1.32717~s &   63.7712~s &     33.7159~ms &      18.9869~ms \\
+%             2 & median  &  1.29369~s &   63.6531~s &     32.7618~ms &      18.4997~ms \\
+%             2 & stddev  &  75.097~ms &  522.991~ms &       1.942~ms &      1.08775~ms \\
+%             2 & cv      &     5.66\% &      0.82\% &         5.76\% &       5.73\% \\
+%             \hline
+%             4 & mean    &  2.55881k &   126.95k &         66.408 &      40.7687 \\
+%             4 & median  &  2.55456k &  127.132k &        65.5368 &      41.1643 \\
+%             4 & stddev  &   36.4501 &  1.32601k &        3.09385 &      1.31168 \\
+%             4 & cv      &    1.42\% &    1.04\% &         4.66\% &       3.22\% \\
+%             \hline
+%             8 & mean    &  5.27796k &  258.773k &        137.697 &      94.7295 \\
+%             8 & median  &  5.27433k &  258.305k &        132.208 &      93.1737 \\
+%             8 & stddev  &   175.087 &  1.40219k &        10.1014 &      4.84181 \\
+%             8 & cv      &    3.32\% &    0.54\% &         7.34\% &       5.11\% \\
+%         \bottomrule
+%     \end{tabular}
+% \end{table}

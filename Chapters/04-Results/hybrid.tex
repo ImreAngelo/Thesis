@@ -1,94 +1,182 @@
 \subsection{Hybrid Gadget} % Theoretical Hybrid Improvement
 \label{sec:results:hybrid}
-An alternative to gadget decomposition often employed in \gls{rns} key-switching is the \textit{hybrid} technique \cite{cryptoeprint:2012/099, cryptoeprint:2021/204}. A natural question is wether this technique can be employed in the external and internal products.
+An alternative to gadget decomposition often employed in \gls{rns} key-switching is the \textit{hybrid} technique \cite{cryptoeprint:2019/688, cryptoeprint:2021/204}, combining the methods of \cite{cryptoeprint:2011/344} and \cite{cryptoeprint:2012/099}. 
+A natural question is whether this technique can be employed in the external and internal products.
 
-% We defer a proper treatise of the 
-In hybrid, the idea is to pre-scale a message $m$ by an auxiliary modulus $P$, where $|P| \approx |Q|/d_{num}$ for some integer $d_{num} \;|\; k$, resulting in a encryption of $m\cdot P$ in the extended ciphertext modulus $QP$. After some homomorphic operation(s) we end up with the message $m'P$ and noise $\epsilon' \geq\epsilon$. Dividing the ciphertext by $P$ will result in a ciphertext encrypting $m'$ in modulus $Q$, scaling down the error by $P$ in the process.
+% We defer a proper treatise of the  
+The technique involves pre-scaling a message $m$ by an auxiliary modulus $P$, where $|P| \approx |Q|/d_{num}$ for some integer parameter $d_{num} \;|\; k$, resulting in a encryption of $m\cdot P$ and noise $\epsilon$ in the extended ciphertext modulus $QP$. After some homomorphic operation(s) we end up with the message $m'P$ and noise $\epsilon'$. Dividing the ciphertext by $P$ would result in an encryption of $m'$ in modulus $Q$ with some error $\epsilon'/P$.
 \begin{gather*}
     (a\cdot s + \Delta m P + \epsilon, a) \pmod{QP} \\
-    P^{-1}\cdot \left[(a\cdot s + \Delta m' P + \epsilon', a) \pmod{QP}\right] \\
+    \left[(a\cdot s + \Delta m' P + \epsilon', a) \pmod{QP}\right] /P \\
     (a'\cdot s + \Delta m' + \epsilon'/P, a') \pmod{Q}
 \end{gather*}
 
-Reframing this technique in terms of the gadget framework established in \autoref{sec:gadget-decomposition} is straight forward. If we let $g = P$, the gadget property holds in the extended modulus $QP$. Using $P^{-1}$ as our decomposition is identical to dividing by $P$ in hybrid.
+$P$ is a zero-divisor in the ring $R_{QP}$. Working strictly in this ring, division by $P$ is hence not well-defined. We therefore use the \Call{ApproxModDown}{} operation from \cref{sec:rns-base-conversion} to switch the modulus to $Q$ and scale by $P^{-1} \bmod Q$. Reframing this in terms of the gadget framework established in \cref{sec:gadget-decomposition}, we let $g = P$, so that the gadget property holds in the extended modulus $QP$, and apply the approximate modulus switch \textit{after} the inner product:
 \begin{gather*}
     \langle x, yP\rangle = x\cdot y \cdot P \pmod{QP} \\
-    \langle P^{-1}\cdot x, yP\rangle = P^{-1}\left[\langle x, yP\rangle\right] = x\cdot y \pmod{Q}
+    P^{-1}\left[\langle x, yP\rangle\right] \approx x\cdot y \pmod{Q}
 \end{gather*}
 
-This is sufficient to define the external product using the hybrid gadget. {This should come as no surprise since key-switching and the external product is essentially the same operation.} We must note, however, that this creates an imbalance between the left and right operands, where the right \gls{rgsw} has rows in the extended $QP$-modulus space while the left \gls{rlwe} is defined in the target modulus $Q$.
+This is sufficient to define an external product using the hybrid gadget. {The existence of this ``hybrid'' external product should come as no surprise since key-switching and external product is essentially the same operation.} Unlike the standard external product \eqref{def:extprod}, there is an imbalance between the left and right operands. The ``hybrid'' \gls{rgsw} has rows in the extended $QP$-modulus space while the \gls{rlwe} exists in the target modulus $Q$.
 
 \begin{definition}[Hybrid-RGSW]
-    An \gls{rgsw} ciphertext that encodes $\mu P$ \textbf{in the extended modulus} $QP$.
+    \label{def:hybrid-rgsw}
+    Let the basis $\mathcal{B}_Q = \{q_0, \dots, q_{k-1}\}$ be partitioned into $d_{num}$ disjoint sub-bases $\mathcal{B}_j$, each forming a block modulus $\tilde{Q}_j = \prod_{q \in \mathcal{B}_j} q$. Let $P$ be an auxiliary modulus formed by a disjoint basis $\mathcal{B}_P$ with $k/d_{num}$ elements, chosen such that its bit-length satisfies $|P| \approx |Q|/d_{num}$. 
+    We define the \emph{hybrid gadget vector} ${g}_{h} \in \mathbb{Z}_{QP}^{d_{num}}$ to be the collection of orthogonal factors scaled by $P$, where the $j$-th element is
+    \begin{equation}
+        \label{eq:hgsw:qh}
+        {g_h}[j] = P \cdot (Q / \tilde{Q}_j)\cdot [(Q/\tilde{Q}_j)^{-1}]_{\tilde{Q}_j} \pmod{QP}
+    \end{equation}
+
+    \newpage
+    Given a polynomial $\mu \in R_Q$ and a secret key $s$, the \emph{Hybrid-RGSW} ciphertext of $\mu$, denoted $\Call{HGSW}{\mu}$, is a $2 d_{num} \times 2$ matrix defined over the ring $R_{QP}$:
     \begin{equation}
         \label{eq:hybrid-rgsw}
-        C_{QP} = Z_{QP} + \mu \begin{pmatrix}
-            P & 0 \\
-            0 & P
-        \end{pmatrix} \pmod{QP}
+        \Call{HGSW}{\mu} = Z + \mu \cdot G_{h} \pmod{QP}
     \end{equation}
-    % \begin{equation}
-    %     \Call{HybridRGSW}{b} = \Call{RGSW}{b\cdot P}
-    % \end{equation}
+    where the hybrid gadget matrix $G_{h} \in R_{QP}^{2 d_{num} \times 2}$ is the Kronecker product $I_2 \otimes {g}_{h}$, and $Z$ is a $2 d_{num} \times 2$ matrix wherein each row constitutes an independent, freshly sampled $\text{RLWE}_s(0)$ ciphertext evaluated in the extended modulus $QP$.
 \end{definition}
 
-Thanks to the abstract interface layout of the core library, a second implementation was developed for this thesis that implements the external product. Note that this implementation is technically using the \emph{GHS} technique from~\cite{cryptoeprint:2012/099}, which is (by definition) hybrid with $d_{num} = 1$. % The implementation was tested in the same way, with the same parameters, as the BV implementation.
+% \begin{remark}
+%     The hybrid gadget is defined so that each row in \eqref{eq:hybrid-rgsw} scales one block of $k/d_{num}$ limbs by $P$, using a similar per-tower cancellation as in the HPS gadget (\autoref{rem:hps-optimization}). \Cref{alg:hybrid:encrypt} applies this mathematically by hoisting the \Call{Power}{} function and masking the correct limbs, though in practice an implementation should mask the limbs first and multiply them by $P$ inside the parallelized loop.
+%     \begin{equation*}
+%         \mu\cdot g_h[j] = [\mu P]_{B_j} = \begin{cases}
+%             [\mu\cdot P]_{q}, & \text{ for towers } q \in \mathcal{B}_j \\
+%             0, & \text{ otherwise }
+%         \end{cases}
+%     \end{equation*}
+% \end{remark}
+
+\begin{remark}
+    The hybrid gadget is defined so that each row of \eqref{eq:hybrid-rgsw} scales one block of $k/d_{num}$ limbs by $P$, using the same per-limb cancellation trick as the HPS gadget (\autoref{rem:hps-optimization}). % Writing $[x]_{\mathcal{B}_j}$ for the restriction of $x$ to the limbs of $\mathcal{B}_j$, zero elsewhere,
+    \begin{equation*}
+        \mu\cdot g_h[j] = [\mu P]_{\mathcal{B}_j} = \begin{cases}
+            [\mu\cdot P]_{q}, & q \in \mathcal{B}_j \\
+            0, & \text{otherwise.}
+        \end{cases}
+    \end{equation*}
+    \Cref{alg:hybrid:encrypt} applies this identity by hoisting \Call{Power}{} out of the loop and masking the correct limbs; an implementation can equivalently mask first and scale only the correct limbs inside the parallel loop.
+\end{remark}
 
 \input{Algorithms/new/encrypt-hybrid}
 
 %% TODO: use scale and approx mod down etc.
 % \input{Algorithms/new/extprod-hybrid}
 
-Hybrid is very fast in \gls{rns} because (1) it uses the fast approximations discussed in \autoref{sec:rns-base-conversion} and (2) the decomposition parameter $d_{num}$ is relatively small compared to, for example, the BV gadget with its $k\ell$ parameter. 
+A second implementation was developed for this thesis that implements the hybrid external product. Rather than give pseudo-code for this function, we refer the reader to the actual code in \texttt{libs/core/src/context-hybrid.cpp}~\cite{gitrepo} and summarize at a high level: first we \Call{FastBaseExtend}{} the \gls{rlwe} ciphertext to $QP$, calculate the inner product, and finally \Call{ApproxModDown}{} the result. Thanks to the interface-based design of the core library, this implementation is easily swapped in to the same benchmarking code used for the BV implementation in \cref{sec:results:benchmarks}. Note that due to the original scope of the project, our implementation is technically using the {Gentry-Halevi-Smart (GHS)} technique from~\cite{cryptoeprint:2012/099}, which is exactly hybrid with $d_{num} = 1$, and does not support other $d_{num}$ values.
 
-%% TODO: Insert table comparing the benchmarks of encryption + external product (single threaded)
+\newpage
+Hybrid is very fast in \gls{rns} because (1) it naturally uses the fast approximations of \cref{sec:rns-base-conversion} and (2) the decomposition parameter $d_{num}$ is typically small compared to, for example, the BV gadget with its $k\ell$ parameter, resulting in much fewer rows in each hybrid-\gls{rgsw}.
+
 \begin{table}[H]
     \caption{Mean CPU time spent per operation, single-threaded.}
     \label{tab:bench:hybrid}
     \centering
     \begin{tabular}{lcc}
         \toprule
-        \textbf{Operation}  & \textbf{BV} & \textbf{Hybrid}  \\
+        \textbf{Operation}  & \textbf{BV}  & \textbf{Hybrid ($d_{num} = 1$)}  \\
         \midrule
-        Encrypt RGSW        & \num{230}~ms & \num{28.7}~ms \\
+        Encrypt             & \num{230}~ms & \num{28.7}~ms \\
         External Product    & \num{67}~ms  & \num{29.2}~ms \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-Our testing suggests the hybrid approach not only improves the speed of the external product, but also improves the noise significantly. In a full implementation this could be tweaked by varying $d_{num}$, with larger values resulting in even faster speeds at the cost of more noise. 
+Our testing suggests the hybrid approach not only improves the speed of the external product, but also improves the noise significantly in long chains. After 300 external products, the noise occupies 40 bits. Running the benchmark with the \texttt{SPAR\_CHAIN\_ITERATIONS=1000} flag extends the chain to 1000 iterations, after which the noise is only 41 bits.
 
-%% TODO: Insert graph of BV versus hybrid external product noise
 \input{Figures/Plots/hybrid-external-product.tex}
 
 \begin{remark}
-    Since hybrid encrypts messages in the extended modulus $QP$, the security of the system must be estimated at the extended modulus $QP$. %% TODO: The table does not have security parity, but it doesn't matter because...
+    \label{rem:hybrid-security}
+    Since hybrid encrypts messages in the extended modulus $QP$, the security of the system must be evaluated at the extended modulus $QP$. With $d_{num} = 1$, the security parameter of the system is roughly halved. Doubling $N$ makes up for this, though at the cost of also doubling the runtime. At the same time, the noise handling of hybrid is much better than BV, which could possibly allow the modulus $Q$ to be halved --- in which case both methods achieve the same security, but the time-advantage of hybrid grows even larger. We list benchmarks for these scenarios in \autoref{tab:bench:hybrid-deviation}, along with their \texttt{params.toml} labels and noise after 300 external products.
 \end{remark}
 
+\vfill
+\newpage
+\vfill
+
+\begin{table}[H]
+    \caption{Hybrid external product performance, single-threaded.}
+    \label{tab:bench:hybrid-deviation}
+    \centering
+    \begin{tabular}{lccccc}
+        \toprule
+        % & \multicolumn{1}{c}{\textbf{Deviation from}} \\ % \textbf{\autoref{tab:bench:params}}
+        \textbf{Label} & \textbf{Changed parameter} & $\lambda$ & \textbf{Time} & \textbf{Noise} & $|Q|$ \\
+        \midrule
+        \texttt{hybrid-N} & $N=32768$ & {132.5} & \num{60.9}~ms & 42~bits & 420~bits \\
+        \texttt{hybrid-Q} & $k=4$     & {114.4} & \num{14.2}~ms & 39~bits & 240~bits \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+    
+The optimal choice is likely hybrid with $d_{num}$ tuned to fully utilize the headroom of a slightly smaller $Q$. As mentioned earlier we fixed $d_{num} = 1$ in our implementation, so we are unable to investigate whether this claim holds true. 
+
+For the same reasons, no effort was put into parallelizing the implementation. Only the fast base extension is partially multi-threaded up to $k$ threads. Outside this, OpenFHE utilizes the available threads to give \emph{some} additional benefit; though the threads are not utilized optimally as OpenFHE is unaware of --- and thus unable to efficiently exploit --- the structure of the high level functions and data structures. As a preliminary result the external product was still measured, though we emphasize these numbers are not necessarily representative of an optimally multi-threaded implementation.
+
+\begin{table}[H]
+    \caption{Hybrid external product performance, multi-threaded.}
+    \label{tab:bench:hybrid-deviation}
+    \centering
+    \begin{tabular}{lcccccc}
+        \toprule
+        \textbf{Label} & $T = 1$ & $T = 2$ & $T = 3$ & $T = 4$ & $T = 5$ & $T = 6$ \\
+        \midrule
+        \texttt{standard} & \num{29.2}~ms & \num{18.0}~ms & \num{14.1}~ms & \num{11.1}~ms & \num{10.8}~ms & \num{11.3}~ms \\
+        \texttt{hybrid-N} & \num{60.9}~ms & \num{39.2}~ms & \num{30.7}~ms & \num{23.1}~ms & \num{24.0}~ms & \num{22.6}~ms \\
+        \texttt{hybrid-Q} & \num{14.2}~ms & \num{8.25}~ms & \num{7.45}~ms & \num{5.07}~ms & \num{5.69}~ms & \num{6.21}~ms \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The suboptimal multi-threading is highlighted in the \texttt{hybrid-Q} case where $k=4$ and $T=4$ produces the fastest benchmarks. Beyond that, managing the additional threads creates a larger overhead than the benefit derived from them.
+
 \subsubsection{Internal Product}
-One would think that since the internal product is defined as repeated applications of the external product, the hybrid technique would extend to this product as well. It does not. The noise advantage of the hybrid external product comes from the rescaling by $P^{-1}$, which necessarily maps the result down to modulus $Q$. Since $P$ is a zero divisor of the ring $R_{QP}$, the inverse does not exist and division by $P$ is only well-defined as a map $R_{QP}\to R_{Q}$. Therefore, a pure ``hybrid'' internal product cannot exist.
+One would think that since the internal product is defined as repeated applications of the external product, the hybrid technique would extend to this product as well. It does not. The noise advantage of the hybrid external product comes from pre-scaling the message relative to the error. Multiplying by $P^{-1}$ necessarily maps the result down to modulus $Q$. Since $P$ is a zero divisor of the ring $R_{QP}$, the inverse does not exist and division by $P$ is only well-defined as a map $R_{QP}\to R_{Q}$. Hence a \emph{purely} hybrid internal product $\Call{HGSW}{}\times\Call{HGSW}{}\mapsto\Call{HGSW}{}$ with the same auxiliary modulus $P$ on both sides cannot retain the noise advantage of the technique. 
+
+\vfill
+\newpage
 
 \subsubsection{Mixed Product}
-Observe that the pure hybrid internal product only breaks because we require the output to be in a modulus that is a factor of $P$. If we distinguish between a \emph{left} (regular) and a \emph{right} (hybrid) RGSW, then we can define a \textit{mixed} product that takes a hybrid-RGSW as one of its operands, but outputs a regular RGSW. Importantly, this product would be infinitely chain-able using only hybrid external products.
+Observe that the pure hybrid internal product only breaks because we require the output to be in a modulus that is a factor of $P$. If we distinguish between a \emph{left} (regular) and a \emph{right} (hybrid) RGSW, then we can define a \textit{mixed} product that takes a hybrid-RGSW as one of its operands, but outputs a regular RGSW. Crucially, chaining this product would be possible using only hybrid external products.
 
-\newcommand{\mixedprod}{\;\boxed{\diamond}\;}
-\begin{corollary}[Mixed Product]
-    Let $\boxdot$ denote the hybrid external product. Let $S$ be an \gls{rgsw} ciphertext \eqref{def:rgsw} with $2\ell$ rows and $H$ be a hybrid-RGSW ciphertext \eqref{eq:hybrid-rgsw}. We define the \emph{mixed internal product} $\mixedprod$ as
+\newcommand{\mixedprod}{\custombox{\diamond}}
+% \newcommand{\mixedprod}{\boxast}
+\begin{conjecture}[Mixed Product]
+    Let $\boxdot$ denote the \emph{hybrid} external product. Let $A$ be an \gls{rgsw} ciphertext \eqref{def:rgsw} with $2k\ell$ rows and $H$ be a hybrid-RGSW ciphertext \eqref{eq:hybrid-rgsw}. We define the \emph{mixed product} $\mixedprod$ as
     \begin{align}
-        \mixedprod:\;\; \Call{RGSW}{} \mixedprod \Call{HybridRGSW}{} &\longmapsto \Call{RGSW}{}  \\
+        \mixedprod:\;\; \Call{RGSW}{} \times \Call{HGSW}{} &\longmapsto \Call{RGSW}{}  \\
         (A, H) &\longmapsto A \mixedprod H = \begin{bmatrix}
             A_0 \boxdot H \\
             \vdots \\
-            A_{2\ell - 1} \boxdot H
+            A_{2k\ell - 1} \boxdot H
         \end{bmatrix}
     \end{align}
-    
-    and propose that this product is \emph{right-chainable} wrt. hybrid-RGSW ciphertexts, in the sense that a sequence of hybrid-RGSW ciphertexts $H_i$ can be repeatedly applied as the right operand: 
+
+    and observe that a sequence of fresh hybrid-RGSW ciphertexts $H_i = \Call{HGSW}{m_i}$ can be applied using \emph{only} hybrid external products. We conjecture that this product inherits the additive noise growth of the internal product (\cref{sec:results:noise}), only with the smaller per-step noise of the hybrid external product, and that:
     \begin{equation*}
-        (((S \mixedprod H_0) \mixedprod H_1) ... ) \mixedprod H_i \mapsto \Call{RGSW}{}
+        (((A \mixedprod H_0) \mixedprod H_1) ... ) \mixedprod H_n \;\longmapsto\; \Call{RGSW}{m_A \cdot m_0 \cdot m_1 \cdot ... \cdot m_{n}}
     \end{equation*}
-\end{corollary}
+\end{conjecture}
 
-This product has not been implemented in our code, so we can only speculate on its performance. However, it stands to reason that it would outperform the regular internal product in an \gls{rns} setting as it uses the faster hybrid external product. In \gls{spar}, specifically, it can be applied to the \texttt{server::Write} loop by setting $h\gets (I_{i,k}\boxtimes \mathsf{notHasWritten}) \mixedprod z_{i,d}$ and having the client send $z$ pre-scaled by $P$ and in the $QP$-modulus space.
+This product has not been implemented in our code, so we can only speculate on its performance. However, it stands to reason that it would outperform internal products by using the faster hybrid external product. %; the number of total rows is also decreased by a factor of $k\ell/d_{num}$. % (where $\ell$ is the ``generic'' decomposition parameter, equal to $k\ell$ in the case of the BV-RNS gadget).
 
-To summarize, we believe that if \autoref{alg:spar:write} was rewritten using only external products, the performance would be significantly improved by using the hybrid technique. Barring that, the protocol might also see a non-negligible speed-up by employing the mixed product when assigning $h$.
+\subsubsection{Application in sPAR}
+If \cref{alg:spar:write} can be rewritten using only external products, with no \gls{rgsw} accumulators, then the hybrid external product could improve the runtime by several orders of magnitudes in the best case, and a few percent in the worst-case. % One option might be to homomorphically expand an \gls{rlwe} to an \gls{rgsw} using e.g., \cite{cryptoeprint:2018/244, chillotti:onionring:2019, cryptoeprint:2025/1088}. \textcolor{red}{Then the server write could perform this expansion in each loop to lift the $\mathsf{hasNotWritten}$ value...}. 
+%% TODO: Check the 2018/244 reference is the right one
+Barring that, the mixed product is already applicable to the inner loop by using hybrid-RGSW for $z_{i,d}$ and rewriting the assignment of $h$ such that:
+\begin{equation}
+    h\gets(I_{i,k}\boxtimes \mathsf{notHasWritten}) \mixedprod z_{i,d}
+\end{equation}
+
+\newpage
+From \cref{tab:bench:rgsw} we know each internal product takes at least $397\text{ ms}$ with $T\leq6$ threads, and see that \cref{alg:spar:write} runs the inner loop $9\eta$ times. Each mixed product performs $2k\ell = 28$ hybrid external products. Based on the preliminary timings in \cref{tab:bench:hybrid-deviation}, we can estimate a runtime between $141.96$ and $632.8 \text{ ms}$ based on the exact parameters used. Over $9\eta$ iterations, this is between $2295.36 \text{ ms}$ faster and $2122.2\text{ ms}$ slower per user, roughly $\pm 2.2\eta$ seconds.
+
+However, this is not a fair analysis for two reasons. First, due to the sub-optimal multi-threading discussed in \cref{rem:hybrid-security}, \emph{any} multi-threaded comparison is favorable to the BV implementation. Second, we see in \cref{tab:bench:rgsw} that the internal product is faster than simply performing an equivalent amount of external products. We can expect the mixed product to have the same amortized behavior, as most of the gain is likely coming from allocating memory for all the rows at once rather than once per row.
+
+Using the same analysis as above for the internal product predicts it would be $50.2\text{ ms}$ slower than what is actually measured at $T=1$. Assuming the same amortization and comparing the methods at $T=1$ suggest the mixed product evaluates in $50.2 + \frac{t_{hybrid}}{65.9}\cdot 1744.8 \text{ ms}$, which places it in the range from $\num{426.166009105}$ to $\num{1662.61760243}\text{ ms}$ single-threaded. 
+
+The two internal products in \cref{alg:spar:write} account for nearly all of the computation in the inner loop; each one expressed as a fraction is $0.499$ times the function's total runtime. % This immediately bounds the achievable improvement, as even a free mixed product removes at most $0.499$ of the runtime, roughly a $2\times$ speedup. 
+The estimated mixed product costs between $r = \num{0.237418}$ (\texttt{hybrid-Q}) and $r = \num{0.92624936068}$ (\texttt{hybrid-N}) times as much as an internal product, reducing the total runtime of \cref{alg:spar:write} by $0.499\,(1 - r)$, an improvement between $3.7\%$ and $38.1\%$. Applied to the measurements in \cref{tab:bench:full}, this optimistic estimate places \serverWrite{} at $\eta = 2$ between $13.79$ and $8.86\text{ s}$ for $T\leq 6$.
+
+While the mixed product alone does not make the protocol practical with respect to time, we believe it is a promising avenue for improving the performance of \gls{spar} in the \gls{rns} setting, warranting a deeper investigation into the application of the hybrid technique in this scenario. Not only as it pertains to improving the speed of the protocol, as is the main point of discussion in this subsection, but also the noise growth --- and by extension the number of users which can be supported in a fixed amount of time.

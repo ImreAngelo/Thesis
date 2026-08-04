@@ -1,19 +1,17 @@
 \section{Discussions}
 \label{sec:results:discussion}
-The results are slower than anticipated. 
+The results are slower than anticipated. Even though we are using much larger parameters than the small TFHE parameters suggested in~\cite{cryptoeprint:2025/860}, the protocol is an order of magnitude slower than what would be practical for most applications. In theory, an arbitrary number of users can be supported, but the parameters that make it possible are too slow for it to be practical in large networks. In the remainder of this section we discuss some potential optimizations that could improve the performance of \gls{spar} and make it feasible in more applications. %% TODO: Lay foundation by saying for example 'making it practical only for applications that can accept such a delay'
 
-Even though we are using much larger parameters than the small TFHE parameters suggested in~\cite{cryptoeprint:2025/860}, the protocol is an order of magnitude slower than what would be practical for most applications. In theory, an arbitrary number of users can be supported, but the parameters that make it possible are too slow for it to be practical in large networks. In the remainder of this section we discuss some potential optimizations that could improve the performance of \gls{spar}.
-
-\subsubsection{AVX512 Instruction Set}
+\subsection{AVX512 Instruction Set}
 \label{sec:avx512}
-OpenFHE supporst the AVX512 instruction set, which offers true \gls{simd} vectorization into 512-bit registers.  
+OpenFHE supports the AVX512 instruction set through the Intel HEXL backend, which offers true \gls{simd} vectorization into 512-bit registers. The benefit offered by this acceleration is substantial. We were unfortunately not able to use AVX512 for our benchmarks due to hardware incompatibility, and stress that the benchmarks would be improved on equivalent but 512-bit capable hardware --- though by exactly how much remains to be seen.
 
-AVX512 offers true \gls{simd} vectorization, as opposed to the \gls{simd} \emph{packing} of \autoref{sec:bgv}. A single instruction operates on a 512-bit register, letting the CPU process several coefficients of an \gls{rns} residue polynomial at once. OpenFHE supports AVX512 acceleration through the Intel HEXL backend, but we were unable to benchmark it because none of the machines available to us have a CPU implementing the instruction set.
+Taking full advantage of AVX512 would require revisiting the parameters, since utilization depends on the sizes of the \gls{rns} moduli. A 512-bit register can for example hold eleven 42-bit integers together with one 50-bit integer, or twelve 42-bit integers with some bits left unused. Optimizing parameters for this scenario, and quantifying the improvement is left as future work.
 
-Taking full advantage of AVX512 would require revisiting the parameters, since register utilization depends on the sizes of the \gls{rns} moduli. A 512-bit register can for example hold eleven 42-bit integers together with one 50-bit integer, or twelve 42-bit integers with some bits left unused. 
-
-Choosing the moduli to match such a layout, so that $k = 12$ and $Q \approx 2^{512}$, would fill every register completely. Whether this repartitioning of $Q$ leaves the noise behaviour of \autoref{sec:results:noise} unchanged is a question we leave open.
-
-%% Througput?
 \subsection{SIMD Packing}
-Throughout this thesis we have emphasized that our implementation supports \gls{simd} packing, but nowhere in \gls{spar} is this utilized. The \texttt{server::Write} loop is the most computationally expensive part of the whole protocol. In theory, \gls{simd} packing allows the server to perform $N$ rounds simultaneously. Converting this into higher throughput, however, would likely require significant changes to the protocol. If $N$ rounds are performed then every client would presumably be encrypting, sending and partially decrypting $N$ times more data, requiring significantly higher bandwidth and RAM on the server.
+\label{sec:simd-packing}
+Throughout this thesis we have emphasized that our core library supports \gls{simd} packing, but nowhere in \gls{spar} is this utilized. The \serverWrite{} loop is the most computationally expensive part of the whole protocol. Since this function evaluates a binary tree, only the first slot is ever used. In theory, \gls{simd} packing thus allows the server to perform $N$ rounds simultaneously by packing one round into each slot of a ciphertext. Converting this into higher throughput, however, would likely require major changes to the protocol. 
+
+Another limiting factor is the sheer amount of data being handled in this case. If $N$ rounds are performed then every client would presumably be encrypting, sending and partially decrypting $N$ times more data, requiring significantly higher bandwidth and RAM on the server. Each message already carries $32\text{ KiB}$ of data, and the \gls{rgsw} ciphertexts are far larger ($2k\ell \cdot 2N\log(Q) \text{ bits} \approx 48.16896 \text{ MB}$). Just storing the $N\cdot\eta$ encrypted messages $V_r$ and $3N\eta\log{\eta}$ encrypted bits $A_{i,d}$ as \gls{rlwe} ciphertexts would require almost $ \text{315 GB}$ of memory even for just 2 users. More realistically, fewer than $N$ rounds could also be performed simultaneously with this approach.
+
+\newpage

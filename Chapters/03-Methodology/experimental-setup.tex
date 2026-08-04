@@ -2,7 +2,7 @@
 \section{Experimental Setup}
 
 \subsubsection{sPAR}
-Communication between parties is not simulated. In its place a single ``all-knowing'' orchestrator, holding the joint secret key, performs the setup and one full round. Multi-party \gls{fhe} is still employed throughout: every user generates its own private key share and a corresponding public share, and the public shares are synthesized into one joint public key.
+Communication between parties is not simulated. In its place a single all-knowing orchestrator, holding the joint secret key, performs the setup and one full round. Multi-party \gls{fhe} is still employed throughout: every user generates its own private key share and a corresponding public share, and the public shares are synthesized into one joint public key.
 
 The orchestrator takes the number of users $\eta$ as input and gives each user a unique identifier. Every user encrypts its identifier under the joint key and sends it to the server together with three random indices, and once all messages have been received the server performs the write operation on each of them. The setup phase is considered free, as it is static and involves no communication in the simulation.
 
@@ -34,15 +34,13 @@ Timings are collected with Google Benchmark and correctness is checked with Goog
 
 \subsubsection{Noise Analysis}
 % As the clients are simulated
-The testing environment always has access to the secret key, so the error of an \gls{rlwe} ciphertext is checked directly rather than inferred.
+The testing environment always has access to the secret key, so the error of an \gls{rlwe} ciphertext is checked directly.
 \begin{gather}
     x = (c_0, c_1) = (c_1s + \Delta m + \epsilon, c_1) \\
     \implies \epsilon = c_0 - c_1s - \Delta m, \quad m = \Call{Decrypt}{x, s}
 \end{gather}
-An \gls{rgsw} ciphertext is an intermediate object, %% TODO: Shorten
-so where a result is itself \gls{rgsw}, as with the internal product or $\mathsf{notHasWritten}$, two methods are available. The first row encodes $\mu\cdot 1$, so that row can be extracted on its own and its error checked. Alternatively the external product with $\Call{RLWE}{1}$ can be computed, where that ciphertext is made noiseless so as not to contribute any error of its own. We use the latter, because the first relies on the gadget containing $1$, which is traditionally but not necessarily the case.
+An \gls{rgsw} ciphertext is an intermediate object, not meant to be decrypted. To get a representative measure of the noise, we convert the \gls{rgsw} to an \gls{rlwe} ciphtext and measure its noise as above. Since the gadget vector usually contains $1$ as an element, one of the \gls{rgsw} rows are an \gls{rlwe} of the actual unscaled message. Alternatively, one can compute the external product using a public key \Call{RLWE}{0}. We use the latter method, as the former ignores the errors of the other rows.
 
-%% TODO: Do not touch this section
 \subsubsection{Multi-Threaded Performance}
 \label{sec:amdahl}
 The main advantage \gls{rns} holds over classical single-precision representations is its multi-threading capability. As described above, our implementation allows efficient parallelization over $k\ell$ threads. However, if fewer threads are available during benchmarking, we extrapolate the expected performance at $k\ell$ processors by modeling theoretical scaling behavior using Amdahl's Law~\cite{Gustafson:2011}.
@@ -51,16 +49,32 @@ The main advantage \gls{rns} holds over classical single-precision representatio
     A task whose execution is divided into a strictly serial fraction $f$ and a broadly parallelizable fraction $1-f$ will experience a theoretical speedup over $T$ processors given by:
     \begin{equation}
         \label{eq:amdahl}
-        \text{Speedup} = \frac{1}{f + \frac{1-f}{T}}
+        \frac{1}{f + \frac{1-f}{T}}
     \end{equation}
 \end{definition}
 
-Let $E(T)$ denote the total execution time of the algorithm on $T$ threads. Because speedup is defined as $\text{Speedup} = \frac{E(1)}{E(T)}$, we can substitute this ratio into~\eqref{eq:amdahl} and isolate $E(T)$ to form a linear equation:
+Let $E(T)$ denote the total execution time of the algorithm on $T$ threads. Because speedup is defined as $\frac{E(1)}{E(T)}$, we can substitute this ratio into~\eqref{eq:amdahl} and isolate $E(T)$ to form a linear equation:
 
-$$ E(T) = E(1)f + \frac{E(1)(1-f)}{T} $$
+\begin{equation}
+    \label{eq:amdahl-et}
+    E(T) = E(1)f + \frac{E(1)(1-f)}{T}
+\end{equation}
 
-By mapping this to the variables $y = E(T)$ and $x = \frac{1}{T}$, the relationship resolves into a standard linear model $y = \beta_0 + \beta_1 x$. The intercept $\beta_0 = E(1)f$ represents the fixed serial execution time, while the slope $\beta_1 = E(1)(1-f)$ captures the parallelizable workload scaled by the inverse thread count.
+By mapping \eqref{eq:amdahl-et} to the variables $y = E(T)$ and $x = \frac{1}{T}$, the relationship resolves into a standard linear model $y = \beta_0 + \beta_1 x$. The intercept $\beta_0 = E(1)f$ represents the fixed serial execution time, while the slope $\beta_1 = E(1)(1-f)$ captures the parallelizable workload scaled by the inverse thread count.
 
-By measuring empirical execution times across a limited set of processor counts ($T = 1, 2, 3, \dots, T_{max}$), we can perform an Ordinary Least Squares (OLS) linear regression on the variable pairs $(\frac{1}{T}, E(T))$. This regression identifies $\beta_0$ and $\beta_1$, mathematically separating the serial and parallel workloads. We can then substitute $T = k\ell$ into the fitted model to accurately extrapolate the expected execution time $E(k\ell)$ for a target architecture where $k\ell \gg T_{max}$.
+\newpage
+By measuring empirical execution times across a limited set of processor counts ($T = 1, 2, 3, \dots, T_{max}$), we can perform an ordinary least squares linear regression on the variable pairs $(\frac{1}{T}, E(T))$. This regression identifies $\beta_0$ and $\beta_1$, mathematically separating the serial and parallel workloads. We can then substitute $T = k\ell$ into the fitted model to accurately extrapolate the expected execution time $E(k\ell)$ for a target architecture where $k\ell \gg T_{max}$.
 
 When fitting this regression model, it is critical to exclude measurements taken at complete hardware saturation (i.e., the benchmarking system's absolute maximum thread count $T_{max}$). At full capacity, execution time is artificially inflated by external systemic overheads, such as OS thread scheduling, memory bandwidth contention, and thermal throttling. Including this saturated data point warps the linear fit, systematically overestimating the serial fraction $f$ and severely degrading the accuracy of the large-scale extrapolation.
+
+\subsubsection{Parameter Tuning}
+{
+%% [Top Priority] TODO: Write this subsection (short < half page)
+\color{red}
+\begin{itemize}
+    \item A few different parameter sets are used, each with an associated label
+    \item Single source of truth for parameters in \texttt{params.toml}
+    \item Add the \texttt{SPAR\_PARAM=label} to any test/benchmark to change the parameters 
+    \item \texttt{make estimate} runs the estimate for all the parameters in \texttt{params.toml} 
+\end{itemize}
+}

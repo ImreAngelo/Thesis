@@ -1,12 +1,10 @@
-%% TODO: Was called "Related Works" but only sPAR really qualifies as that
 \chapter{Preliminaries}
 \label{chp:protocol}
 
 \vfill
+%% [Low Priority] TODO: Rewrite all chapter inrtoductions
 This section begins \autoref{sec:notation} by establishing the common notation used throughout the thesis. Section \ref{sec:fhe} introduces homomorphic encryption, the BGV scheme and its multi-party variant. The following section introduces RNS, and the remainder of the section is dedicated to the \gls{spar} construction, and the \gls{fhe} primitives it depends upon.
 \newpage
-
-% If time allows, this section also details HomExpand, which decreases the bandwidth (allowing the clients/users to send a single rlwe that is then expanded into a series of RGSW ciphertexts encrypting each bit of the index).
 
 \newcommand{\gadgetformat}[2]{{#1}_{\mathsf{#2}}}
 \newcommand{\behz}[1]{\gadgetformat{#1}{BEHZ}}
@@ -17,5 +15,4 @@ This section begins \autoref{sec:notation} by establishing the common notation u
 \newpage\input{Chapters/02-Related/01-fhe-new}
 \newpage\input{Chapters/02-Related/02-rns}
 \newpage\input{Chapters/02-Related/03-gadgets} 
-%\newpage\input{Chapters/02-Related/04-tfhe}
 \newpage\input{Chapters/02-Related/05-spar}

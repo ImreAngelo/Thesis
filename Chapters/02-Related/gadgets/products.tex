@@ -1,30 +1,32 @@
 \subsection{RGSW}
-The techniques above are used in the \gls{gsw} scheme~\cite{cryptoeprint:2013/340} and its ring variants~\cite{cryptoeprint:2014/816, cryptoeprint:2018/421}, where the ciphertext itself is built around a gadget. We now formally define an \gls{rgsw} sample, and related products. %% TODO: Rewrite for style + TFHE approximates gadget + Formalize sample vs ciphertext vs encryption.
-% \gls{gsw} came with a homomorphic product between two of its ciphertexts, and TFHE later added an asymmetric product between an \gls{rlwe} and an \gls{rgsw} ciphertext~\cite{cryptoeprint:2016/870, cryptoeprint:2018/421}. This subsection defines the \gls{rgsw} ciphertext and both products.
+The techniques above are used in the \gls{gsw} scheme~\cite{cryptoeprint:2013/340} and its ring variants~\cite{cryptoeprint:2014/816, cryptoeprint:2018/421}, where the ciphertext itself is built around a gadget. We now formally define an \gls{rgsw} ciphertext, and the operations required to employ \gls{rgsw} in \gls{fhe} schemes. %% TODO: Rewrite for style + TFHE approximates gadget + Formalize sample vs ciphertext vs encryption.
 
 \begin{definition}[Gadget Matrix]
     \label{def:gadget-matrix}
-    A gadget $g \in \mathbb{Z}_Q^\ell$ is extended to $k$-dimensional ciphertexts by the block-diagonal gadget matrix $G = I_k \otimes g \in R_Q^{k\ell\times k}$
+    A gadget $g \in R_Q^\ell$ is extended to $k$-dimensional ciphertexts by the block-diagonal gadget matrix $G = I_k \otimes g \in R_Q^{k\ell\times k}$
 \end{definition}
 
-\begin{definition}[RGSW]
-    Given a gadget matrix $G = I_2 \otimes g$, we define the \emph{masking} matrix $Z \in R_Q^{2\ell\times 2}$ as a collection of $2\ell$ \gls{rlwe} public keys $\Call{RLWE}{0}$. An \emph{\gls{rgsw}} encryption $C$ of $\mu \in R_Q$ is defined as
+\begin{definition}[RGSW Ciphertext]
+    Given a gadget matrix $G = I_2 \otimes g$, we define the \emph{masking} matrix $Z \in R_Q^{2\ell\times 2}$ as a collection of $2\ell$ \gls{rlwe} public keys $\Call{RLWE}{0}$. An \emph{\gls{rgsw}} encryption $C$ of $\mu \in R_Q$ is denoted $\Call{RGSW}{\mu}$ and defined as
     \begin{equation}
         \label{def:rgsw}
-        C = Z + \mu\cdot G \in R_Q^{2\ell\times 2}
+        C = Z + \mu\cdot G % \in R_Q^{2\ell\times 2}
     \end{equation}
 \end{definition}
 
+% Each row of an \gls{rgsw} ciphertext is a valid \gls{rlwe} sample. The upper block of $\ell$ rows are equivalent to $\Call{RLWE}{\mu g_i}$ for row $i$. The lower block of the remaining $\ell$ rows encode the message in the public components, where the $i$-th row effectively becoming $\Call{RLWE}{-\mu g_i\cdot s}$.
+
 An \gls{rgsw} ciphertext encodes the gadget-scaled messages $\mu g_i$ row by row. In the top block, $\mu g_i$ is added to the masked element, replacing the zero message of the underlying $\Call{RLWE}{0}$; in the bottom block it is added to the public element, so the row decrypts to $-\mu g_i\cdot s$ instead. Every row of $C$ is therefore itself an \gls{rlwe} ciphertext.
 
-Two \gls{rgsw} ciphertexts add homomorphically, just as \gls{rlwe} ciphertexts do: the zero encryptions and the gadget terms add component-wise, so $C_A + C_B$ encrypts $\mu_A + \mu_B$. Addition alone is, however, not sufficient for \gls{fhe}. This motivates the need for an \gls{rgsw}$\times$\gls{rgsw} product and a \gls{rlwe}$\times$\gls{rgsw} product. TFHE \cite{cryptoeprint:2018/421} formally introduced two such products through approximate gadget decomposition in two dimensions.  
-
+Two \gls{rgsw} ciphertexts add homomorphically, just as \gls{rlwe} ciphertexts do: the zero encryptions and the gadget terms add component-wise, so $C_A + C_B$ encrypts $\mu_A + \mu_B$. Addition alone is, however, not sufficient for \gls{fhe}. This motivates the need for an \gls{rgsw}$\times$\gls{rgsw} product and a \gls{rlwe}$\times$\gls{rgsw} product. These are called the internal and external products, respectively, in \cite{cryptoeprint:2018/421}. First, we extend the gadget property to two dimensions:
 % The multiplication mirrors the vector--matrix relationship between the two ciphertext types: the \gls{rlwe} ciphertext $x = (x_0, x_1)$ is mapped by a two-dimensional decomposition $G^{-1}(x)$ to a row vector of $2\ell$ small ring elements, which multiplies the $2\ell\times 2$ matrix $C$. The only requirement on $G^{-1}(x)$ is that it approximately inverts the $G$ matrix: 
 \begin{equation}
     \label{eq:gadget-matrix-property}
-    G^{-1}(x)\cdot G = x + e \pmod{Q}
+    G^{-1}(x)\cdot G = x + e \pmod{Q}%, \qquad\|G^{-1}(x)\|_{\infty} \leq \beta
 \end{equation}
-with quality $\|G^{-1}(x)\| \leq \beta$. No particular decomposition is prescribed. The canonical choice is the base-$B$ digit decomposition of the ciphertext coefficients~\cite{cryptoeprint:2018/421}, and it is the one usually meant when the external product is written down, but nothing in the definition depends on it. Any $G^{-1}(x)$ meeting \eqref{eq:gadget-matrix-property} at quality $\beta$ yields a valid product, and the noise bounds below are stated in terms of $\beta$ alone. % a generality that later chapters exploit by instantiating $G^{-1}$ with different gadgets. %% DO NOT FORWARD REFERENCE!
+
+%% TODO: Rewrite if time
+No particular decomposition is prescribed. The canonical choice is the base-$B$ digit decomposition of the ciphertext coefficients~\cite{cryptoeprint:2018/421}, and it is the one usually meant when the external product is written down, but nothing in the definition depends on it. Any $G^{-1}(x)$ meeting \eqref{eq:gadget-matrix-property} at quality $\beta$ yields a valid product, and the noise bounds below are stated in terms of $\beta$ alone.
 
 \begin{definition}[External Product]
     \label{def:prod:external}
@@ -34,14 +36,14 @@ with quality $\|G^{-1}(x)\| \leq \beta$. No particular decomposition is prescrib
         \label{def:extprod}
         (x, C) &\longmapsto x \boxdot C = G^{-1}(x) \cdot C,
     \end{align}
-    which returns an encryption of the product of the messages: $\Call{RLWE}{m} \boxdot \Call{RGSW}{\mu} = \Call{RLWE}{m\cdot\mu}$.
-    Correctness follows by inserting \eqref{def:rgsw} into \eqref{def:extprod}:
+    which evaluates $\Call{RLWE}{m}\,\boxdot\,\Call{RGSW}{\mu} = \Call{RLWE}{m\cdot\mu}$. Formal correctness and noise bounds are given in~\cite{cryptoeprint:2018/421}, though informally this follows from inserting \eqref{def:rgsw} into \eqref{def:extprod} and using the gadget property \eqref{eq:gadget-matrix-property}, yielding a sum of two \gls{rlwe} samples:
     \begin{equation}
         \label{eq:extprod-expansion}
         G^{-1}(x)\cdot C = G^{-1}(x)\cdot Z + \mu\cdot(x + e)
     \end{equation}
-    where $\mu\cdot x$ carries the message and the remaining terms contribute only noise; formal correctness and noise bounds are given in~\cite{cryptoeprint:2018/421}.
 \end{definition}
+
+\vspace{1pt}
 
 \begin{lemma}[Gadget Matrix Construction]
     \label{lemma:gadget-matrix-construction}
@@ -68,20 +70,13 @@ with quality $\|G^{-1}(x)\| \leq \beta$. No particular decomposition is prescrib
 \end{lemma}
 
 \begin{remark}%[Asymmetric Noise Growth]
-    \label{rem:extprod-asymmetry}
-    Due to an asymmetry in the noise
-    \autoref{appendix:asymmetry} details how equation \eqref{eq:extprod-expansion} shows this asymmetry in the external product, where the error is primarily a product of the decomposition quality $\beta$ and the masking errors $\epsilon_i$ in $Z$.
-
-    Due to this, it has been noted in \cite{cryptoeprint:2013/541}.
-    
-    The two noise terms of \eqref{eq:extprod-expansion} behave very differently, as detailed in \autoref{appendix:asymmetry}. The term $G^{-1}(x)\cdot Z \leq (a\cdot s + \beta\sum_{i=0}^{2\ell-1} \epsilon_i,\; a)$ amplifies the masking errors of the \gls{rgsw} operand by the decomposition quality. The precision term $e$ is scaled by $\mu$, which is why $\mu$ is typically constrained to $\{0,1\}$ when an inexact gadget is used. The error of the \gls{rlwe} operand, by contrast, is never amplified: it is carried into the result scaled only by $\mu$. This asymmetry was observed early on~\cite{cryptoeprint:2013/541, cryptoeprint:2014/094, cryptoeprint:2014/816}, and makes \gls{gsw}-style ciphertexts particularly suited to evaluating long chains of products. The noise stays low as long as the right operand is fresh, or at least has a small $\|\epsilon\|_\infty$, regardless of the error already accumulated on the left.
+    \label{rem:extprod-asymmetry} %% TODO: Include more sources/authors
+    \gls{rgsw} ciphertexts have been by several authors, including \cite{cryptoeprint:2013/541, cryptoeprint:2018/421}, to be uniquely suited to evaluate long chains of products, due to an asymmetry in the noise propagation --- an asymmetry explained in greater detail in \cref{appendix:asymmetry}. Essentially, since $\|G^{-1}(x)\|_\infty \leq \beta$ and $\mu\in\{0,1\}$ we see that \eqref{eq:extprod-expansion} is bounded by $\beta\cdot Z + x + e$. The total error in the external product becomes dominated by the product $\beta \cdot Z$, while $x$ is effectively ignored. A chain of external products $(x\boxdot C_0) \boxdot C_1 \boxdot ...$ is thus able to sustain itself with minimal noise growth as long as the \gls{rgsw} ciphertexts $C_i$ are fresh encryptions.
 \end{remark}
-
-The external product leaves the \gls{rgsw} operand untouched and returns an \gls{rlwe} ciphertext, so it cannot be chained: its output is not of the right type to serve as either operand again. The original \gls{gsw} construction therefore defined its product directly between two of its own ciphertexts~\cite{cryptoeprint:2013/340}. That product needs no separate machinery here. Every row of an \gls{rgsw} ciphertext is an \gls{rlwe} ciphertext, so applying the external product row by row multiplies the whole matrix by the same message and returns an \gls{rgsw} ciphertext again.
 
 \begin{definition}[Internal Product]
     \label{def:prod:internal}
-    Let $A, C \in R_Q^{2\ell\times 2}$ be \gls{rgsw} encryptions of $\mu_A, \mu_C \in R_Q$ under the same secret key and gadget, and let $A_i$ denote the $i$-th row of $A$. The \emph{internal product}~\cite{cryptoeprint:2018/421} applies the external product to each row of the left operand:
+    Let $A, C \in R_Q^{2\ell\times 2}$ be \gls{rgsw} encryptions of $\mu_A, \mu_C \in R_Q$ under the same secret key and gadget, and let $A_i$ denote the $i$-th row of $A$. The \emph{internal product} applies the external product to each row of the left operand:
     \begin{align}
         \boxtimes: \Call{RGSW}{} \times \Call{RGSW}{} &\longrightarrow \Call{RGSW}{} \nonumber \\
         (A, C) &\longmapsto A \boxtimes C = \begin{bmatrix}
@@ -100,5 +95,5 @@ The asymmetry of \autoref{rem:extprod-asymmetry} applies to each of the $2\ell$ 
 
 \begin{remark}[Operand Order]
     \label{rem:operand-order}
-    The convention above places the \gls{rlwe} operand of the external product on the left and the \gls{rgsw} operand on the right, so that both products read left to right with the accumulator first. TFHE writes the external product the other way round~\cite{cryptoeprint:2018/421}, with the \gls{rgsw} ciphertext on the left. The operation is the same, but any expression carried over from that literature must be transposed before it is read against \eqref{def:extprod}.
+    The convention above places the \gls{rlwe} operand of the external product on the left and the \gls{rgsw} operand on the right, so that both products read left to right with the accumulator first. TFHE writes the external product the other way round~\cite{cryptoeprint:2018/421}, with the \gls{rgsw} ciphertext on the left. The operation is the same, but any expression carried over from that literature must be flipped before it is read against \eqref{def:extprod}.
 \end{remark}

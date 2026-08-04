@@ -1,5 +1,5 @@
 In BGV, BFV and CKKS the ciphertext modulus $Q$ is typically large, much larger than a machine word or register (64 bits on modern computers). Numbers that do not fit inside a register must be handled with multi-precision arithmetic, which is known to be slow due to its serial nature. % that does not allow parallelization. 
-High-performance instantiations remedy this by using a \gls{rns} where large numbers are represented as a set of smaller, independent residues via the \gls{crt} (detailed in \appref{app:crt}). \gls{rns} variants of BGV, BFV and CKKS are the standard in practice; OpenFHE, for example, only supports the RNS versions of these schemes~\cite{cryptoeprint:2022/915}.
+High-performance instantiations remedy this by using a \gls{rns} where large numbers are represented as a set of smaller, independent residues via the \gls{crt} (detailed in \autoref{appendix:crt}). \gls{rns} variants of BGV, BFV and CKKS are the standard in practice; OpenFHE, for example, only supports the RNS versions of these schemes~\cite{cryptoeprint:2022/915}.
 
 \begin{definition}[RNS Basis]
     Let $w$ denote the bit-width of a standard machine word. A positive integer $q$ is termed \emph{small} if it fits entirely within this word, such that $0 < q < 2^w$. A set of $k$ moduli $\mathcal{B}_Q = \{q_0, q_1, \dots, q_{k-1}\}$ is considered an \emph{RNS basis} for $Q = \prod_{i=0}^{k-1} q_i$ if its $k$ elements are all small and pairwise coprime ($\gcd(q_i, q_j) = 1$ for all $i \neq j$).
@@ -38,20 +38,20 @@ High-performance instantiations remedy this by using a \gls{rns} where large num
     \end{equation}
 \end{definition}
 
-Because the RNS moduli are small, every coefficient in \eqref{form:crt} fits within a single machine word. Furthermore, the coprimality of the basis ensures this representation is an isomorphism \eqref{eq:rns-poly}, allowing global reconstruction back to $R_Q$ via \gls{crt}. Consequently, additition and subtraction of two \gls{rns} polynomials in the same basis is functionally equivalent to the element-wise addition and subtraction of their \firstForm{s} modulo $q_i$. No carries propagate between the towers, allowing all $k$ residues to be processed in parallel utilizing fast, native hardware instructions.
+The RNS moduli are specifically chosen to be strictly smaller than $2^w$, so that every coefficient in \eqref{form:crt} is small and fits within a single machine word. Furthermore, the coprimality of the basis ensures this representation is an isomorphism \eqref{eq:rns-poly} allowing reconstruction back to $R_Q$ via the \gls{crt}. Consequently, addition and subtraction of two \gls{rns} polynomials in the same basis is functionally equivalent to the element-wise addition and subtraction of their \firstForm{s} modulo $q_i$. No carries propagate between the towers, allowing all $k$ residues to be processed in parallel utilizing fast, native hardware instructions.
 
 \subsection{Double CRT Polynomial}
-While the \firstForm{} perfectly isolates polynomial addition into word-sized registers, standard polynomial multiplication in $R_Q$ operating directly on coefficients scales poorly at $\mathcal{O}(N^2)$. To achieve practical performance, high-speed implementations map these polynomials into an evaluation domain using the \gls{ntt} described in more detail in \appref{app:ntt}.
+While the \firstForm{} perfectly isolates polynomial addition into word-sized registers, standard polynomial multiplication in $R_Q$ operating directly on coefficients scales poorly at $\mathcal{O}(N^2)$. To achieve practical performance, high-speed implementations map these polynomials into an evaluation domain using the \gls{ntt} described in more detail in \autoref{appendix:ntt}.
 
 \begin{definition}[NTT-Friendly RNS Basis]
     \label{def:ntt-friendly}
-    Let $N$ denote the dimension of the polynomial ring $R_Q$, where $N$ is a power of two. A small modulus $q_i$ is termed \emph{NTT-friendly} if $q_i \equiv 1 \pmod{2N}$, guaranteeing the existence of a primitive $2N$-th root of unity $\omega_i \in \mathbb{Z}_{q_i}$. An RNS basis $\mathcal{B}_Q$ is \gls{ntt}-friendly if it consists entirely of \gls{ntt}-friendly moduli.
+    Let $N$ denote the dimension of the polynomial ring $R_Q$, where $N$ is a power of two: $N=2^n$. A small modulus $q_i$ is \emph{NTT-friendly} if $q_i \equiv 1 \pmod{2N}$, guaranteeing the existence of a primitive $2N$-th root of unity $\omega_i \in \mathbb{Z}_{q_i}$. An RNS basis $\mathcal{B}_Q$ is \gls{ntt}-friendly if it consists entirely of \gls{ntt}-friendly moduli.
 \end{definition}
 
 \newcommand{\secondForm}{evaluation form}
 \begin{definition}[Second RNS Form (Evaluation Form)]
     \label{def:ntt-form}
-    Let $a \in R_Q$ be an RNS polynomial over an NTT-friendly basis $\mathcal{B}_Q$. The \gls{ntt} is an invertible mapping that transitions a polynomial from its coefficient representation into a point-value representation (see \appref{app:ntt}).
+    Let $a \in R_Q$ be an RNS polynomial over an NTT-friendly basis $\mathcal{B}_Q$. The \gls{ntt} is an invertible mapping that transitions a polynomial from its coefficient representation into a point-value representation (see \autoref{appendix:ntt}).
     
     The \emph{\secondForm} (or \emph{NTT form}) of $a$, denoted $\text{NTT}(a)$, is the $k \times N$ matrix obtained by independently applying the $N$-point NTT to each of its $k$ limbs:
     
@@ -68,8 +68,8 @@ While the \firstForm{} perfectly isolates polynomial addition into word-sized re
     \end{equation}
 \end{definition}
 
-The \secondForm reduces polynomial multiplication in $R_Q$ to the element-wise product of their respective matrices. The \secondForm{} also inherits the element-wise addition and subtraction from the \firstForm, meaning an entire sequence of arithmetic operations can be executed entirely in parallel using native hardware instructions, without ever leaving the \gls{ntt} domain.
+The \secondForm reduces polynomial multiplication in $R_Q$ to the element-wise product of their respective matrices. The \secondForm{} also inherits the element-wise addition and subtraction from the \firstForm, meaning an entire sequence of arithmetic operations can be executed entirely in parallel using native hardware instructions, without ever leaving the evaluation domain.
 
 %%
-%% CLOSING REMARKS
-However, this efficiency dictates a strict computational trade-off. Certain arithmetic operations fundamentally cannot be performed in the \secondForm{} and require the polynomial's coefficients. The transition between representations necessitates a Forward or Inverse NTT, which is a computationally expensive $\mathcal{O}(N \log N)$ procedure. Consequently, a primary objective in the implementation of \gls{rns}-variants of homomorphic encryption schemes is the strategic minimization of transitions between the \firstForm{} and \secondForm{}.
+%% CLOSING REMARKS 
+Although the evaluation form enables fast, parallel polynomial addition and multiplication, certain arithmetic operations fundamentally cannot be performed in the evaluation domain. The transition between representations necessitates a Forward or Inverse NTT, which is a computationally expensive $\mathcal{O}(N \log N)$ procedure. Consequently, a primary objective in the implementation of \gls{rns}-variants of homomorphic encryption schemes is the strategic minimization of transitions between the \gls{rns} and evaluation forms.

@@ -15,50 +15,37 @@
 \edef\largeSlope{\pgfplotstableregressiona}
 \edef\largeIntercept{\pgfplotstableregressionb}
 
+%% TODO: Ensure colors are consistent across graphs: BV ell = 2 should always be gaussblue etc.
+%% TODO: Rename color names to be more memorizable
 \begin{figure}[H]
     \centering
-    \caption{Hybrid noise growth in chained external products}
+    \caption{Noise growth in chained external products.}
     \label{fig:hybrid:plot-1}
     \begin{tikzpicture}
     \begin{semilogyaxis}[
         noiseaxis,
         log basis y=2,
-        xmin=0, xmax=1000,
+        xmin=0, xmax=300,
         xlabel={Chain length},
         ylabel={Error $\|\epsilon\|_\infty$},
         legend pos=south east,
         set layers,
         width=\textwidth,
-        height=0.55\textwidth,
+        height=0.5\textwidth,
     ]
         % ---------- Scatter plots ----------
         \addplot[only marks, mark=*, mark size=.5pt, color=gaussblue]
-            table[col sep=comma, x=n, y=noise] {Data/Noise/ExternalProd/bv.csv};
+            table[col sep=comma, x=n, y=noise] {Data/Noise/ExternalProd/bv_2.csv};
         \addplot[only marks, mark=*, mark size=.5pt, color=hpsgreen]
+            table[col sep=comma, x=n, y=noise] {Data/Noise/ExternalProd/bv_3.csv};
+        \addplot[only marks, mark=*, mark size=.5pt, color=canonorange]
+            table[col sep=comma, x=n, y=noise] {Data/Noise/ExternalProd/bv_4.csv};
+        \addplot[only marks, mark=*, mark size=.5pt, color=maxred]
+            table[col sep=comma, x=n, y=noise] {Data/Noise/ExternalProd/bv_5.csv};
+        \addplot[only marks, mark=*, mark size=.5pt, color=hpspurple]
             table[col sep=comma, x=n, y=noise] {Data/Noise/ExternalProd/hybrid.csv};
             
-        % ---------- Regression lines ----------
-        % \addplot[thick, solid, dotted, on layer=axis foreground, color=canonorange, domain=1:1000, samples=300, forget plot]
-        %     {\smallSlope*x + \smallIntercept};
-        % \addplot[thick, solid, dotted, on layer=axis foreground, color=hpspurple, domain=1:1000, samples=300, forget plot]
-        %     {\largeSlope*x + \largeIntercept};
-            
-        \legend{BV, Hybrid}
+        \legend{BV $\ell = 2$, BV $\ell = 3$, BV $\ell = 4$, BV $\ell = 5$, Hybrid}
     \end{semilogyaxis}
     \end{tikzpicture}
 \end{figure}
-
-
-% \newpage
-
-% \begin{tabular}{lc} 
-%     \toprule
-%     \textbf{n} & \textbf{noise} \\ % & \textbf{Role} \\ % Manual Table Header
-%     \midrule
-    
-%     % Reads CSV, maps column headers to macros, and loops through rows
-%     \csvreader[head to column names]{Data/ExternalProduct/bv-small.csv}{}
-%     {\n & \noise \\} 
-    
-%     % \bottomrule
-% \end{tabular}

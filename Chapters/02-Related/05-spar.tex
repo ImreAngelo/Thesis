@@ -1,6 +1,12 @@
+%% [High Priority] TODO: Rewrite/clean up this section!!
+%% [Top Priroty] TODO: Why FHE-based approach is better than others + specify preprint version (has no implementation)
 \section{(Somewhat) Practical Anonymous Router}
 \label{sec:spar}
+The \gls{niar} . The router construction makes the client-communication complexity practical, as each client only contacts the router and the router contacts each client, the total number of connections is $\eta$. \gls{spar} takes it a step further and makes the instantiation practical, since it relies only on well-known assumptions etc. A final measure of practicality remains; how long does it take to run the protocol?
 
+The (Somewhat) Practical Anonymous Router was created in response to the \gls{niar}'s impractical instantiation. 
+
+% \textcolor{red}{\Blindtext[1][1]}
 
 % \gls{spar} realizes the anonymous router of \autoref{chp:background} from the primitives of the preceding sections~\cite{cryptoeprint:2025/860}. Each of the $\eta$ clients encrypts its message together with a randomly chosen destination index, and the server writes every message into an encrypted list at the position its sender picked. Both the list and the indices remain encrypted throughout the write.
 
@@ -14,28 +20,23 @@ Two further assumptions are what the protocol takes explicit measures to satisfy
 
 %%
 %% THE PROTOCOL
-\subsection{The Protocol}
+\subsection{Protocol}
 \label{sec:spar:protocol}
 A one-time setup is followed by polynomially many rounds under the same keys, each consisting of four computations separated by two client--server round trips.
 
-\subsubsection{Setup}
+\subsubsection{Setup Phase}
 The clients agree on a set of \gls{fhe} parameters and run the multi-party key generation of \autoref{sec:mpfhe}, producing a joint public key under which every round is encrypted. % In contrast to existing protocols, neither a permutation nor any trusted party enters the setup.
 
-\subsubsection{Client: Encryption}
-Client $i$ encrypts its message under the joint key and samples three bucket indices $a_0, a_1, a_2 \overset{\$}{\leftarrow} [0, \eta)$ uniformly, encrypting the $\log\eta$ bits of each index separately. A single index per client would collide too often, whereas with $\eta$ buckets of three slots the probability that all nine candidate slots are taken falls below $10^{-11}$, and on that event the message is dropped and retransmitted in a later round~\cite{cryptoeprint:2025/860}.
-
-\subsubsection{Server: Write}
-The server keeps a message matrix $L$ of $\eta\times3$ \gls{rlwe} slots and an availability matrix $I$ of $\eta\times3$ encrypted flags marking which slots are free. For each client it evaluates \autoref{alg:spar:homplacing}, where a binary tree of depth $\log\eta$ turns each encrypted index into an indicator vector over the buckets, and the write loop then places the message in the first free slot among the three chosen buckets, tracked by the encrypted flag $\mathsf{hasWritten}$. Clients upload \gls{rlwe} ciphertexts only, as the index bits are expanded to \gls{rgsw} by the server~\cite{chillotti:onionring:2019, park:sortinghat:2022}.
-
-Once all $\eta$ messages are written, the slots of each bucket are sorted obliviously and $L$ is broadcast to the clients.
+\subsubsection{Online Phase}
+\begin{itemize}
+    \item \emph{Client: Encrypt} Client $i$ encrypts its message under the joint key and samples three bucket indices $a_0, a_1, a_2 \overset{\$}{\leftarrow} [0, \eta)$ uniformly, encrypting the $\log\eta$ bits of each index separately. A single index per client would collide too often, whereas with $\eta$ buckets of three slots the probability that all nine candidate slots are taken falls below $10^{-11}$, and on that event the message is dropped and retransmitted in a later round~\cite{cryptoeprint:2025/860}.
+    \item \emph{Server: Write} The server keeps a message matrix $L$ of $\eta\times3$ \gls{rlwe} slots and an availability matrix $I$ of $\eta\times3$ encrypted flags marking which slots are free. For each client it evaluates \autoref{alg:spar:homplacing}, where a binary tree of depth $\log\eta$ turns each encrypted index into an indicator vector over the buckets, and the write loop then places the message in the first free slot among the three chosen buckets, tracked by the encrypted flag $\mathsf{hasWritten}$. Clients upload \gls{rlwe} ciphertexts only, as the index bits are expanded to \gls{rgsw} by the server~\cite{chillotti:onionring:2019, park:sortinghat:2022}. Once all $\eta$ messages are written, the slots of each bucket are sorted obliviously and $L$ is broadcast to the clients.
+    \item \emph{Client: Decrypt} Each client partially decrypts all $3\eta$ slots with its own share (\autoref{sec:mpfhe}) and sends the result back to the server. % When $N > 3\eta$, the partial decryptions of one client pack into a single ciphertext~\cite{cryptoeprint:2020/015}.
+    \item \emph{Server: Decrypt} The server aggregates the partial decryptions of each slot (\autoref{sec:mpfhe}) and recovers the list. Empty slots decrypt to zero and are discarded, leaving the $\eta$ messages in an order that is a fresh uniform permutation of the senders.
+\end{itemize}
 
 \input{Algorithms/spar-2} % paper Alg. 2: choice-of-three (new float)
-
-\subsubsection{Client: Partial Decryption}
-Each client partially decrypts all $3\eta$ slots with its own share (\autoref{sec:mpfhe}) and sends the result back to the server. % When $N > 3\eta$, the partial decryptions of one client pack into a single ciphertext~\cite{cryptoeprint:2020/015}.
-
-\subsubsection{Server: Final Decryption}
-The server aggregates the partial decryptions of each slot (\autoref{sec:mpfhe}) and recovers the list. Empty slots decrypt to zero and are discarded, leaving the $\eta$ messages in an order that is a fresh uniform permutation of the senders.
+\newpage
 
 %%
 %% REQUIREMENTS

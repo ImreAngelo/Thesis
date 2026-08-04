@@ -20,6 +20,7 @@
 \newcommand{\boxast}{\mathbin{\ooalign{$\square$\cr\hidewidth\raisebox{0.2ex}{$\scriptstyle\ast$}\hidewidth\cr}}}
 
 % Autoref
+\usepackage[nameinlink]{cleveref}
 \newcommand{\algorithmautorefname}{Algorithm}
 
 % \autoref for a *section-level* appendix reference (e.g. A.1) prints
@@ -66,6 +67,24 @@
 \NewExpandableDocumentCommand { \jsonmspern } { m m m }
   { \fp_eval:n { round ( \JSONParseExpandableValue {#1} {#2} / (#3) , 2 ) } }
 \ExplSyntaxOff
+
+% Mixed product symbol
+% Define a universal macro to center any symbol inside a \square
+\makeatletter
+\newcommand{\custombox}[1]{%
+  \mathbin{\mathpalette\@custombox{#1}}%
+}
+\newcommand{\@custombox}[2]{%
+  \vcenter{\hbox{%
+    \ooalign{%
+      % Center the square on the math axis
+      $\m@th#1\vcenter{\hbox{$\m@th#1\square$}}$\cr
+      % Center the inner symbol on the math axis and horizontally center it
+      \hidewidth$\m@th#1\vcenter{\hbox{$\m@th#1#2$}}$\hidewidth\cr
+    }%
+  }}%
+}
+\makeatother
 
 % Strike-through text
 % \usepackage[normalem]{ulem}

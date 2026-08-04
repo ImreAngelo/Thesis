@@ -14,7 +14,7 @@
 %%   CKKS17=2016/421, CGGI20=2018/421 all cited below; AP14=2014/094 is cited in products.tex.
 %%   Cited nowhere in the thesis: MP12, GINX16, BIP+22.
 Brakerski and Vaikuntanathan~\cite{cryptoeprint:2011/344} first decomposed ciphertext elements into small digits as a means of controlling the noise in their \emph{relinearization} technique. %% VERIFIED: BV11 applies the decomposition in relinearization / key switching, NOT in scalar multiplication. The "scalar multiplication" framing traces to the quoted survey line in 03-gadgets.tex, which describes gadget decomposition's general role rather than BV11's own contribution.
-The idea has since been generalized into the idea of \emph{gadget decomposition} and employed in the design of numerous \gls{fhe} schemes % as an auxiliary tool for certain procedures, such as key-switching, or as the basis for entire scheme. 
+The idea has since been generalized into \emph{gadget decomposition} and employed in the design of numerous \gls{fhe} schemes % as an auxiliary tool for certain procedures, such as key-switching, or as the basis for entire scheme. 
 \cite{cryptoeprint:2011/277, cryptoeprint:2012/078, cryptoeprint:2012/144, cryptoeprint:2013/340, cryptoeprint:2014/816, cryptoeprint:2016/421, cryptoeprint:2018/421}.
 
 %% (R)GSW - Used in GSW (cryptoeprint:2013/340), FHEW (cryptoeprint:2014/816) and TFHE (cryptoeprint:2018/421)
@@ -24,44 +24,68 @@ The idea has since been generalized into the idea of \emph{gadget decomposition}
 
 \begin{definition}[Digit Decomposition]
     \label{def:digit-decomposition}
-    Given an integer $\gamma\in\mathbb{Z}_q$ for a modulus $q\geq 2$, base $B$ and decomposition parameter $\ell$, the digit decomposition $\decomp{\gamma}{} = (\gamma_0, \gamma_1, \dots, \gamma_{\ell-1}) \in \mathbb{Z}_B^\ell$ outputs an ordered list of $\ell$ base-$B$ \emph{digits} satisfying
-    \begin{equation*}
+    Given an integer $\gamma\in\mathbb{Z}_q$ for a modulus $q\geq 2$, base $B$ and decomposition parameter $\ell$, the digit decomposition $\decomp{\gamma}{}$ outputs an ordered list of $\ell$ base-$B$ \emph{digits} $(\gamma_0, \gamma_1, \dots, \gamma_{\ell-1}) \in \mathbb{Z}_B^\ell$ satisfying
+    \begin{equation}
+        \label{eq:digit-decomp}
         \gamma = \gamma_0\frac{q}{B} + \gamma_1\frac{q}{B^2} + ... \gamma_{\ell - 1}\frac{q}{B^{\ell}} = \sum_{i=0}^{\ell-1}\gamma_i\frac{q}{B^{i+1}}
-    \end{equation*}
+    \end{equation}
 \end{definition}
 
 %%
 %% Why its helpful
-By construction, $\langle\decomp{\gamma}{}, g\rangle = \gamma$ for the fixed vector $g = (q/B, \dots, q/B^{\ell})$, meaning $\langle\decomp{\gamma}{}, g\cdot x\rangle = \gamma\cdot x$ for an arbitrary integer $x\in \mathbb{Z}$. If the digits of $\decomp{\gamma}{}$ are small, 
-\begin{equation*}
-    \langle\decomp{\gamma + \epsilon}{}, g\cdot x\rangle =  
-\end{equation*}
-
-If the digits of $\decomp{\gamma}{}$ are small, then $\langle \decomp{\gamma}{}, \epsilon \cdot g\rangle \leq \ell\cdot \max\{\gamma_i\cdot \epsilon_i\} \leq \ell B\epsilon \ll \gamma\epsilon$. This allows some control over the noise growth, since . Second, two integers can be multiplied through the decomposition. By construction, $\langle\decomp{\gamma}{}, g\rangle = \gamma$ for the fixed vector $g = (q/B, \dots, q/B^{\ell})$, meaning $\langle\decomp{\gamma}{}, g\cdot x\rangle = \gamma\cdot x$ for an arbitrary integer $x\in \mathbb{Z}$. For either of these properties, the particular form of $g$ is unimportant as long as the digits $\gamma_i$ remain small. Furthermore, as we are generally working with some intrinsic error in FHE, \cite{cryptoeprint:2018/421} proposed allowing some error $\epsilon$ in the reconstruction, giving the definition from their paper verbatim:
+By construction, $\langle\decomp{\gamma}{}, g\rangle = \gamma$ for the fixed vector $g = (q/B, \dots, q/B^{\ell})$. % Multiplication is carried through $\langle\decomp{\gamma}{}, g\cdot x\rangle = \langle\decomp{\gamma}{}, g\rangle\cdot x = \gamma\cdot x$ for an arbitrary integer $x\in \mathbb{Z}$. 
+Consider a vector $C = g\cdot s + \epsilon$ encoding a secret integer $s$ with some noise $\epsilon\in \mathbb{Z}^{\ell}$, and its inner product with the decomposition of another large integer $\gamma \gg B$.
+\begin{align*}
+    \langle\decomp{\gamma}{}, C\rangle &= \langle \decomp{\gamma}{}, g\cdot s + \epsilon\rangle \\
+    &= \langle \decomp{\gamma}{}, g\rangle \cdot s + \langle\decomp{\gamma}{}, \epsilon\rangle \\
+    &= \gamma \cdot s + \langle\decomp{\gamma}{}, \epsilon\rangle \\
+    &\leq \gamma\cdot s + B\cdot\epsilon
+\end{align*}
 
 %%
-%% Gadget Decomposition
-%% 
-\begin{definition}[(Abstract) Gadget Decomposition]
-    \label{def:tfhe:gadget-decomposition}
-    An efficient algorithm $\decomp{v}{g,\beta,\epsilon}$ is a valid decomposition on the gadget $g\in \mathbb{Z}_q^\ell$ with quality $\beta \in \mathbb{Z}^{+}$ and precision $\epsilon \in \mathbb{Z}^+$ if and only if for any ring element $v\in R_Q$ it efficiently and publicly outputs a small vector $u \in \mathbb{Z}_q$ such that $\|u\|_\infty \leq \beta$ and $\langle u, g\rangle \leq v + \epsilon$.
+%% Bridge to abstract definition
+Because the decomposition outputs arbitrarily small digits $\|\decomp{\gamma}{}\|_\infty \leq B$, we are able to control the noise growth in the multiplication --- homomorphically multiplying $s$ by a large $\gamma$ \emph{without} scaling the error by the same large factor. Neither the function which produced the digits $\gamma_i$ nor the exact form of the \emph{gadget} vector $g$ matters, \cite{cryptoeprint:2018/421} even proposed allowing the gadget itself to introduce some error. We abstract the exact properties we care about.
 
-    % Furthermore, the expectation of u · H − v must to be equal to 0 when v is uniformly distributed in M .
-\end{definition}
-
-The entries of the output vector $u$ are again called \emph{digits}, named after digit decomposition, though for a general gadget they need not be digits of any base. It is convenient to name the two sides of the reconstruction rather than to carry an algorithm and a fixed gadget separately. Writing $D(v)$ for the output of $\decomp{v}{g,\beta,\epsilon}$ and $P(u)$ for the gadget-scaled vector $g\cdot u$, the condition $\langle u, g\rangle \leq v + \epsilon$ becomes a statement about a pair of vectors, which is the form used throughout this thesis.
-
-\begin{definition}[Gadget Property]
-    Two vectors $P(x) \in \mathbb{Z}_Q^\ell$ and $D(y) \in \mathbb{Z}_\beta^\ell$ are said to have the \textit{gadget property} if and only if they satisfy \eqref{def:gadget-property} for any pair of ring elements $(x,y)\in R_Q^2$ with precision $\epsilon \in \mathbb{Z}_q^+$ and quality $\beta$ where $\|D(y)\|_\infty \leq \beta$. If $\epsilon = 0$ then $P(x)$ and $D(y)$ are said to have the \textit{exact} gadget property.
+%% Note: Consider using the non-property definition <u, g> = v + e, so the K-dim gadget becomes G = I_K \otimes g instead of I_K \otimes P(1)
+\begin{definition}[Gadget Decomposition]
+    Adopting definition 3.6 from \cite{cryptoeprint:2018/421} to our context, we say that an efficient algorithm $\decomp{u}{g}$ is a valid decomposition on the gadget $g\in \mathbb{Z}_Q^\ell$ with quality $\beta \in \mathbb{Z}^{+}$ and precision $\epsilon \in \mathbb{Z}^+$ if and only if, for any ring element $u\in R_Q$ it efficiently and publicly outputs a small vector of \emph{digits} $D(u) \in R_Q^{\ell}$ such that $\|D(u)\|_\infty \leq \beta$ and $\langle D(u), g\rangle \leq u + \epsilon$. The gadget is said to be \emph{exact} if $\epsilon = 0$. For convenience we might define $g$ as a function of another element $v\in R_Q$ such that $g=P(v)\in \mathbb{Z}_Q^\ell$. \textit{Any} pair of vectors $D(u), P(v)$ that satisfy \eqref{def:gadget-property} is then said to possess the \emph{gadget property}, meaning $D(u)$ is the digits of a valid decomposition on $P(v)$.
     \begin{equation}
         \label{def:gadget-property}
-        \langle P(x), D(y)\rangle = x\cdot y + \epsilon \pmod{Q}
+        \langle D(u), P(v)\rangle = u\cdot v + \epsilon \pmod{Q}
     \end{equation}
 \end{definition}
 
+% \begin{definition}[Gadget Property]
+%     Two vectors $D(a) \in \mathbb{Z}_Q^\ell$ and $P(b) \in \mathbb{Z}_\beta^\ell$ are said to have the \emph{gadget property} with precision $\epsilon$ and quality $\beta$ if and only if they satisfy \eqref{def:gadget-property} for any pair of ring elements $(a,b)\in R_Q^2$ with $\epsilon \geq 0$ and $\|D(a)\|_\infty \leq \beta$. If $\epsilon = 0$ then the pair is said to have the \emph{exact} gadget property.
+%     \begin{equation}
+%         \label{def:gadget-property}
+%         \langle D(x), P(y)\rangle = x\cdot y + \epsilon \pmod{Q}
+%     \end{equation}
+% \end{definition}
+
+% %%
+% %% Gadget Decomposition
+% %% 
+% \begin{definition}[(Abstract) Gadget Decomposition]
+%     \label{def:tfhe:gadget-decomposition}
+%     An efficient algorithm $\decomp{v}{g,\beta,\epsilon}$ is a valid decomposition on the gadget $g\in \mathbb{Z}_q^\ell$ with quality $\beta \in \mathbb{Z}^{+}$ and precision $\epsilon \in \mathbb{Z}^+$ if and only if for any ring element $v\in R_Q$ it efficiently and publicly outputs a small vector $u \in \mathbb{Z}_q$ such that $\|u\|_\infty \leq \beta$ and $\langle u, g\rangle \leq v + \epsilon$.
+
+%     % Furthermore, the expectation of u · H − v must to be equal to 0 when v is uniformly distributed in M .
+% \end{definition}
+
+% The entries of the output vector $u$ are again called \emph{digits}, named after digit decomposition, though for a general gadget they need not be digits of any base. It is convenient to name the two sides of the reconstruction rather than to carry an algorithm and a fixed gadget separately. Writing $D(v)$ for the output of $\decomp{v}{g,\beta,\epsilon}$ and $P(u)$ for the gadget-scaled vector $g\cdot u$, the condition $\langle u, g\rangle \leq v + \epsilon$ becomes a statement about a pair of vectors, which is the form used throughout this thesis.
+
+% \begin{definition}[Gadget Property]
+%     Two vectors $P(x) \in \mathbb{Z}_Q^\ell$ and $D(y) \in \mathbb{Z}_\beta^\ell$ are said to have the \textit{gadget property} if and only if they satisfy \eqref{def:gadget-property} for any pair of ring elements $(x,y)\in R_Q^2$ with precision $\epsilon \in \mathbb{Z}_q^+$ and quality $\beta$ where $\|D(y)\|_\infty \leq \beta$. If $\epsilon = 0$ then $P(x)$ and $D(y)$ are said to have the \textit{exact} gadget property.
+%     \begin{equation}
+%         \label{def:gadget-property}
+%         \langle P(x), D(y)\rangle = x\cdot y + \epsilon \pmod{Q}
+%     \end{equation}
+% \end{definition}
+
 \begin{lemma}[Layered Gadget Decomposition]
     \label{thm:gadget-layers}
-    Let $(P_1, D_1)$ and $(P_2, D_2)$ be two pairs with the gadget property, of quality $\beta_1, \beta_2$ and precision $\epsilon_1, \epsilon_2$ respectively. Their composition, defined component-wise by $(P_1\circ P_2)(u) = P_1(P_2(u))$ and $(D_1\circ D_2)(v) = D_1(D_2(v))$, again has the gadget property, with quality $\beta_1$ and precision $\epsilon_1 + \epsilon_2$.
+    Let $(P_1, D_1)$ and $(P_2, D_2)$ be two pairs with the gadget property \eqref{def:gadget-property}, of quality $\beta_1, \beta_2$ and precision $\epsilon_1, \epsilon_2$ respectively. Their composition, defined component-wise by $(P_1\circ P_2)(u) = P_1(P_2(u))$ and $(D_1\circ D_2)(v) = D_1(D_2(v))$, again has the gadget property, with quality $\beta_1$ and precision $\epsilon_1 + \epsilon_2$.
     \begin{equation}
         \label{eq:gadget-layers}
         \langle (P_1\circ P_2)(u),\; (D_1\circ D_2)(v)\rangle = u\cdot v + \epsilon_1 + \epsilon_2 \pmod{Q}
@@ -78,10 +102,10 @@ The entries of the output vector $u$ are again called \emph{digits}, named after
 
 \subsubsection{RNS Instantiation}
 \label{sec:hps}
-Digit decomposition cannot be applied directly to ring elements in an \gls{rns} scheme where the system only has access to the residues. When Bajard et al. implemented the first \gls{rns} version of the BV scheme \cite{cryptoeprint:2016/510} they exchanged digit decomposition for an \gls{rns} decomposition, exploiting the fact that this decomposition is already required by the representation. Halevi, Polyakov and Shoup later simplified their construction into the form below \cite{cryptoeprint:2018/117}, which is the one used here.
+Digit decomposition cannot be applied directly to ring elements in an \gls{rns} scheme where the system only has access to the residues. When Bajard et al. implemented the first \gls{rns} version of the BV scheme \cite{cryptoeprint:2016/510} they exchanged digit decomposition for \gls{crt} decomposition, exploiting the fact that this decomposition is already required by the \gls{rns}. Halevi, Polyakov and Shoup later simplified their construction into the form below \cite{cryptoeprint:2018/117}, which is the one we adopt here.
 
 \begin{definition}[HPS Gadget]
-    Recall from~\autoref{sec:rns-base-conversion} the factors $\hat{q}_i = Q/q_i$, and let $[\hat{q}_i^{-1}]_{q_i}$ denote the modular inverse of $\hat{q}_i$ so that $\hat{q}_i\cdot[\hat{q}_i^{-1}]_{q_i} \equiv 1 \pmod{q_i}$. By formulating the \gls{crt} as an inner product \eqref{eq:crt-gadget}, it is immediately clear that the \gls{rns} decomposition with moduli $q_i$ is an exact decomposition on $g = (\hat{q}_0\cdot[\hat{q}_0^{-1}]_{q_0}, \dots, \hat{q}_{k-1}\cdot[\hat{q}_{k-1}^{-1}]_{q_{k-1}})$ with $\beta = \max_i\{q_i\}/2$ (assuming centered residues).
+    Recall from~\autoref{sec:rns-base-conversion} the factors $\hat{q}_i = Q/q_i$ and their modular inverses $\hat{q}_i^{-1}$ where $\hat{q}_i\cdot\hat{q}_i^{-1} \equiv 1 \pmod{q_i}$. By formulating the \gls{crt} as an inner product \eqref{eq:crt-gadget}, it is immediately clear that the \gls{rns} decomposition with moduli $q_i$ is an exact decomposition on $g = (\hat{q}_0\cdot[\hat{q}_0^{-1}]_{q_0}, \dots, \hat{q}_{k-1}\cdot[\hat{q}_{k-1}^{-1}]_{q_{k-1}})$ with $\beta = \max_i\{q_i\}/2$ (assuming centered residues).
     \begin{align}
         \label{def:hps:P}
         \hps{P}(a) &= (a\cdot[\hat{q}^{-1}_0]_{q_0}\cdot \hat{q}_0, \dots, a\cdot[\hat{q}^{-1}_{k-1}]_{q_{k-1}}\cdot [\hat{q}_{k-1}]_Q) \\
@@ -92,7 +116,7 @@ Digit decomposition cannot be applied directly to ring elements in an \gls{rns} 
 
 \begin{remark}
     \label{rem:hps-optimization}
-    As \gls{rns} stores the polynomial $a\in R_Q$ as the set of residues $[a]_{q_i}$ for all $q_i \in \mathcal{B}_{Q}$, the $\hps{D}(\cdot)$ vector \eqref{def:hps:D} is \emph{free} in the sense that calculating $\hps{D}(a) \cong a$ requires no arithmetic. In fact, neither does \eqref{def:hps:P} since $\hat{q}_i = Q/q_i = (\prod_{l=0}^{k-1}q_l)/q_i$ contains $q_j$ as a factor unless $i=j$, in which case $\hat{q}_i\cdot[\hat{q}_i^{-1}]_{q_i} = 1$ by definition! \\
+    As \gls{rns} stores the polynomial $a\in R_Q$ as the set of residues $[a]_{q_i}$ for all $q_i \in \mathcal{B}_{Q}$, the $\hps{D}$ decomposition \eqref{def:hps:D} is \emph{free} in the sense that $\hps{D}(a) \cong a$ and calculating it requires no arithmetic. In fact, neither does $\hps{P}$ since $\hat{q}_i = Q/q_i = (\prod_{l=0}^{k-1}q_l)/q_i$ contains $q_j$ as a factor unless $i=j$, in which case $\hat{q}_i\cdot[\hat{q}_i^{-1}]_{q_i} = 1$ by definition! \\
     \begin{gather*}
         a\cdot[\hat{q}^{-1}_i]_{q_i}\cdot\hat{q}_i = \{(a\cdot[\hat{q}_i^{-1}]_{q_i}\cdot\hat{q}_i) \bmod{q_j} \}_{j = 0}^{k-1} 
         \\
@@ -109,4 +133,4 @@ Digit decomposition cannot be applied directly to ring elements in an \gls{rns} 
     \end{gather*}
 \end{remark} 
 
-While the HPS gadget is cheap, its quality $\beta = \max_i\{q_i\}/2$ is too large for many applications, as the digits are the full residues themselves. A second layer of decomposition brings the quality down. Every digit of $\hps{D}(a)$ fits inside a machine word, since the \gls{rns} moduli are chosen that way, so the digit decomposition of \autoref{def:digit-decomposition} applies to each limb directly and \autoref{thm:gadget-layers} makes the composition a valid gadget in its own right. Taking the second layer on the powers of a base $B$, that is on $g = (1, B, \dots, B^{\ell-1})$, splits each of the $k$ residues into $\ell$ digits. The composed gadget produces $k\ell$ digits of quality $\beta = B/2$ once they are centered, and it is exact whenever $B^\ell \geq \max_i\{q_i\}$, which fixes the decomposition parameter at $\ell = \lceil \log_B \max_i\{q_i\}\rceil$.
+While the HPS gadget is cheap, its quality $\beta = \max_i\{q_i\}/2$ is too large for many applications. A second decomposition can be independently applied to each of the digits (limbs) as permitted by \autoref{thm:gadget-layers}, decreasing the upper bound further. As every digit now fits inside a machine word, we are not restricted in the same way as before; allowing us to use, for example, digit decomposition. Integer schemes such as BGV and BFV typically use the \emph{powers-of-base} $B$ gadget $g = (1, B, \dots, B^{\ell-1})$. This is another form of digit decomposition, where the digits are ordered from least significant to most --- as opposed to \eqref{eq:digit-decomp} which reverses that order. This guarantees all the elements in $g$ are integers, rather than fractions, though the decomposition generally must be exact to prevent huge precision errors from cutting of the \emph{most} significant digit(s).

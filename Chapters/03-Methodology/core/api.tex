@@ -1,7 +1,7 @@
 \section{Implementation Details of the Core Library}
 \label{sec:impl:core}
 The core library, located in the \texttt{libs/core} directory, extends OpenFHE~\cite{cryptoeprint:2022/915} with \gls{rgsw} functionality that the framework does not itself expose; of which the most important functions are listed in \autoref{tab:main-functions}. These are declared by an abstract interface, \texttt{IExtendedContext}, allowing alternative implementations to serve as drop-in replacements without requiring user modifications in the future. % This allows different gadgets to be utilized without inconveniencing the project...
-We also provide a concrete implementation using gadget decomposition of the RNS moduli, as described in \autoref{sec:gadget-decomposition}. Following the convention of~\cite{cryptoeprint:2021/204, cryptoeprint:2022/915}, we use \emph{BV} to refer to this technique after Brakerski and Vaikuntanathan~\cite{cryptoeprint:2011/344}. %, and by extension to the implementation built on it.
+We also provide a concrete implementation using gadget decomposition of the RNS moduli, as described in \autoref{sec:gadget-decomposition}. Following the convention of~\cite{cryptoeprint:2021/204, cryptoeprint:2022/915}, we use \emph{BV} to refer to this technique after Brakerski and Vaikuntanathan's work in~\cite{cryptoeprint:2011/344}.
 
 \begin{table}[H]
     \centering
