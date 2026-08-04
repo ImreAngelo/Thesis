@@ -8,7 +8,13 @@
 \fi
 \pagestyle{empty}
 \begin{abstract}
-\noindent \Blindtext[3][1] % Replace this by your own text
+\noindent Anonyme kommunikasjonssystemer lar brukere utveksle meldinger over et nettverk uten å avsløre hvem som kommuniserer med hvem, men de mest utbredte systemene er avhengige av at deler av infrastrukturen opptrer ærlig. Somewhat Practical Anonymous Router (sPAR) er en ny konstruksjon som fjerner denne avhengigheten ved hjelp av fullstendig homomorf kryptering (FHE), slik at én enkelt, ikke-klarert tjener kan permutere krypterte meldinger uten noen gang å lære permutasjonen. I motsetning til sine forgjengere bygger sPAR utelukkende på primitiver som etablerte FHE-metoder allerede tilbyr. Konstruksjonen har så langt bare eksistert på papiret og som et lite konseptbevis, og verken den konkrete kostnaden eller skaleringen i antall deltakere har vært målt.
+
+Denne oppgaven presenterer en implementasjon av sPAR bygget på BGV og den første empiriske evalueringen av protokollen. Ettersom OpenFHE ikke eksponerer RGSW-kryptering eller de eksterne og interne produktene sPAR krever, overfører vi først disse operasjonene fra TFHE til RNS-varianten av BGV, og leverer dem som et gjenbrukbart C++ bibliotek som utvider OpenFHE. Oppå dette biblioteket implementerer vi protokollen ende-til-ende, inkludert dekryptering under flerparts terskelnøkler (TFHE), og måler støyvekst og kjøretid som funksjoner av antall deltakere.
+
+Protokollen kjører korrekt, men kostnaden er vesentlig høyere enn den opprinnelige analysen forutså. En runde domineres av tjenerens skrivesteg, som igjen domineres av interne produkter, en operasjon som ikke inngår i den opprinnelige kostnadsanalysen og som med våre parametre er omtrent fjorten ganger så dyr som et eksternt produkt. Tjenerens samlede arbeid per runde vokser kvadratisk i antall deltakere; ett enkelt skrivekall tar omtrent fjorten sekunder med to deltakere og omtrent ett minutt med åtte. Rundetider på sekunder for hundre brukere, slik den opprinnelige artikkelen forespeilet, er utenfor rekkevidde for denne instansieringen.
+
+Hindringene vi identifiserer er kvantitative snarere enn strukturelle. Vi erkjenner at sPAR kan bygges utelukkende av veletablerte RLWE- og RGSW-konstruksjoner, og vi skisserer flere veier som kan senke kostnaden betydelig, blant annet en hybrid gadget-dekomponering for produktene, maskinvareakselerasjon og amortisering av de sekvensielle skrivestegene over flere runder.
 \end{abstract}
 \cleardoublepage
 \resetlanguage

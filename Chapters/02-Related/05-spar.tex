@@ -1,14 +1,13 @@
-%% [High Priority] TODO: Rewrite/clean up this section!!
-%% [Top Priority] TODO: Why FHE-based approach is better than others!!!!!!!!!!!! (IMPORTANT) + specify preprint version (which has no implementation)
+%%
+%% (Somewhat) Practical Anonymous Router
+%%
 \section{(Somewhat) Practical Anonymous Router}
 \label{sec:spar}
-NIAR proposed an "anonymous router" primitive, which has better scaling than existing solutions with the same privacy guarantees. Their instantiation is hard/impossible to instantiate. sPAR \cite{cryptoeprint:2025/860} attempts to design such a router than can be implemented in practice by relying on 
+\gls{spar} realizes the anonymous router of \autoref{chp:background} from the primitives of the preceding sections~\cite{cryptoeprint:2025/860}. Each of the $\eta$ clients encrypts its message together with a randomly chosen index, and the server writes every message into an encrypted list at the position its sender picked. Both the list and the indices remain encrypted throughout the write.
 
-The (Somewhat) Practical Anonymous Router was created in response to the \gls{niar}'s impractical instantiation. The router construction makes the client-communication complexity practical, as each client only contacts the router and the router contacts each client, the total number of connections is $\eta$. \gls{spar} takes it a step further and makes the instantiation practical, since it relies only on well-known assumptions etc. A final measure of practicality remains; how long does it take to run the protocol?
+Each client contacts only the server and the server contacts each client, so the communication graph is a star of $\eta$ links and clients never address one another. A round is assembled entirely from the multi-party scheme of \autoref{sec:mpfhe} and the \gls{rgsw} products of \autoref{sec:gadget-decomposition}.
 
-% \textcolor{red}{\Blindtext[1][1]}
-
-% \gls{spar} realizes the anonymous router of \autoref{chp:background} from the primitives of the preceding sections~\cite{cryptoeprint:2025/860}. Each of the $\eta$ clients encrypts its message together with a randomly chosen destination index, and the server writes every message into an encrypted list at the position its sender picked. Both the list and the indices remain encrypted throughout the write.
+This thesis follows the initial preprint of May 2025~\cite{cryptoeprint:2025/860}, the only version available at the time of writing. No implementation of the protocol accompanies that version.
 
 %%
 %% SYSTEM MODEL
@@ -16,32 +15,34 @@ The (Somewhat) Practical Anonymous Router was created in response to the \gls{ni
 \label{sec:spar:model}
 The system contains $\eta$ clients and a single server, with communication happening in \emph{rounds}. Every client submits exactly one message per round, sending a random message if it has nothing to say, and all traffic passes through the server. The server is untrusted for privacy but trusted for availability, and may collude with any number of corrupted clients. Sender anonymity follows from the IND-CPA security of the underlying scheme, with definitions and proofs given in the original paper~\cite{cryptoeprint:2025/860}.
 
-Messages are assumed to be uniformly distributed, in which case sorting a set of . 
-
 Messages are assumed to be uniformly distributed, which is what lets placement at a random encrypted index stand in for a shuffle. Messages sharing a bucket must additionally be sorted obliviously before the list is opened, since their relative order would otherwise reveal which sender wrote first.
 
 %%
 %% THE PROTOCOL
 \subsection{Protocol}
 \label{sec:spar:protocol}
-A one-time setup is followed by polynomially many rounds under the same keys, each consisting of four computations separated by two client-server round trips. %% By using FHE, 
+A one-time setup is followed by polynomially many rounds under the same keys, each consisting of four computations separated by two client-server round trips.
 
 \subsubsection{Setup Phase}
-The clients agree on a set of \gls{fhe} parameters and run the multi-party key generation of \autoref{sec:mpfhe}, producing a joint public key under which every round is encrypted. % In contrast to existing protocols, neither a permutation nor any trusted party enters the setup.
+The clients agree on a set of \gls{fhe} parameters and run the multi-party key generation of \autoref{sec:mpfhe}, producing a joint public key under which every round is encrypted. Neither a permutation nor any trusted party enters the setup. The permutation of a round is determined by randomness the clients draw freshly each time, so a single setup serves every round without making a sender's positions linkable across them.
 
 \subsubsection{Online Phase}
 \begin{itemize}
-    \item \emph{Client: Encrypt} Client $i$ encrypts its message under the joint key and samples three bucket indices $a_0, a_1, a_2 \overset{\$}{\leftarrow} [0, \eta)$ uniformly, encrypting the $\log\eta$ bits of each index separately. A single index per client would collide too often, whereas with $\eta$ buckets of three slots the probability that all nine candidate slots are taken falls below $10^{-11}$, and on that event the message is dropped and retransmitted in a later round~\cite{cryptoeprint:2025/860}.
-    \item \emph{Server: Write} The server keeps a message matrix $L$ of $\eta\times3$ \gls{rlwe} slots and an availability matrix $I$ of $\eta\times3$ encrypted flags marking which slots are free. For each client it evaluates \autoref{alg:spar:homplacing}, where a binary tree of depth $\log\eta$ turns each encrypted index into an indicator vector over the buckets, and the write loop then places the message in the first free slot among the three chosen buckets, tracked by the encrypted flag $\mathsf{hasWritten}$. Clients upload \gls{rlwe} ciphertexts only, as the index bits are expanded to \gls{rgsw} by the server~\cite{chillotti:onionring:2019, park:sortinghat:2022}. Once all $\eta$ messages are written, the slots of each bucket are sorted obliviously and $L$ is broadcast to the clients.
-    \item \emph{Client: Decrypt} Each client partially decrypts all $3\eta$ slots with its own share (\autoref{sec:mpfhe}) and sends the result back to the server. % When $N > 3\eta$, the partial decryptions of one client pack into a single ciphertext~\cite{cryptoeprint:2020/015}.
+    \item \emph{Client: Encrypt} Client $i$ encrypts its message under the joint key together with three bucket indices $a_0, a_1, a_2 \overset{\$}{\leftarrow} [0, \eta)$ sampled uniformly. A single index per client would collide too often, whereas with $\eta$ buckets of three slots the probability that all nine candidate slots are taken falls below $10^{-11}$, and on that event the message is dropped and retransmitted in a later round~\cite{cryptoeprint:2025/860}.
+    \item \emph{Server: Write} The server keeps a message matrix $L$ of $\eta\times3$ \gls{rlwe} slots and an availability matrix $I$ of $\eta\times3$ encrypted flags marking which slots are free. Each of a client's indices enters the write as an indicator vector over the buckets --- $\eta$ encrypted bits, exactly one encrypting $1$ --- derived from the upload as described in \autoref{sec:spar:bandwidth}. The write loop of \autoref{alg:spar:homplacing} then places each message in the first free slot among its three chosen buckets, tracked by the encrypted flag $\mathsf{hasWritten}$. Once all $\eta$ messages are written, the slots of each bucket are sorted obliviously and $L$ is broadcast to the clients.
+    \item \emph{Client: Decrypt} Each client partially decrypts all $3\eta$ slots with its own share (\autoref{sec:mpfhe}) and sends the result back to the server.
     \item \emph{Server: Decrypt} The server aggregates the partial decryptions of each slot (\autoref{sec:mpfhe}) and recovers the list. Empty slots decrypt to zero and are discarded, leaving the $\eta$ messages in an order that is a fresh uniform permutation of the senders.
 \end{itemize}
 
+%%
+%% BANDWIDTH
 \subsection{Bandwidth Optimizations}
-\begin{itemize}
-    \item RLWE ciphertexts are sent and expanded on the server using HomExpand \cite{he-rotate, chillotti:onionring:2019, cryptoeprint:2025/1088}.
-    \item Lines 1 - 12 are purely about extracting the bits and processing them for 
-\end{itemize}
+\label{sec:spar:bandwidth}
+Transmitted directly, an indicator vector occupies $\eta$ ciphertexts, so the three vectors of one client would cost $3\eta$ ciphertexts against a single one for its message. The paper instead uploads the $\log\eta$ bits of each index, encrypted separately, and rebuilds the indicator vectors on the server. Lines 1--12 of \autoref{alg:spar:homplacing} perform the reconstruction by descending a binary tree of depth $\log\eta$ whose root encrypts $1$, multiplying the running node by the current index bit and by its complement at every level, so that the $\eta$ leaves form the indicator vector of the encrypted index. The tree is pure preprocessing; the write loop from line 13 onward is identical whether the vectors are received directly or rebuilt from bits.
+
+The format of the upload is compressed as well. The index bits enter the products of \autoref{alg:spar:homplacing} as \gls{rgsw} ciphertexts (\autoref{sec:spar:requirements}), and an \gls{rgsw} ciphertext is a matrix of $2\ell$ \gls{rlwe} rows \eqref{def:rgsw}, so transmitting the bits in the form the server consumes would multiply the upload by $2\ell$. Clients instead upload ordinary \gls{rlwe} encryptions, which the server expands into \gls{rgsw} form homomorphically ($\mathsf{HomExpand}$)~\cite{chillotti:onionring:2019, park:sortinghat:2022, cryptoeprint:2025/1088}.
+
+The decryption phase compresses in the same way. When $N > 3\eta$, the $3\eta$ partial decryptions of one client pack into a single ciphertext through the ciphertext conversions of~\cite{cryptoeprint:2020/015}. All three measures trade bandwidth for server computation, and none of them alters the placement itself.
 
 \input{Algorithms/spar-2} % paper Alg. 2: choice-of-three (new float)
 \newpage
@@ -51,3 +52,5 @@ The clients agree on a set of \gls{fhe} parameters and run the multi-party key g
 \subsection{Depth Requirements}
 \label{sec:spar:requirements}
 \autoref{alg:spar:homplacing} is stated for a generic homomorphic multiplication, but the circuit it describes is deep. Every level of the binary tree multiplies the running node by a further encrypted bit, and the write loop chains $9\eta$ multiplications through $\mathsf{hasWritten}$ for each message. Ciphertext multiplication in the sense of \autoref{sec:bgv} would exhaust the noise budget long before a round completed, so the authors propose evaluating the tree with the external product, whose noise grows additively along such a chain (\autoref{rem:extprod-asymmetry}).
+
+The operands of the circuit fall into two types. The message $V_r$ and the entries of $L$ carry plaintexts from the full space $R_t$ and remain \gls{rlwe} ciphertexts throughout. Every other encrypted value in \autoref{alg:spar:homplacing} --- the index bits, the tree nodes and indicator entries derived from them, the availability flags of $I$ and the flag $\mathsf{hasWritten}$ --- encrypts a bit that reappears as the multiplier of later products, which is the position \autoref{def:prod:external} reserves for the \gls{rgsw} operand. Writing a message into its slot is therefore an external product of the \gls{rlwe} message with an \gls{rgsw} control value, while every product among the control values themselves takes two \gls{rgsw} operands, the internal product of \autoref{def:prod:internal}.

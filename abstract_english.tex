@@ -1,7 +1,13 @@
 \pagestyle{empty}
 %\selectlanguage{english}
 \begin{abstract}
-\noindent \Blindtext[3][1] % Replace this by your own text
+\noindent Anonymous communication systems let users exchange messages over a network without revealing who is communicating with whom, but most deployed designs depend on some part of the infrastructure behaving honestly. The Somewhat Practical Anonymous Router (sPAR) is a recent construction that removes this trust assumption by using fully homomorphic encryption (FHE), allowing a single untrusted server to shuffle encrypted messages without ever learning the permutation. Unlike its predecessors, sPAR relies only on primitives that established FHE schemes already provide. It has so far existed only on paper and as a small proof of concept, leaving its concrete cost and its scaling in the number of participants unmeasured.
+
+This thesis presents an implementation of sPAR on the BGV scheme and the first empirical evaluation of the protocol. Because OpenFHE does not expose RGSW encryption or the external and internal products sPAR requires, we first port these TFHE-style operations to the RNS variant of BGV, and deliver them as a reusable C++ library extending OpenFHE. On top of this library we implement the protocol end-to-end, including decryption under multi-party threshold keys, and measure noise growth and runtime as functions of the number of participants.
+
+The protocol runs correctly, but its cost is substantially higher than the original analysis anticipated. A round is dominated by the server's write step, which is in turn dominated by internal products, an operation absent from the original cost analysis and roughly fourteen times as expensive as an external product at our parameters. The server's total work per round grows quadratically in the number of participants; a single write call takes about fourteen seconds for two participants and about one minute for eight. The round times of seconds for a hundred users anticipated by the original paper are out of reach for this instantiation.
+
+The obstacles we identify are quantitative rather than structural. We confirm sPAR can be built entirely from well-established RLWE and RGSW constructions, and we outline several paths that could materially lower its cost, including a hybrid gadget decomposition for the products, hardware acceleration, and amortizing the sequential write steps across rounds.
 \end{abstract}
 \cleardoublepage
 \resetlanguage
