@@ -1,0 +1,23 @@
+    ## Default parameters (table 4.1)
+    ## 131.5-bit security
+    [standard]
+    plaintext_modulus = 65537
+    ring_dim = 16384
+    limbs = 7
+    first_mod_size = 60
+    scaling_mod_size = 60
+    standard_deviation = 3.19
+    ell = 2
+    scheme = "bv"
+
+    ## Test with smaller plaintext modulus t
+    ## 131.5-bit security
+    [small-t]
+    plaintext_modulus = 256
+    ring_dim = 16384
+    limbs = 7
+    first_mod_size = 60
+    scaling_mod_size = 60
+    standard_deviation = 3.19
+    ell = 2
+    scheme = "bv"

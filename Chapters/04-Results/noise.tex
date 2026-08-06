@@ -40,7 +40,7 @@ The protocol was run end-to-end in the multi-party context using OpenFHE's \text
         $2$  & $261.4$ & $23.0$ & x & y \\ % (290 + 245 + 243 + 240 + 289)/5 = 261.4 
         $4$  & $299.6$ & $17.3$ & x & y \\ % (292 + 293 + 334 + 290 + 289)/5 = 299.6 --> 38.2/2 = 19.1
         $8$  & $387.6$ & $33.9$ & x & y \\ % (382 + 419 + 381 + 419 + 337)/5 = 387.6 --> 88/4 = 22 --> Average = 20.55
-        $16$ &   ---   &   ---   & x & y \\ % decryption failure
+        $16$ &   ---   &   ---  & x & y \\ % decryption failure
         \bottomrule
     \end{tabular}
 \end{table}
@@ -51,7 +51,7 @@ The protocol was run end-to-end in the multi-party context using OpenFHE's \text
 % failure,   % (261 + 362 + 255 + ) = 292.666666667  --> 50/4 = 12.5
 % -------,   % (261 + 332 + xxx) = 
 
-We were unable to run the protocol at $\eta=16$ users without producing decryption failures. Decryption fails once the error exceeds $\lfloor Q/2 \rfloor = 419$ bits, and we can extrapolate that each user adds approximately $20.55$ bits of noise. On paper, then, the protocol supports $\eta = 9$ users, though this leaves only 3 bits of room for random variance. The number of users that can \emph{reliably} be supported is therefore $\eta = 8$. Increasing the decomposition parameter improves the noise as expected, but also increases the runtime of the algorithm by the same factor.
+We were unable to run the protocol at $\eta=16$ users without producing decryption failures. Decryption fails once the error exceeds $\lfloor Q/2 \rfloor = 419$ bits, and we can extrapolate that each user adds approximately $20.55$ bits of noise. On paper, then, the protocol supports $\eta = 9$ users, though this leaves only a few bits of room for random variance. The number of users that can \emph{reliably} be supported is therefore $\eta = 8$. Increasing the decomposition parameter improves the noise as expected, but also increases the runtime of the algorithm by the same factor.
 
 Initially we suspected this number to be artificially low due to the large $t$, as BGV encodes the error in the most significant bits ($\epsilon = t\epsilon_{rlwe}$). Additionally, $h \gets I_{i,k}\boxtimes\mathsf{notHasWritten}\boxtimes z_{i,d}$ is created from a single fresh ciphertext, $z_{i,d}$, so a ``dirty'' ciphertext necessarily must appear on the right hand side in one of the internal products, breaking the freshness assumption in \cref{rem:extprod-asymmetry}. However, running the same test with $t=2^8$ decreased the noise by a negligible amount.
 
